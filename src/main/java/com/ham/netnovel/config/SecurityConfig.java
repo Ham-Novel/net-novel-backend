@@ -1,9 +1,12 @@
 package com.ham.netnovel.config;
 
+import com.ham.netnovel.OAuth.CustomOAuthUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -11,19 +14,45 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+
+    private final CustomOAuthUserService customOAuthUserService;
+
+    public SecurityConfig(CustomOAuthUserService customOAuthUserService) {
+        this.customOAuthUserService = customOAuthUserService;
+    }
+
+    //서블릿 필터 무시 URL 정적 리소스 등록 필수
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/static/**", "/css/**", "/js/**", "/images/**","/favicon**");
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        //        //CSRF disable, 테스트 상태에서만 disable 상태로 유지
+         //CSRF disable, 테스트 상태에서만 disable 상태로 유지
         http.csrf(AbstractHttpConfigurer::disable);
 
-        //경로설정
-        // 명시적으로 모든 요청 허용
-        http.authorizeHttpRequests(authorize ->
-                authorize
-                        .anyRequest().permitAll()
+        //From 로그인 방식 disable
+        http.formLogin((login) -> login.disable());
+
+        //oauth2 방식 로그인사용
+        http.oauth2Login(oauth2Login->
+                        oauth2Login
+                                .loginPage("/login")
+                                .userInfoEndpoint(userInfoEndPoint ->
+                                        userInfoEndPoint.userService(customOAuthUserService))
         );
-        return http.build();
+
+
+        //사용자 인증 URL 설정
+        http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/","/login**").permitAll()//인증 예외 URL
+                .anyRequest().authenticated()
+        );
+
+
+         return http.build();
     }
 
 
