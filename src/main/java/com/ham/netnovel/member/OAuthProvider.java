@@ -1,6 +1,6 @@
 package com.ham.netnovel.member;
 
-public enum Provider {
+public enum OAuthProvider {
     GOOGLE,
     NAVER,
     KAKAO
