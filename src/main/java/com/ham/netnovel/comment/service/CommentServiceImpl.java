@@ -6,6 +6,7 @@ import com.ham.netnovel.comment.CommentRepository;
 import com.ham.netnovel.comment.CommentStatus;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
+import com.ham.netnovel.comment.dto.CommentListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeService;
@@ -16,8 +17,10 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -147,5 +150,26 @@ public class CommentServiceImpl implements CommentService {
 
 
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentListDto> getCommentList(Long episodeId) {
+
+        //episode id로 조회
+        //가져와주셈
+        List<CommentListDto> collect = commentRepository.findByEpisodeId(episodeId)
+                .stream().map(comment -> {
+                    new CommentListDto();
+                    return CommentListDto.builder()
+                            .nickName(comment.getMember().getNickName())
+                            .content(comment.getContent())
+                            .commentId(comment.getId())
+                            .updatedAt(comment.getUpdatedAt())
+                            .build();
+                }).toList();
+        return collect;
+
+    }
+
 
 }

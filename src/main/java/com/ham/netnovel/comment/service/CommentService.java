@@ -3,8 +3,10 @@ package com.ham.netnovel.comment.service;
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
+import com.ham.netnovel.comment.dto.CommentListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CommentService {
@@ -37,5 +39,8 @@ public interface CommentService {
      * @param commentDeleteDto 삭제 요청된 댓글(comment)의 정보를 담는 DTO
      */
     void deleteComment(CommentDeleteDto commentDeleteDto);
+
+
+    List<CommentListDto> getCommentList(Long episodeId);
 
 }
