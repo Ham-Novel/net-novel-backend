@@ -5,6 +5,7 @@ import com.ham.netnovel.episodeRating.EpisodeRating;
 import com.ham.netnovel.coinUseHistory.CoinUseHistory;
 import com.ham.netnovel.novel.Novel;
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 public class Episode {
 
     @Id
