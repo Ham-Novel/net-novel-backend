@@ -1,0 +1,114 @@
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: 'Roboto', sans-serif !important;
+}
+
+div,
+input,
+textarea {
+    box-sizing: border-box !important;
+
+}
+
+
+
+
+/*login 관련 class*/
+
+.login-container{
+
+    padding-top: 150px ;
+
+}
+.login-info{
+
+    background-color: white;  /* 밝은 배경색 */
+    border-radius: 8px;  /* 모서리 둥글게 */
+    padding: 20px;  /* 내부 여백 */
+    text-align: center;  /* 텍스트 중앙 정렬 */
+    margin-bottom: 30px;  /* 아래쪽 여백 */
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+    flex-direction: column;
+
+
+
+
+
+
+
+}
+
+.login-info p {
+    line-height: 30px;
+    font-weight: bold;
+    font-family: 'Noto Sans', sans-serif;  /* 폰트 스타일 */
+    font-size: 18px;  /* 글자 크기 */
+    color: #666;  /* 글자 색상: 회색 */
+    margin: 10px 0;  /* 문단 간격 */
+
+    display: block;
+}
+
+
+.login-button-container{
+
+
+    display: flex;
+
+    align-items: center;
+
+    flex-direction: column;
+
+
+
+}
+
+.login-logo{
+
+    margin-right: 24px;
+
+
+}
+
+.login-button{
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+
+
+    padding: 8px;
+
+    margin-bottom: 20px;
+
+    display: flex;
+
+    width: 300px;
+    height: 50px;
+
+
+    align-items: center;
+
+    border: 1px solid #eaeaea;
+
+
+
+}
+
+.login-button-text{
+
+    font-weight: 550;
+    font-size: 16px;
+
+
+
+
+}
+
