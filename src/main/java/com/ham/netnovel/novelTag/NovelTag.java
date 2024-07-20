@@ -5,9 +5,6 @@ import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.tag.Tag;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 public class NovelTag {
 
