@@ -41,6 +41,11 @@ public interface CommentService {
     void deleteComment(CommentDeleteDto commentDeleteDto);
 
 
+    /**
+     * Episode에 달린 댓글들을 List로 반환하는 메서드
+     * @param episodeId episode의 PK값
+     * @return CommentListDto List 형태로 반환
+     */
     List<CommentListDto> getCommentList(Long episodeId);
 
 }
