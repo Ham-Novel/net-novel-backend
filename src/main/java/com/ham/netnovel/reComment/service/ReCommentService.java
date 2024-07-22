@@ -1,5 +1,6 @@
 package com.ham.netnovel.reComment.service;
 
+import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.reComment.ReComment;
 import com.ham.netnovel.reComment.dto.ReCommentCreateDto;
 import com.ham.netnovel.reComment.dto.ReCommentDeleteDto;
@@ -46,6 +47,13 @@ public interface ReCommentService {
      */
     List<ReCommentListDto> getReCommentList(Long commentId);
 
+
+    /**
+     * 유저가 작성한 대댓글을 DB에서 찾아 반환하는 메서드
+     * @param providerId
+     * @return
+     */
+    List<MemberCommentDto> getMemberReCommentList(String providerId);
 
 
 
