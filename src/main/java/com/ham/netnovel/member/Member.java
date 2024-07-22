@@ -2,9 +2,9 @@ package com.ham.netnovel.member;
 
 
 import com.ham.netnovel.episodeRating.EpisodeRating;
-import com.ham.netnovel.favoriteNovel.FavoriteNovel;
 import com.ham.netnovel.coinChargeHistory.CoinChargeHistory;
 import com.ham.netnovel.comment.Comment;
+import com.ham.netnovel.favoriteNovel.FavoriteNovel;
 import com.ham.netnovel.member.data.Gender;
 import com.ham.netnovel.member.data.MemberRole;
 import jakarta.persistence.*;
@@ -59,6 +59,7 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<FavoriteNovel> favoriteNovels = new ArrayList<>();
 
+
     //junction table 연결,별 점준 에피소드
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<EpisodeRating> episodeRatings = new ArrayList<>();
@@ -78,5 +79,9 @@ public class Member {
         this.role = role;
         this.nickName = nickName;
         this.gender = gender;
+    }
+
+    public void changeNickName(String nickName){
+        this.nickName = nickName;
     }
 }
