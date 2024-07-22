@@ -3,6 +3,7 @@ package com.ham.netnovel.comment;
 
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
+import com.ham.netnovel.reComment.ReComment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 에피소드별 댓글 엔티티
@@ -45,6 +48,8 @@ public class Comment {
 
 
 
+    @OneToMany(mappedBy = "comment")
+    private List<ReComment> reComments = new ArrayList<>();
 
     //N인 comment에서 외래키 가져감
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,6 +60,7 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
 
 
 
