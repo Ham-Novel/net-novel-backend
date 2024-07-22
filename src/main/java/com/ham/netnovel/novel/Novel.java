@@ -5,10 +5,7 @@ package com.ham.netnovel.novel;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +15,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Novel {
 
     @Id
@@ -37,11 +35,10 @@ public class Novel {
     private NovelStatus status;
 
     //작가
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
+    @Column(nullable = false)
     private String authorId;
 
-    @OneToMany(mappedBy = "novel")
-    private List<Episode> episodes = new ArrayList<>();
+//    @OneToMany(mappedBy = "novel")
+//    private List<Episode> episodes = new ArrayList<>();
 
 }
