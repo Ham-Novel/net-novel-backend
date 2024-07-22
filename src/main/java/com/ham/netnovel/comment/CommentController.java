@@ -7,7 +7,8 @@ import com.ham.netnovel.comment.dto.CommentDeleteDto;
 import com.ham.netnovel.comment.dto.CommentListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.comment.service.CommentService;
-import com.ham.netnovel.utils.Authenticator;
+import com.ham.netnovel.common.utils.Authenticator;
+import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +40,10 @@ public class CommentController {
 
     /**
      * 유저가 작성한 댓글(comment)를 서버에 저장하는 API
-     *
-     * @param commentCreateDto 댓글내용, 에피소드id를 저장하는 DTO
+     * @param commentCreateDto 클라이언트에서 보낸 내용을 담는 DTO
+     *                         content(댓글내용), episodeId, providerId(유저정보)를 멤버변수로 가짐
      * @param authentication   유저의 인증정보
-     * @return ResponseEntity 요청 실패시 badRequest 전송
+     * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
     @PostMapping("/comment")
     public ResponseEntity<String> createComment(@Valid @RequestBody CommentCreateDto commentCreateDto,
@@ -52,7 +53,10 @@ public class CommentController {
         //CommentCreateDto Validation 에러가 있을경우 badRequest 전송
         if (bindingResult.hasErrors()) {
             log.error("createComment API 에러발생 ={}", bindingResult.getFieldError());
-            return ResponseEntity.badRequest().body("에러발생");
+            //에러 메시지들 List에 담음
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
+            //에러 메시지 body에 담아 전송
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
@@ -68,7 +72,14 @@ public class CommentController {
     }
 
 
-    //댓글 수정 기능
+    /**
+     * 유저가 작성한 댓글의 내용을 업데이트하는 API
+     * @param commentUpdateDto 클라이언트에서 보낸 내용을 담는 DTO,
+     *                         content(댓글내용), episodeId, commentId ,providerId(유저정보)를 멤버변수로 가짐
+     * @param bindingResult DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
+     * @param authentication 유저의 인증 정보
+     * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
+     */
     @PatchMapping("/comment")
     public ResponseEntity<String> updateComment(@Valid @RequestBody CommentUpdateDto commentUpdateDto,
                                                 BindingResult bindingResult,
@@ -77,7 +88,10 @@ public class CommentController {
         //CommentUpdateDto Validation 에러가 있을경우 badRequest 전송
         if (bindingResult.hasErrors()) {
             log.error("updateComment API 에러발생 ={}", bindingResult.getFieldError());
-            return ResponseEntity.badRequest().body("에러발생");
+            //에러 메시지들 List에 담음
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
+            //에러 메시지 body에 담아 전송
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
@@ -86,12 +100,21 @@ public class CommentController {
         //DTO에 유저 정보(providerId) 값 저장
         commentUpdateDto.setProviderId(principal.getName());
 
+        //
         commentService.updateComment(commentUpdateDto);
 
         return ResponseEntity.ok("댓글 수정 완료");
 
     }
 
+    /**
+     * 유저가 작성한 댓글의 상태를 DELETED_BY_USER로 변경하는 API
+     * @param commentDeleteDto 클라이언트에서 보낸 내용을 담는 DTO
+     *                         episodeId, commentId ,providerId(유저정보)를 멤버변수로 가짐
+     * @param bindingResult DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
+     * @param authentication 유저의 인증 정보
+     * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
+     */
     @DeleteMapping("/comment")
     public ResponseEntity<String> deleteComment(@Valid @RequestBody CommentDeleteDto commentDeleteDto,
                                                 BindingResult bindingResult,
@@ -100,8 +123,11 @@ public class CommentController {
 
         //CommentUpdateDto Validation 에러가 있을경우 badRequest 전송
         if (bindingResult.hasErrors()) {
-            log.error("deleteComment API 에러발생 ={}", String.valueOf(bindingResult.getFieldError()));
-            return ResponseEntity.badRequest().body("에러발생");
+            log.error("deleteComment API 에러발생 ={}", bindingResult.getFieldError());
+            //에러 메시지들 List에 담음
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
+            //에러 메시지 body에 담아 전송
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
@@ -118,8 +144,12 @@ public class CommentController {
 
     }
 
+
     /**
-     * Episode에 등록된 댓글을 반환하는 API
+     * 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API
+     * 댓글과 대댓글 DTO는 엔티티PK, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
+     * @param requestBody episodeId값을 저장할 객체
+     * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
     @PostMapping("/comment/list")
     public ResponseEntity<?> getCommentList(@RequestBody Map<String, String> requestBody) {
