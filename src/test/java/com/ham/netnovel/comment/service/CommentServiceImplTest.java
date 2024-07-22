@@ -2,10 +2,14 @@ package com.ham.netnovel.comment.service;
 
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
+import com.ham.netnovel.comment.dto.CommentListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
+import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -69,6 +73,39 @@ class CommentServiceImplTest {
                 .commentId(16L)
                 .build();
         commentService.deleteComment(build);
+
+
+    }
+
+
+    /*
+    테스트 성공
+     */
+    @Test
+    public void getCommentListTest(){
+        System.out.println("댓글 불러오기 테스트");
+
+        List<CommentListDto> commentList = commentService.getCommentList(2306L);
+//        List<CommentListDto> commentList = commentService.getCommentList(909090909L);//존재하지 않는 에피소드 테스트, 빈리스트 반환됨
+
+        for (CommentListDto commentListDto : commentList) {
+            System.out.println("댓글정보");
+
+            List<ReCommentListDto> reCommentList = commentListDto.getReCommentList();
+            System.out.println(commentListDto.toString());
+
+
+            //대댓글 정보 출력
+            System.out.println("대댓글 정보");
+            for (ReCommentListDto reCommentListDto : reCommentList) {
+
+                System.out.println(reCommentListDto.toString());
+
+            }
+
+
+
+        }
 
 
     }

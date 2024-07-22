@@ -14,8 +14,8 @@ import lombok.ToString;
 @Builder
 public class CommentUpdateDto {
     //댓글 내용
-    @NotBlank
-    @Size(max = 300,message = "댓글은 300자 이하로 작성해주세요!")
+    @NotBlank(message = "댓글 내용을 입력해 주세요!")
+    @Size(min = 1, max = 300,message = "댓글은 300자 이하로 작성해주세요!")
     private String content;
 
 

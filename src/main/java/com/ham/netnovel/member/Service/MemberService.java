@@ -2,6 +2,7 @@ package com.ham.netnovel.member.Service;
 
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.data.Gender;
+import com.ham.netnovel.member.dto.ChangeNickNameDto;
 import com.ham.netnovel.member.dto.MemberCreateDto;
 import com.ham.netnovel.member.dto.MemberLoginDto;
 
@@ -33,6 +34,12 @@ public interface MemberService {
     void createNewMember(MemberCreateDto memberCreateDto);
 
 
+    /**
+     * 유저의 닉네임을 변경하는 메서드
+     * 닉네임은 2~20길이의 한글 또는 영문만 허용
+     * @param changeNickNameDto providerId, 변경할 닉네임을 포함하는 DTO
+     */
+    void updateMemberNickName(ChangeNickNameDto changeNickNameDto);
 
 
 

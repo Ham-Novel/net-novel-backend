@@ -1,4 +1,4 @@
-package com.ham.netnovel.config;
+package com.ham.netnovel.common.config;
 
 import com.ham.netnovel.OAuth.CustomOAuthUserService;
 import org.springframework.context.annotation.Bean;
@@ -28,13 +28,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-         //CSRF disable, 테스트 상태에서만 disable 상태로 유지
-        http.csrf(AbstractHttpConfigurer::disable);
+            //CSRF disable, 테스트 상태에서만 disable 상태로 유지
+            http.csrf(AbstractHttpConfigurer::disable);
 
-        //From 로그인 방식 disable
-        http.formLogin((login) -> login.disable());
+            //From 로그인 방식 disable
+            http.formLogin((login) -> login.disable());
 
         //oauth2 방식 로그인사용
         http.oauth2Login(oauth2Login->

@@ -1,11 +1,10 @@
-package com.ham.netnovel.comment;
+package com.ham.netnovel.reComment;
 
 
-import com.ham.netnovel.episode.Episode;
+import com.ham.netnovel.comment.Comment;
+import com.ham.netnovel.comment.CommentStatus;
 import com.ham.netnovel.member.Member;
-import com.ham.netnovel.reComment.ReComment;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,31 +12,24 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * 에피소드별 댓글 엔티티
- */
 @Entity
 @NoArgsConstructor
 @Getter
-public class Comment {
-
+public class ReComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
 
-    //댓글 내용 300자 제한이나, DB 유연성을 위해 305자로 설정
+    //대댓글 내용 300자 제한이나, DB 유연성을 위해 305자로 설정
     @Column(nullable = false,length = 305)
     private String content;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private  CommentStatus status = CommentStatus.ACTIVE;
+    private CommentStatus status = CommentStatus.ACTIVE;
 
 
     @CreationTimestamp
@@ -46,15 +38,10 @@ public class Comment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-
-
-    @OneToMany(mappedBy = "comment")
-    private List<ReComment> reComments = new ArrayList<>();
-
-    //N인 comment에서 외래키 가져감
+    //N인 reComment에서 외래키 가져감
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "episode_id")
-    private Episode episode;
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
 
     //작성한 유저
     @ManyToOne(fetch = FetchType.LAZY)
@@ -62,26 +49,23 @@ public class Comment {
     private Member member;
 
 
-
-
-
-
     @Builder
-    public Comment(String content, Episode episode, Member member) {
-        this.content =content;
-        this.episode = episode;
+    public ReComment(String content, Comment comment, Member member) {
+        this.content = content;
+        this.comment = comment;
         this.member = member;
-
     }
 
-    //댓글 엔티티 내용 변경
-    public void updateComment(String content){
+    //대댓글 엔티티 내용 변경
+    public void updateReComment(String content){
         this.content = content;
     }
 
-    //댓글 엔티티 상태 변경
-   public  void changeStatus(CommentStatus status) {
+    //대댓글 엔티티 상태 변경
+    public  void changeReStatus(CommentStatus status) {
         this.status = status;
     }
+
+
 
 }

@@ -1,17 +1,17 @@
 package com.ham.netnovel.comment.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.ham.netnovel.reComment.dto.ReCommentListDto;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentListDto {
+@ToString
+public class CommentListDto {//뷰에 반환할때 사용하는 DTO
 
 
     private Long commentId;
@@ -23,5 +23,7 @@ public class CommentListDto {
 
     private LocalDateTime updatedAt;
 
+    private List<ReCommentListDto> reCommentList;
 
 }
+

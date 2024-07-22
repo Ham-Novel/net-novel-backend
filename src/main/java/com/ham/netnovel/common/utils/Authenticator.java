@@ -1,4 +1,4 @@
-package com.ham.netnovel.utils;
+package com.ham.netnovel.common.utils;
 
 import com.ham.netnovel.OAuth.CustomOAuth2User;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;

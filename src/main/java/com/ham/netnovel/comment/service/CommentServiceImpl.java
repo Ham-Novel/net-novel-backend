@@ -10,16 +10,15 @@ import com.ham.netnovel.comment.dto.CommentListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeService;
+import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.Service.MemberService;
+import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,13 +31,11 @@ public class CommentServiceImpl implements CommentService {
     private final MemberService memberService;
 
     private final EpisodeService episodeService;
-
-    public CommentServiceImpl(CommentRepository commentRepository, MemberService memberService, EpisodeService episodeService) {
+      public CommentServiceImpl(CommentRepository commentRepository, MemberService memberService, EpisodeService episodeService) {
         this.commentRepository = commentRepository;
         this.memberService = memberService;
         this.episodeService = episodeService;
     }
-
 
     @Override
     @Transactional(readOnly = true)
@@ -49,34 +46,24 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public void createComment(CommentCreateDto commentCreateDto) {
-
         log.info("댓글정보={}", commentCreateDto.toString());
+        //Member 엔티티 조회, null이면 예외로 던짐
+        Member member = memberService.getMember(commentCreateDto.getProviderId())
+                .orElseThrow(() -> new NoSuchElementException("Member 정보 없음"));
+
+        //Member 엔티티 조회, null이면 예외로 던짐
+        Episode episode = episodeService.getEpisode(commentCreateDto.getEpisodeId())
+                .orElseThrow(() -> new NoSuchElementException("Episode 정보 없음"));
+
         try {
-            //Member 엔티티 조회, null이면 예외로 던짐
-            Member member = memberService.getMember(commentCreateDto.getProviderId())
-                    .orElseThrow(() -> new RuntimeException("Member 정보 없음"));
-
-            //Member 엔티티 조회, null이면 예외로 던짐
-            Episode episode = episodeService.getEpisode(commentCreateDto.getEpisodeId())
-                    .orElseThrow(() -> new RuntimeException("episode 정보 없음"));
-
-
             //Comment 엔티티 생성
             Comment comment = new Comment(commentCreateDto.getContent(), episode, member);
-
-
             //Comment 엔티티 저장
             commentRepository.save(comment);
 
-
-        } catch (DataAccessException ex) {
-            // 데이터베이스 저장 과정에서 예외 발생 시 처리
-            log.error("Failed to save comment to database: {}", ex.getMessage());
-            throw new RuntimeException("Comment 생성 에러 발생"); // 예외 던지기
         } catch (Exception ex) {
-            //그외 예외처리
-            log.error("Failed to save comment to database: {}", ex.getMessage());
-            throw new RuntimeException("Failed to save comment. Please try again later."); // 예외 던지기
+            //나머지 예외처리
+            throw new ServiceMethodException("createComment 메서드 에러 발생"); // 예외 던지기
         }
     }
 
@@ -85,16 +72,13 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public void updateComment(CommentUpdateDto commentUpdateDto) {
         log.info("댓글정보={}", commentUpdateDto.toString());
-
+        //null 체크, null이면 예외로 던짐
+        Comment comment = getComment(commentUpdateDto.getCommentId())
+                .orElseThrow(() -> new NoSuchElementException("댓글 정보 없음"));
         try {
-            //null 체크, null이면 예외로 던짐
-            Comment comment = getComment(commentUpdateDto.getCommentId())
-                    .orElseThrow(() -> new RuntimeException("잘못된요청"));
-
             String providerId = comment.getMember().getProviderId();
 
             Long episodeId = comment.getEpisode().getId();
-
 
             //댓글 수정 요청자와 댓글 작성자가 일치하는지 확인
             //댓글 수정 에피소드와 기존 댓글과 mapping된 에피소드가 일치하는지 확인
@@ -103,13 +87,13 @@ public class CommentServiceImpl implements CommentService {
                 commentRepository.save(comment);
 
             } else {
-                throw new RuntimeException("댓글 삭제 에러, 잘못된 유저의 요청");
+                log.error("updateComment 메서드 에러 발생,  잘못된 파라미터 입력");
+                throw new IllegalArgumentException("updateComment,  잘못된 파라미터 입력");
             }
 
         } catch (Exception ex) {
             //그외 예외처리
-            log.error("Failed to save comment to database: {}", ex.getMessage());
-            throw new RuntimeException("Failed to save comment. Please try again later."); // 예외 던지기
+            throw new ServiceMethodException("updateComment 메서드 에러 발생"); // 예외 던지기
         }
 
 
@@ -118,12 +102,10 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public void deleteComment(CommentDeleteDto commentDeleteDto) {
-
+        //null 체크, null이면 예외로 던짐
+        Comment comment = getComment(commentDeleteDto.getCommentId())
+                .orElseThrow(() -> new NoSuchElementException("댓글 정보 없음"));
         try {
-            //null 체크, null이면 예외로 던짐
-            Comment comment = getComment(commentDeleteDto.getCommentId())
-                    .orElseThrow(() -> new RuntimeException("잘못된요청"));
-
             String providerId = comment.getMember().getProviderId();
 
             Long episodeId = comment.getEpisode().getId();
@@ -139,13 +121,12 @@ public class CommentServiceImpl implements CommentService {
                 commentRepository.save(comment);
 
             } else {
-                throw new RuntimeException("에러");
+                throw new IllegalArgumentException("deleteComment 메서드 에러 발생, 잘못된 파라미터 입력");
             }
 
         } catch (Exception ex) {
             //그외 예외처리
-            log.error("Failed to delete comment to database: {}", ex.getMessage());
-            throw new RuntimeException("Failed to save comment. Please try again later."); // 예외 던지기
+            throw new ServiceMethodException("deleteComment 메서드 에러 발생"); // 예외 던지기
         }
 
 
@@ -155,19 +136,31 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     public List<CommentListDto> getCommentList(Long episodeId) {
 
-        //episode id로 조회
-        //가져와주셈
-        List<CommentListDto> collect = commentRepository.findByEpisodeId(episodeId)
-                .stream().map(comment -> {
-                    new CommentListDto();
-                    return CommentListDto.builder()
+        try {
+            return commentRepository.findByEpisodeId(episodeId)
+                    .stream()
+                    .map(comment -> CommentListDto.builder()
                             .nickName(comment.getMember().getNickName())
                             .content(comment.getContent())
                             .commentId(comment.getId())
                             .updatedAt(comment.getUpdatedAt())
-                            .build();
-                }).toList();
-        return collect;
+                            .reCommentList(Optional.ofNullable(comment.getReComments())//대댓글 null 체크
+                                    .orElse(Collections.emptyList()) // null일 경우 빈 리스트 반환
+                                    .stream()//연관된 대댓글 엔티티를 DTO 형태로 변환하여 List로 반환
+                                    .map(reComment -> ReCommentListDto.builder()
+                                            .nickName(reComment.getMember().getNickName())
+                                            .content(reComment.getContent())
+                                            .reCommentId(reComment.getComment().getId())
+                                            .updatedAt(reComment.getUpdatedAt())
+                                            .build())
+                                    .collect(Collectors.toList())) // List로 변환
+                            .build())
+                    .collect(Collectors.toList()); // List로 변환
+
+        }catch (Exception e) {
+            throw new ServiceMethodException("getReCommentList 메서드 에러 발생"); // 예외 던지기
+        }
+
 
     }
 
