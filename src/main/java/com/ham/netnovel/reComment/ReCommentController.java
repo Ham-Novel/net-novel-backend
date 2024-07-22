@@ -2,14 +2,12 @@ package com.ham.netnovel.reComment;
 
 
 import com.ham.netnovel.OAuth.CustomOAuth2User;
-import com.ham.netnovel.comment.dto.CommentCreateDto;
-import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.reComment.dto.ReCommentCreateDto;
 import com.ham.netnovel.reComment.dto.ReCommentDeleteDto;
 import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import com.ham.netnovel.reComment.dto.ReCommentUpdateDto;
 import com.ham.netnovel.reComment.service.ReCommentService;
-import com.ham.netnovel.utils.Authenticator;
+import com.ham.netnovel.common.utils.Authenticator;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

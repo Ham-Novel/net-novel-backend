@@ -4,7 +4,7 @@ package com.ham.netnovel.reComment.service;
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.CommentStatus;
 import com.ham.netnovel.comment.service.CommentService;
-import com.ham.netnovel.exception.ServiceMethodException;
+import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.Service.MemberService;
 import com.ham.netnovel.reComment.ReComment;

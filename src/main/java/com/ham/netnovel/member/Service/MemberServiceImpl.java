@@ -1,21 +1,17 @@
 package com.ham.netnovel.member.Service;
 
 
-import com.ham.netnovel.exception.ServiceMethodException;
+import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
 import com.ham.netnovel.member.dto.MemberCreateDto;
 import com.ham.netnovel.member.dto.MemberLoginDto;
-import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.service.spi.ServiceException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service
 class MemberServiceImpl implements MemberService {
