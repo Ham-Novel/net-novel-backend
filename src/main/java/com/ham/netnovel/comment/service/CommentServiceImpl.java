@@ -4,15 +4,17 @@ package com.ham.netnovel.comment.service;
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.CommentRepository;
 import com.ham.netnovel.comment.CommentStatus;
+import com.ham.netnovel.comment.data.CommentType;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
-import com.ham.netnovel.comment.dto.CommentListDto;
+import com.ham.netnovel.comment.dto.CommentEpisodeListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeService;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.Service.MemberService;
+import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,8 @@ public class CommentServiceImpl implements CommentService {
     private final MemberService memberService;
 
     private final EpisodeService episodeService;
-      public CommentServiceImpl(CommentRepository commentRepository, MemberService memberService, EpisodeService episodeService) {
+
+    public CommentServiceImpl(CommentRepository commentRepository, MemberService memberService, EpisodeService episodeService) {
         this.commentRepository = commentRepository;
         this.memberService = memberService;
         this.episodeService = episodeService;
@@ -134,12 +137,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CommentListDto> getCommentList(Long episodeId) {
+    public List<CommentEpisodeListDto> getEpisodeCommentList(Long episodeId) {
 
         try {
             return commentRepository.findByEpisodeId(episodeId)
                     .stream()
-                    .map(comment -> CommentListDto.builder()
+                    .map(comment -> CommentEpisodeListDto.builder()
                             .nickName(comment.getMember().getNickName())
                             .content(comment.getContent())
                             .commentId(comment.getId())
@@ -155,12 +158,40 @@ public class CommentServiceImpl implements CommentService {
                                             .build())
                                     .collect(Collectors.toList())) // List로 변환
                             .build())
+                    //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
+                    .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt))
                     .collect(Collectors.toList()); // List로 변환
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new ServiceMethodException("getReCommentList 메서드 에러 발생"); // 예외 던지기
         }
 
+
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MemberCommentDto> getMemberCommentList(String providerId) {
+
+        try {
+            //유저가 작성한 댓글이 있으면, DTO로 변환해서 반환
+            return commentRepository.findByMember(providerId)
+                    .stream()
+                    .map(comment -> MemberCommentDto.builder()
+                            .type(CommentType.COMMENT)//타입지정
+                            .id(comment.getId())
+                            .content(comment.getContent())
+                            .createAt(comment.getCreatedAt())
+                            .updatedAt(comment.getUpdatedAt())
+                            .build())
+                    //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
+                    .sorted(Comparator.comparing(MemberCommentDto::getCreateAt).reversed())
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            throw new ServiceMethodException("getMemberCommentList 메서드 에러 발생"); // 예외 던지기
+        }
 
     }
 
