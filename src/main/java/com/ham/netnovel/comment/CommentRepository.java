@@ -12,4 +12,20 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
     @Query("select c from Comment c " +
             "where c.episode.id =:episodeId")
     List<Comment> findByEpisodeId(@Param("episodeId")Long episodeId);
+
+
+    /**
+     * 유저가 작성한 댓글을 모두찾아 반환하는 메서드
+     * @param providerId 유저의 providerId 값
+     * @return List Comment 엔티티 List로 반환
+     */
+    @Query("select c from Comment c " +
+            "where c.member.providerId =:providerId " +
+            "order by c.createdAt DESC ")//생성 날짜 내림차순 정렬(최신글이 위로오게설정)
+    List<Comment> findByMember(@Param("providerId")String providerId);
+
+
+
+
+
 }
