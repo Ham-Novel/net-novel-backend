@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CommentListDto {//뷰에 반환할때 사용하는 DTO
+public class CommentEpisodeListDto {//뷰에 반환할때 사용하는 DTO
 
 
     private Long commentId;
@@ -20,6 +20,8 @@ public class CommentListDto {//뷰에 반환할때 사용하는 DTO
 
     //작성자 닉네임
     private String nickName;
+
+    private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
