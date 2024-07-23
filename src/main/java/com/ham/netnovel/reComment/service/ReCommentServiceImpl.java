@@ -7,7 +7,7 @@ import com.ham.netnovel.comment.data.CommentType;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
-import com.ham.netnovel.member.Service.MemberService;
+import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.reComment.ReComment;
 import com.ham.netnovel.reComment.ReCommentRepository;
