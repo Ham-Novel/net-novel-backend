@@ -13,4 +13,12 @@ public interface ReCommentRepository extends JpaRepository<ReComment, Long> {
             "where r.comment.id = :commentId")
     List<ReComment> findByCommentId(@Param("commentId")Long commentId);
 
+
+    @Query("select r from ReComment  r " +
+            "where r.member.providerId =:providerId " +
+            "order by r.createdAt desc ")
+    List<ReComment> findByMember(@Param("providerId")String providerId);
+
+
+
 }

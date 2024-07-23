@@ -1,9 +1,10 @@
-package com.ham.netnovel.member.Service;
+package com.ham.netnovel.member.service.impl;
 
 
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.MemberRepository;
+import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
 import com.ham.netnovel.member.dto.MemberCreateDto;
 import com.ham.netnovel.member.dto.MemberLoginDto;
@@ -17,6 +18,8 @@ import java.util.Optional;
 class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+
+
 
     public MemberServiceImpl(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;

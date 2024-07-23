@@ -3,10 +3,12 @@ package com.ham.netnovel.reComment.service;
 
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.CommentStatus;
+import com.ham.netnovel.comment.data.CommentType;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
-import com.ham.netnovel.member.Service.MemberService;
+import com.ham.netnovel.member.service.MemberService;
+import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.reComment.ReComment;
 import com.ham.netnovel.reComment.ReCommentRepository;
 import com.ham.netnovel.reComment.dto.ReCommentCreateDto;
@@ -17,10 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -148,13 +148,42 @@ public class ReCommentServiceImpl implements ReCommentService {
                             .content(reComment.getContent())
                             .reCommentId(reComment.getComment().getId())
                             .updatedAt(reComment.getUpdatedAt())
-                            .build()).toList();
+                            .build())
+                    .sorted(Comparator.comparing(ReCommentListDto::getCreatedAt).reversed())
+                    .toList();
 
 
         } catch (Exception e) {
             throw new ServiceMethodException("getReCommentList 메서드 에러 발생"); // 예외 던지기
 
         }
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MemberCommentDto> getMemberReCommentList(String providerId) {
+
+        try {
+            //유저가 작성한 대댓글이 있으면, DTO로 변환해서 반환
+            return reCommentRepository.findByMember(providerId)
+                    .stream()
+                    .map(reComment -> MemberCommentDto.builder()
+                            .type(CommentType.RECOMMENT)//타입지정
+                            .id(reComment.getId())
+                            .content(reComment.getContent())
+                            .createAt(reComment.getCreatedAt())
+                            .updatedAt(reComment.getUpdatedAt())
+                            .build())
+                    //생성시간 역순으로 정렬(최신 대댓글이 먼저 나오도록)
+                    .sorted(Comparator.comparing(MemberCommentDto::getCreateAt).reversed())
+                    .collect(Collectors.toList());
+
+
+        } catch (Exception e) {
+            throw new ServiceMethodException("getMemberReCommentList 메서드 에러 발생"); // 예외 던지기
+        }
+
 
     }
 }

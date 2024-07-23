@@ -3,8 +3,9 @@ package com.ham.netnovel.comment.service;
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
-import com.ham.netnovel.comment.dto.CommentListDto;
+import com.ham.netnovel.comment.dto.CommentEpisodeListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
+import com.ham.netnovel.member.dto.MemberCommentDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,8 +45,21 @@ public interface CommentService {
     /**
      * Episode에 달린 댓글들을 List로 반환하는 메서드
      * @param episodeId episode의 PK값
-     * @return CommentListDto List 형태로 반환
+     * @return CommentEpisodeListDto List 형태로 반환
      */
-    List<CommentListDto> getCommentList(Long episodeId);
+    List<CommentEpisodeListDto> getEpisodeCommentList(Long episodeId);
+
+
+    /**
+     * 유저가 작성한 댓글을 DB에서 찾아 반환하는 메서드
+     * @param providerId
+     * @return
+     */
+    List<MemberCommentDto> getMemberCommentList(String providerId);
+
+
+
+
+
 
 }
