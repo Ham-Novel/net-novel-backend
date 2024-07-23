@@ -170,21 +170,6 @@ public class CommentController {
 
     }
 
-    @PostMapping("/comment/")
-    public ResponseEntity<?> getMemberCommentList(Authentication authentication){
-
-        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
-        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
-
-        //유저가 작성한 댓글 가져와주세요~
-
-       commentService.getMemberCommentList(principal.getName());
-
-
-        return ResponseEntity.ok("ok");
-    }
-
-
     //댓글 생성 테스트용 API
     @GetMapping("/comment/test")
     public String commentTest() {
