@@ -8,6 +8,7 @@ import com.ham.netnovel.member.dto.ChangeNickNameDto;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.member.dto.MemberOAuthDto;
 import com.ham.netnovel.common.utils.Authenticator;
+import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -128,7 +129,32 @@ public class MemberController {
     }
 
 
+    /**
+     * 유저가 좋아요 누른 소설 리스트를 전송하는 API
+     * @param authentication 유저의 인증 정보
+     * @return ResponseEntity
+     */
+    @PostMapping("/members/novel")
+    public ResponseEntity<?> postFavoriteNovels(Authentication authentication){
 
+        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
+        //유저가 좋아요 누른 소설 반환
+        List<NovelFavoriteDto> novels = memberMyPageService.getFavoriteNovelsByMember(principal.getName());
+
+        //클라이언트로 정보 전송
+        return ResponseEntity.ok(novels);
+
+    }
+
+
+    //테스트 API
+    @GetMapping("/members/novel/test")
+    public String memberNovelTest(){
+
+        return "/member/novel-test";
+    }
 
 
     @GetMapping("/members/comment/test")
