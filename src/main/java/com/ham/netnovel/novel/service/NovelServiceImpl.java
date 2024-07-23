@@ -6,10 +6,13 @@ import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+
+@Transactional
 @Service
 public class NovelServiceImpl implements NovelService {
     private final NovelRepository novelRepository;
@@ -42,7 +45,7 @@ public class NovelServiceImpl implements NovelService {
             Novel novel = novelRepository.findById(id).orElseThrow();
 
             //Novel 변경 권한 검증
-            if (!novel.getAuthorId().equals(updater.getProviderId())) {
+            if (!novel.getAuthor().getProviderId().equals(updater.getProviderId())) {
                 throw new RuntimeException("작가 본인만 작품 수정이 가능합니다.");
             }
 

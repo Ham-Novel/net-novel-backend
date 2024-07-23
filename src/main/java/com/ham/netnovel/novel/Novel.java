@@ -13,9 +13,8 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @ToString
+@NoArgsConstructor
 public class Novel {
 
     @Id
@@ -23,11 +22,11 @@ public class Novel {
     private Long id;
 
     //제목
-    @Column(nullable = false) //null 불가능
+    @Column(nullable = false, length = 30) //null 불가능
     private String title;
 
     //작품 설명
-    @Column(nullable = false)
+    @Column(nullable = false, length = 300)
     private String description;
 
     //연재 상태 Enum 사용
@@ -35,10 +34,18 @@ public class Novel {
     private NovelStatus status;
 
     //작가
-    @Column(nullable = false)
-    private String authorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private Member author;
 
-//    @OneToMany(mappedBy = "novel")
-//    private List<Episode> episodes = new ArrayList<>();
+    @OneToMany(mappedBy = "novel")
+    private List<Episode> episodes = new ArrayList<>();
+
+    @Builder
+    public Novel(String title, String description, Member author) {
+        this.title = title;
+        this.description = description;
+        this.author = author;
+    }
 
 }
