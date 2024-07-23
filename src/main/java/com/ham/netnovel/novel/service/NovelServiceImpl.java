@@ -1,7 +1,6 @@
 package com.ham.netnovel.novel.service;
 
 import com.ham.netnovel.common.exception.ServiceMethodException;
-import com.ham.netnovel.episode.EpisodeService;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
@@ -19,19 +18,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 
 @Service
 @Slf4j
 public class NovelServiceImpl implements NovelService {
     private final NovelRepository novelRepository;
-    private final EpisodeService episodeService;
     private final MemberService memberService;
 
     @Autowired
-    public NovelServiceImpl(NovelRepository novelRepository, EpisodeService episodeService, MemberService memberService) {
+    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService) {
         this.novelRepository = novelRepository;
-        this.episodeService = episodeService;
         this.memberService = memberService;
     }
 
@@ -51,15 +49,22 @@ public class NovelServiceImpl implements NovelService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Novel> getNovelEntity(Long id) {
+        return novelRepository.findById(id);
+    }
+
+    @Override
     @Transactional
     public NovelDataDto createNovel(NovelCreateDto novelCreateDto) {
         log.info("Novel 생성 = {}", novelCreateDto.toString());
 
-        //Author 유저 검증
-        Member author = memberService.getMember(novelCreateDto.getAuthorProviderId())
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Author 입니다."));
+        //Member Entity 조회 -> Author 검증
+        Member author = memberService.getMember(novelCreateDto.getAccessorProviderId())
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Member 입니다."));
 
         try {
+            //Novel 생성
             Novel targetNovel = Novel.builder()
                     .title(novelCreateDto.getTitle())
                     .description(novelCreateDto.getDescription())
@@ -69,7 +74,7 @@ public class NovelServiceImpl implements NovelService {
             return novelRepository.save(targetNovel).parseDataDto();
         } catch (Exception ex) {
             //나머지 예외처리
-            throw new ServiceMethodException("createNovel Error");
+            throw new ServiceMethodException("createNovel Error" + ex.getMessage());
         }
 
     }
@@ -87,7 +92,7 @@ public class NovelServiceImpl implements NovelService {
             //Novel 변경 권한 검증
             boolean isAuthor = novelUpdateDto.getAccessorProviderId().equals(targetNovel.getAuthor().getProviderId());
             if (!isAuthor) {
-                throw new AccessDeniedException("해당 Novel에 접근 권한이 업습니다.");
+                throw new AccessDeniedException("해당 Novel에 접근 권한이 없습니다.");
             }
 
             //변경사항 novelDetails 내용 일치 검증
@@ -99,7 +104,7 @@ public class NovelServiceImpl implements NovelService {
             }
 
         } catch (Exception ex) {
-            throw new ServiceMethodException("updateNovel Error");
+            throw new ServiceMethodException("updateNovel Error" + ex.getMessage());
         }
 
         // Logic
@@ -125,7 +130,7 @@ public class NovelServiceImpl implements NovelService {
                 throw new AccessDeniedException("해당 Novel에 접근 권한이 업습니다.");
             }
         } catch (Exception ex) {
-            throw new ServiceMethodException("updateNovel Error");
+            throw new ServiceMethodException("updateNovel Error" + ex.getMessage());
         }
         novelRepository.delete(targetNovel);
         return targetNovel.parseDataDto();
