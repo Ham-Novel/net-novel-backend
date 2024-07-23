@@ -1,10 +1,13 @@
 package com.ham.netnovel.episode;
 
 
+import com.ham.netnovel.episode.dto.EpisodeDataDto;
+import com.ham.netnovel.episode.dto.EpisodeUpdateDto;
 import com.ham.netnovel.episodeRating.EpisodeRating;
 import com.ham.netnovel.coinUseHistory.CoinUseHistory;
 import com.ham.netnovel.novel.Novel;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -69,4 +72,29 @@ public class Episode {
     //junction table 연결, 코인 사용 기록
     @OneToMany(mappedBy = "episode")
     private List<CoinUseHistory> coinUseHistories = new ArrayList<>();
+
+    @Builder
+    public Episode(Integer episodeNumber, String title, String content, Novel novel) {
+        this.episodeNumber = episodeNumber;
+        this.title = title;
+        this.content = content;
+        this.novel = novel;
+    }
+
+    public EpisodeDataDto parseDataDto() {
+        return EpisodeDataDto.builder()
+                .episodeId(this.id)
+                .episodeNumber(this.episodeNumber)
+                .title(this.title)
+                .content(this.content)
+                .view(this.view)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .build();
+    }
+
+    public void updateEpisode(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

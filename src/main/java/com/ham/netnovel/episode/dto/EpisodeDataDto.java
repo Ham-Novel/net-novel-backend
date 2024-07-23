@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @ToString
@@ -13,9 +15,6 @@ import lombok.ToString;
 public class EpisodeDataDto {
 
     private Long episodeId;
-
-    @NotNull
-    private Long novelId;
 
     @NotNull
     private Integer episodeNumber;
@@ -26,8 +25,9 @@ public class EpisodeDataDto {
     @NotNull
     private String content;
 
-//    @NotNull
-//    private Integer coinCost;
-
     private Integer view;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }
