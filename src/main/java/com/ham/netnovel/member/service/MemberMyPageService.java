@@ -1,4 +1,4 @@
-package com.ham.netnovel.member.Service;
+package com.ham.netnovel.member.service;
 
 
 import com.ham.netnovel.member.dto.MemberCommentDto;

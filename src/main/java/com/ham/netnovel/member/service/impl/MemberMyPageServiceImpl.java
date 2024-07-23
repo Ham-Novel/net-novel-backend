@@ -1,13 +1,12 @@
-package com.ham.netnovel.member.Service.impl;
+package com.ham.netnovel.member.service.impl;
 
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.member.MemberRepository;
-import com.ham.netnovel.member.Service.MemberMyPageService;
+import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.reComment.service.ReCommentService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;

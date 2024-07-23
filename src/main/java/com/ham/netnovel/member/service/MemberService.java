@@ -1,7 +1,6 @@
-package com.ham.netnovel.member.Service;
+package com.ham.netnovel.member.service;
 
 import com.ham.netnovel.member.Member;
-import com.ham.netnovel.member.data.Gender;
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
 import com.ham.netnovel.member.dto.MemberCreateDto;
 import com.ham.netnovel.member.dto.MemberLoginDto;
