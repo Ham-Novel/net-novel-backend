@@ -13,7 +13,7 @@ import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeService;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
-import com.ham.netnovel.member.Service.MemberService;
+import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import lombok.extern.slf4j.Slf4j;
