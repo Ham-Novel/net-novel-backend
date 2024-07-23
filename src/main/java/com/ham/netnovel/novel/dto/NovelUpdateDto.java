@@ -1,7 +1,6 @@
 package com.ham.netnovel.novel.dto;
 
-import com.ham.netnovel.novel.Novel;
-import com.ham.netnovel.novel.NovelStatus;
+import com.ham.netnovel.novel.data.NovelStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

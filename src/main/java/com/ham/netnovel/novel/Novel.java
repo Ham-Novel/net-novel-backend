@@ -2,6 +2,7 @@ package com.ham.netnovel.novel;
 
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
+import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.dto.NovelDataDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import jakarta.persistence.*;

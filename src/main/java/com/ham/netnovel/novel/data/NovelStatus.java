@@ -1,4 +1,4 @@
-package com.ham.netnovel.novel;
+package com.ham.netnovel.novel.data;
 
 public enum NovelStatus {
     ONGOING, //연재중

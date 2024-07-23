@@ -6,7 +6,7 @@ import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
-import com.ham.netnovel.novel.NovelStatus;
+import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDataDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
@@ -35,6 +35,7 @@ public class NovelServiceImpl implements NovelService {
         this.memberService = memberService;
     }
 
+    //TODO 각 Method마다 주석 작성
     @Override
     @Transactional
     public List<Novel> getAllNovels() {
