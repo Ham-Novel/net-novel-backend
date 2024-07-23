@@ -2,8 +2,10 @@ package com.ham.netnovel.member;
 
 
 import com.ham.netnovel.OAuth.CustomOAuth2User;
-import com.ham.netnovel.member.Service.MemberService;
+import com.ham.netnovel.member.service.MemberMyPageService;
+import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
+import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.member.dto.MemberOAuthDto;
 import com.ham.netnovel.common.utils.Authenticator;
 import jakarta.validation.Valid;
@@ -15,10 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,9 +30,12 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    public MemberController(Authenticator authenticator, MemberService memberService) {
+    private final MemberMyPageService memberMyPageService;
+
+    public MemberController(Authenticator authenticator, MemberService memberService, MemberMyPageService memberMyPageService) {
         this.authenticator = authenticator;
         this.memberService = memberService;
+        this.memberMyPageService = memberMyPageService;
     }
 
 
@@ -99,13 +101,46 @@ public class MemberController {
     }
 
 
+    /**
+     * 유저가 작성한 댓글, 대댓글을 반환하는 API
+     * API 요청시 인증 정보를 확인 한 후, 인증된 유저가 작성한 댓글,대댓글을 DTO 변환후 List 형태로 반환
+     * @param authentication 유저의 인증 정보
+     * @return ResponseEntity 댓글과 대댓글의 정보를 body에 담아 반환
+     */
+    @PostMapping("/members/comment")
+    public ResponseEntity<?> postMemberCommentList(Authentication authentication){
+
+        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
+        //유저가 작성한 댓글,대댓글 정보를 DB에서 받아와 DTO 형태로 변환(최근에 작성한 댓글이 index 앞에 위치)
+        List<MemberCommentDto> commentList = memberMyPageService.getMemberCommentAndReCommentList(principal.getName());
+
+        for (MemberCommentDto memberCommentDto : commentList) {
+            log.info("정보{}",memberCommentDto.toString());
+
+        }
+
+        //클라이언트로 정보 전송
+        return ResponseEntity.ok(commentList);
+
+
+    }
+
+
+
+
+
+    @GetMapping("/members/comment/test")
+    public String memberCommentTest(){
+
+        return "/member/comment-test";
+    }
 
     @GetMapping("/members/nickname/test")
     public String nickNameChangeTest(){
 
         return "/member/nickname-test";
-
-
     }
 
     @GetMapping("/members/session/test")
