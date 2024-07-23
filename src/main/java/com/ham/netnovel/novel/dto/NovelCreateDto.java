@@ -18,6 +18,6 @@ public class NovelCreateDto {
     @Size(max = 300)
     private String description;
 
-    //작가 provider ID
-    private String authorProviderId;
+    //실행자 유저 ID
+    private String accessorProviderId;
 }
