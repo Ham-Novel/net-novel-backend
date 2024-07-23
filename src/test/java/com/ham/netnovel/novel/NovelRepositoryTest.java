@@ -17,9 +17,6 @@ class NovelRepositoryTest {
 
     @Autowired
     NovelRepository novelRepository;
-//
-//    @Autowired
-//    MemberService memberService;
 
     @Test
     void basicCreate() {
@@ -37,7 +34,7 @@ class NovelRepositoryTest {
 
         // then
         Novel loadNovel = novelRepository.findById(1L).orElseThrow(() -> new NullPointerException());
-//        System.out.println(">>Load Novel Model: " + loadNovel.toString());
+        System.out.println(">>Load Novel Model: " + loadNovel.toString());
         Assertions.assertThat(loadNovel.getTitle()).isEqualTo(newNovel.getTitle());
         Assertions.assertThat(loadNovel.getDescription()).isEqualTo(newNovel.getDescription());
 
