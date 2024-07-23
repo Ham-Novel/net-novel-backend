@@ -15,9 +15,6 @@ public class EpisodeUpdateDto {
     private Long episodeId;
 
     @NotNull
-    private Integer episodeNumber;
-
-    @NotNull
     private String title;
 
     @NotNull

@@ -1,6 +1,6 @@
 package com.ham.netnovel.novel;
 
-import com.ham.netnovel.episode.EpisodeService;
+import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
 import com.ham.netnovel.novel.dto.NovelDataDto;
