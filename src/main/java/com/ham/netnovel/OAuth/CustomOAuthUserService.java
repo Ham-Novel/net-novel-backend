@@ -1,9 +1,7 @@
 package com.ham.netnovel.OAuth;
 
-import com.ham.netnovel.member.Member;
-import com.ham.netnovel.member.data.Gender;
 import com.ham.netnovel.member.data.MemberRole;
-import com.ham.netnovel.member.Service.MemberService;
+import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.MemberCreateDto;
 import com.ham.netnovel.member.dto.MemberLoginDto;
 import com.ham.netnovel.member.dto.MemberOAuthDto;

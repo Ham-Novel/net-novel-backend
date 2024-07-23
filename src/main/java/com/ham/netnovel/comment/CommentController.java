@@ -4,7 +4,7 @@ package com.ham.netnovel.comment;
 import com.ham.netnovel.OAuth.CustomOAuth2User;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
-import com.ham.netnovel.comment.dto.CommentListDto;
+import com.ham.netnovel.comment.dto.CommentEpisodeListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.common.utils.Authenticator;
@@ -152,14 +152,14 @@ public class CommentController {
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
     @PostMapping("/comment/list")
-    public ResponseEntity<?> getCommentList(@RequestBody Map<String, String> requestBody) {
+    public ResponseEntity<?> getEpisodeCommentList(@RequestBody Map<String, String> requestBody) {
         String episodeId = requestBody.get("episodeId");
 
         try {
             //Long 타입으로 타입 캐스팅
             Long episodeIdLong = Long.valueOf(episodeId);
 
-            List<CommentListDto> commentList = commentService.getCommentList(episodeIdLong);
+            List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentList(episodeIdLong);
 
             return ResponseEntity.ok(commentList);
 
@@ -169,7 +169,6 @@ public class CommentController {
         }
 
     }
-
 
     //댓글 생성 테스트용 API
     @GetMapping("/comment/test")
