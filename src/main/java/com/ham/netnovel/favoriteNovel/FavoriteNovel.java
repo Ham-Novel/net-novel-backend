@@ -1,24 +1,25 @@
-package com.ham.netnovel.novelTag;
+package com.ham.netnovel.favoriteNovel;
 
 
+import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.Novel;
-import com.ham.netnovel.tag.Tag;
 import jakarta.persistence.*;
 
 @Entity
-public class NovelTag {
+public class FavoriteNovel {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)//auto_increment 자동생성
     private Long id;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id")
-    private Tag tag;
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "novel_id")
     private Novel novel;
 

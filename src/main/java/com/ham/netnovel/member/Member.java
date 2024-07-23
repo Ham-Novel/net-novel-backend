@@ -8,6 +8,7 @@ import com.ham.netnovel.favoriteNovel.FavoriteNovel;
 import com.ham.netnovel.member.data.Gender;
 import com.ham.netnovel.member.data.MemberRole;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -72,6 +73,7 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder
     public Member(String email, OAuthProvider provider, String providerId, MemberRole role, String nickName, Gender gender,Integer coinCount) {
         this.email = email;
         this.provider = provider;

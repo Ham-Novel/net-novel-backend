@@ -47,7 +47,7 @@ public class SecurityConfig {
 
         //사용자 인증 URL 설정
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/","/login**").permitAll()//인증 예외 URL
+                .requestMatchers("/","/login**", "/api/**").permitAll()//인증 예외 URL
                 .anyRequest().authenticated()
         );
 

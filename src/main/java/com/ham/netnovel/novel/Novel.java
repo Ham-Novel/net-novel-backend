@@ -1,23 +1,16 @@
 package com.ham.netnovel.novel;
 
-//
-//import com.ham.netnovel.author.Author;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
+import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Novel {
 
     @Id
@@ -25,11 +18,11 @@ public class Novel {
     private Long id;
 
     //제목
-    @Column(nullable = false) //null 불가능
+    @Column(nullable = false, length = 30) //null 불가능
     private String title;
 
     //작품 설명
-    @Column(nullable = false)
+    @Column(nullable = false, length = 300)
     private String description;
 
     //연재 상태 Enum 사용
@@ -38,10 +31,24 @@ public class Novel {
 
     //작가
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
-    private String authorId;
+    @JoinColumn(name = "member_id")
+    private Member author;
 
     @OneToMany(mappedBy = "novel")
     private List<Episode> episodes = new ArrayList<>();
 
+    @Builder
+    public Novel(String title, String description, NovelStatus status, Member author) {
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.author = author;
+    }
+
+    //댓글 엔티티 내용 변경
+    public void updateNovel(NovelUpdateDto updateDto){
+        this.title = updateDto.getTitle();
+        this.description = updateDto.getDescription();
+        this.status = updateDto.getStatus();
+    }
 }

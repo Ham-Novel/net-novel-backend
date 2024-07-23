@@ -2,6 +2,9 @@ package com.ham.netnovel.novel.service;
 
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.Novel;
+import com.ham.netnovel.novel.dto.NovelCreateDto;
+import com.ham.netnovel.novel.dto.NovelDeleteDto;
+import com.ham.netnovel.novel.dto.NovelUpdateDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,11 +13,11 @@ public interface NovelService {
 
     List<Novel> getAllNovels();
 
-    Optional<Novel> getNovel(Long id);
+    Novel getNovel(Long id);
 
-    Novel createNovel(Novel novel);
+    Novel createNovel(NovelCreateDto novelCreateDto);
 
-    void updateNovel(Long id, Novel novelDetails, Member updater);
+    Novel updateNovel(NovelUpdateDto novelUpdateDto);
 
-    void deleteNovel(Long id);
+    Novel deleteNovel(NovelDeleteDto novelDeleteDto);
 }

@@ -19,7 +19,7 @@ public class Tag {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "tag_id")
+    @OneToMany(mappedBy = "tag")
     private List<NovelTag> novelTags= new ArrayList<>();
 
 
