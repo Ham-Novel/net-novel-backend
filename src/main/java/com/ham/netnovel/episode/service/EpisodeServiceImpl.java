@@ -44,6 +44,11 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
+    public Optional<Episode> getEpisodeEntity(Long episodeId) {
+        return episodeRepository.findById(episodeId);
+    }
+
+    @Override
     @Transactional
     public EpisodeDataDto createEpisode(EpisodeCreateDto episodeCreateDto) {
         Novel novelFrom = novelService.getNovelEntity(episodeCreateDto.getNovelId())
