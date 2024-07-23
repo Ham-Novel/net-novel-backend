@@ -3,7 +3,7 @@ package com.ham.netnovel.novel.service;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.episode.EpisodeService;
 import com.ham.netnovel.member.Member;
-import com.ham.netnovel.member.Service.MemberService;
+import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.NovelStatus;
