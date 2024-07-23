@@ -20,15 +20,6 @@ public class NovelController {
         this.novelService = novelService;
     }
 
-    /**
-     * 소설 상세 페이지 관련 정보 모두 요청
-     * Novel: 엔티티 전체
-     * Episode: 해당 Novel 총 화수, 총 조회수
-     * EpisodeRating: 해당 Novel 별점
-     * FavoriteNovel: 유저 관심 등록 수
-     * @param novelId
-     * @return
-     */
     @GetMapping("/{novelId}")
     public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId) {
         NovelResponseDto responseData = parseResponseData(novelService.getNovel(novelId));
