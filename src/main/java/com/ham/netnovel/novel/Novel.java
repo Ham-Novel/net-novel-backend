@@ -1,9 +1,8 @@
 package com.ham.netnovel.novel;
 
-//
-//import com.ham.netnovel.author.Author;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
+import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,10 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Setter
 @Getter
-@ToString
-@NoArgsConstructor
 public class Novel {
 
     @Id
@@ -35,7 +31,7 @@ public class Novel {
 
     //작가
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
+    @JoinColumn(name = "member_id")
     private Member author;
 
     @OneToMany(mappedBy = "novel")
@@ -47,5 +43,12 @@ public class Novel {
         this.description = description;
         this.status = status;
         this.author = author;
+    }
+
+    //댓글 엔티티 내용 변경
+    public void updateNovel(NovelUpdateDto updateDto){
+        this.title = updateDto.getTitle();
+        this.description = updateDto.getDescription();
+        this.status = updateDto.getStatus();
     }
 }

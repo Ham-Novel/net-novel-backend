@@ -28,9 +28,9 @@ public class NovelUpdateDto {
 
     private NovelStatus status;
 
-//    private String authorPId;
+//    private String authorProviderId;
 
-    private String accessorPId;
+    private String accessorProviderId;
 
     public boolean isSameContent(Novel novel) {
         return this.title.equals(novel.getTitle())

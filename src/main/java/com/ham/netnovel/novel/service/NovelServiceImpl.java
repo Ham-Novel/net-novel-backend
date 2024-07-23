@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 
 @Service
@@ -54,17 +53,17 @@ public class NovelServiceImpl implements NovelService {
         log.info("Novel 생성 = {}", novelCreateDto.toString());
 
         //Author 유저 검증
-        Member author = memberService.getMember(novelCreateDto.getAuthorPId())
+        Member author = memberService.getMember(novelCreateDto.getAuthorProviderId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Author 입니다."));
 
         try {
-            Novel novelToCreate = Novel.builder()
+            Novel targetNovel = Novel.builder()
                     .title(novelCreateDto.getTitle())
                     .description(novelCreateDto.getDescription())
                     .author(author)
                     .status(NovelStatus.ONGOING)
                     .build();
-            return novelRepository.save(novelToCreate);
+            return novelRepository.save(targetNovel);
         } catch (Exception ex) {
             //나머지 예외처리
             throw new ServiceMethodException("createNovel Error");
@@ -77,18 +76,18 @@ public class NovelServiceImpl implements NovelService {
         log.info("Novel 변경 = {}", novelUpdateDto.toString());
 
         //변경할 Novel 검증
-        Novel novelToUpdate = novelRepository.findById(novelUpdateDto.getNovelId())
+        Novel targetNovel = novelRepository.findById(novelUpdateDto.getNovelId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Novel 입니다."));
 
         try {
             //Novel 변경 권한 검증
-            boolean isAuthor = novelUpdateDto.getAccessorPId().equals(novelToUpdate.getAuthor().getProviderId());
+            boolean isAuthor = novelUpdateDto.getAccessorProviderId().equals(targetNovel.getAuthor().getProviderId());
             if (!isAuthor) {
                 throw new AccessDeniedException("해당 Novel에 접근 권한이 업습니다.");
             }
 
             //변경사항 novelDetails 내용 일치 검증
-            if (novelUpdateDto.isSameContent(novelToUpdate)) {
+            if (novelUpdateDto.isSameContent(targetNovel)) {
                 throw new RuntimeException("변경 사항이 없습니다.");
             }
         } catch (Exception ex) {
@@ -96,12 +95,10 @@ public class NovelServiceImpl implements NovelService {
         }
 
         // Logic
-        novelToUpdate.setTitle(novelUpdateDto.getTitle());
-        novelToUpdate.setDescription(novelUpdateDto.getDescription());
-        novelToUpdate.setStatus(novelUpdateDto.getStatus());
+        targetNovel.updateNovel(novelUpdateDto);
 
         // JPA save() 메소드는 자동으로 변경 감지 => create(X) update(O) 작업 수행
-        return novelRepository.save(novelToUpdate);
+        return novelRepository.save(targetNovel);
     }
 
     @Override
@@ -109,19 +106,19 @@ public class NovelServiceImpl implements NovelService {
         log.info("Novel 삭제 = {}", novelDeleteDto.toString());
 
         //삭제할 Novel 검증
-        Novel novelToDelete = novelRepository.findById(novelDeleteDto.getNovelId())
+        Novel targetNovel = novelRepository.findById(novelDeleteDto.getNovelId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Novel 입니다."));
 
         try {
             //Novel 변경 권한 검증
-            boolean isAuthor = novelDeleteDto.getAccessorPId().equals(novelToDelete.getAuthor().getProviderId());
+            boolean isAuthor = novelDeleteDto.getAccessorProviderId().equals(targetNovel.getAuthor().getProviderId());
             if (!isAuthor) {
                 throw new AccessDeniedException("해당 Novel에 접근 권한이 업습니다.");
             }
         } catch (Exception ex) {
             throw new ServiceMethodException("updateNovel Error");
         }
-        novelRepository.delete(novelToDelete);
-        return novelToDelete;
+        novelRepository.delete(targetNovel);
+        return targetNovel;
     }
 }

@@ -20,5 +20,5 @@ public class NovelCreateDto {
     private String description;
 
     //작가 provider ID
-    private String authorPId;
+    private String authorProviderId;
 }

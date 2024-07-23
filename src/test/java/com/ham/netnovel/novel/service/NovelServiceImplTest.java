@@ -48,7 +48,7 @@ class NovelServiceImplTest {
         NovelCreateDto novelCreateDto = NovelCreateDto.builder()
                 .title("전형적인 빙의물")
                 .description("그냥 평범한 판타지 빙의물입니다.")
-                .authorPId("1111")
+                .authorProviderId("1111")
                 .build();
         System.out.println(">> Novel Create " + novelCreateDto.toString());
 
