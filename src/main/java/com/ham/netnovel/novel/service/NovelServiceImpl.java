@@ -121,4 +121,22 @@ public class NovelServiceImpl implements NovelService {
         novelRepository.delete(targetNovel);
         return targetNovel;
     }
+
+
+    //단순히 엔티티 List만 반환하는 메서드
+    //Null체크, DTO 변환은 MemberMyPageService에서 진행
+    @Override
+    @Transactional(readOnly = true)
+    public List<Novel> getFavoriteNovels(String providerId) {
+
+        try {
+            return novelRepository.findFavoriteNovelsByMember(providerId);
+
+
+        } catch (Exception ex) {//예외 발생시 처리
+            throw new ServiceMethodException("getMemberFavoriteNovels Error");
+        }
+
+
+    }
 }

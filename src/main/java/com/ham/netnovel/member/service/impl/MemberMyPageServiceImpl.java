@@ -4,6 +4,8 @@ import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
+import com.ham.netnovel.novel.dto.NovelFavoriteDto;
+import com.ham.netnovel.novel.service.NovelService;
 import com.ham.netnovel.reComment.service.ReCommentService;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +25,13 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
 
     private final MemberRepository memberRepository;
 
-    public MemberMyPageServiceImpl(CommentService commentService, ReCommentService reCommentService, MemberRepository memberRepository) {
+    private final NovelService novelService;
+
+    public MemberMyPageServiceImpl(CommentService commentService, ReCommentService reCommentService, MemberRepository memberRepository, NovelService novelService) {
         this.commentService = commentService;
         this.reCommentService = reCommentService;
         this.memberRepository = memberRepository;
+        this.novelService = novelService;
     }
 
 
@@ -43,6 +48,23 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
                 .sorted(Comparator.comparing(MemberCommentDto::getCreateAt).reversed())
                 // 정렬된 스트림을 리스트 형태로 수집하여 반환
                 .collect(Collectors.toList());
+    }
+
+
+    //ToDo Author 엔티티 생성 후, 작가 정보도 DTO에 담아서 반환
+    @Override
+    public List<NovelFavoriteDto> getFavoriteNovelsByMember(String providerId) {
+        if (providerId == null || providerId.trim().isEmpty()) {
+            throw new IllegalArgumentException("getFavoriteNovelsByMember 파라미터 에러, 파라미터가 비어있음");
+        }
+        return novelService.getFavoriteNovels(providerId)
+                .stream()
+                .map(novel -> NovelFavoriteDto.builder()
+                        .novelId(novel.getId())
+                        .title(novel.getTitle())
+                        .status(novel.getStatus())
+                        .build()
+                ).collect(Collectors.toList());
     }
 
 
