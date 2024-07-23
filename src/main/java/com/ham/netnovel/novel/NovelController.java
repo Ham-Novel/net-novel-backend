@@ -3,7 +3,7 @@ package com.ham.netnovel.novel;
 import com.ham.netnovel.episode.EpisodeService;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
-import com.ham.netnovel.novel.dto.NovelResponseDto;
+import com.ham.netnovel.novel.dto.NovelDataDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novel.service.NovelService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,40 +21,25 @@ public class NovelController {
     }
 
     @GetMapping("/{novelId}")
-    public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId) {
-        NovelResponseDto responseData = parseResponseData(novelService.getNovel(novelId));
-        log.debug("Get {}", responseData.toString());
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<NovelDataDto> getNovel(@PathVariable("novelId") Long novelId) {
+        return ResponseEntity.ok(novelService.getNovel(novelId));
     }
 
     @PostMapping
-    public ResponseEntity<NovelResponseDto> createNovel(@RequestBody NovelCreateDto reqBody) {
-        NovelResponseDto responseData = parseResponseData(novelService.createNovel(reqBody));
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<NovelDataDto> createNovel(@RequestBody NovelCreateDto reqBody) {
+        return ResponseEntity.ok(novelService.createNovel(reqBody));
     }
 
     @PutMapping
-    public ResponseEntity<NovelResponseDto> createNovel(@RequestBody NovelUpdateDto reqBody) {
-        NovelResponseDto responseData = parseResponseData(novelService.updateNovel(reqBody));
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<NovelDataDto> createNovel(@RequestBody NovelUpdateDto reqBody) {
+        return ResponseEntity.ok(novelService.updateNovel(reqBody));
     }
 
     @DeleteMapping("/{novelId}")
-    public ResponseEntity<NovelResponseDto> deleteNovel(
+    public ResponseEntity<NovelDataDto> deleteNovel(
             @PathVariable("novelId") Long novelId,
             @RequestBody NovelDeleteDto reqBody) {
-        NovelResponseDto responseData = parseResponseData(novelService.deleteNovel(reqBody));
-        return ResponseEntity.ok(responseData);
-    }
-
-    public NovelResponseDto parseResponseData(Novel novel) {
-        return NovelResponseDto.builder()
-                .id(novel.getId())
-                .title(novel.getTitle())
-                .description(novel.getDescription())
-                .authorName(novel.getAuthor().getNickName())
-                .status(novel.getStatus())
-                .build();
+        return ResponseEntity.ok(novelService.deleteNovel(reqBody));
     }
 
 /*

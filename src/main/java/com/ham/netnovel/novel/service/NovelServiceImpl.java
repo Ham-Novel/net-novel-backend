@@ -8,6 +8,7 @@ import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.NovelStatus;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
+import com.ham.netnovel.novel.dto.NovelDataDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import lombok.extern.slf4j.Slf4j;
@@ -42,14 +43,15 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     @Transactional(readOnly = true)
-    public Novel getNovel(Long id) {
+    public NovelDataDto getNovel(Long id) {
         return novelRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Novel 입니다."));
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Novel 입니다."))
+                .parseDataDto();
     }
 
     @Override
     @Transactional
-    public Novel createNovel(NovelCreateDto novelCreateDto) {
+    public NovelDataDto createNovel(NovelCreateDto novelCreateDto) {
         log.info("Novel 생성 = {}", novelCreateDto.toString());
 
         //Author 유저 검증
@@ -63,7 +65,7 @@ public class NovelServiceImpl implements NovelService {
                     .author(author)
                     .status(NovelStatus.ONGOING)
                     .build();
-            return novelRepository.save(targetNovel);
+            return novelRepository.save(targetNovel).parseDataDto();
         } catch (Exception ex) {
             //나머지 예외처리
             throw new ServiceMethodException("createNovel Error");
@@ -72,7 +74,8 @@ public class NovelServiceImpl implements NovelService {
     }
 
     @Override
-    public Novel updateNovel(NovelUpdateDto novelUpdateDto) {
+    @Transactional
+    public NovelDataDto updateNovel(NovelUpdateDto novelUpdateDto) {
         log.info("Novel 변경 = {}", novelUpdateDto.toString());
 
         //변경할 Novel 검증
@@ -87,9 +90,13 @@ public class NovelServiceImpl implements NovelService {
             }
 
             //변경사항 novelDetails 내용 일치 검증
-            if (novelUpdateDto.isSameContent(targetNovel)) {
+            if (isSameContent(targetNovel,
+                    novelUpdateDto.getTitle(),
+                    novelUpdateDto.getDescription(),
+                    novelUpdateDto.getStatus())) {
                 throw new RuntimeException("변경 사항이 없습니다.");
             }
+
         } catch (Exception ex) {
             throw new ServiceMethodException("updateNovel Error");
         }
@@ -98,11 +105,12 @@ public class NovelServiceImpl implements NovelService {
         targetNovel.updateNovel(novelUpdateDto);
 
         // JPA save() 메소드는 자동으로 변경 감지 => create(X) update(O) 작업 수행
-        return novelRepository.save(targetNovel);
+        return novelRepository.save(targetNovel).parseDataDto();
     }
 
     @Override
-    public Novel deleteNovel(NovelDeleteDto novelDeleteDto) {
+    @Transactional
+    public NovelDataDto deleteNovel(NovelDeleteDto novelDeleteDto) {
         log.info("Novel 삭제 = {}", novelDeleteDto.toString());
 
         //삭제할 Novel 검증
@@ -119,6 +127,12 @@ public class NovelServiceImpl implements NovelService {
             throw new ServiceMethodException("updateNovel Error");
         }
         novelRepository.delete(targetNovel);
-        return targetNovel;
+        return targetNovel.parseDataDto();
+    }
+
+    public boolean isSameContent(Novel novel, String title, String desc, NovelStatus status) {
+        return novel.getTitle().equals(title)
+                && novel.getDescription().equals(desc)
+                && novel.getStatus().equals(status);
     }
 }

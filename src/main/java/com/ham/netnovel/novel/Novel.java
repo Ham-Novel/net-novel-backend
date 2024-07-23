@@ -2,6 +2,7 @@ package com.ham.netnovel.novel;
 
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
+import com.ham.netnovel.novel.dto.NovelDataDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Novel {
 
     @Id
@@ -50,5 +52,15 @@ public class Novel {
         this.title = updateDto.getTitle();
         this.description = updateDto.getDescription();
         this.status = updateDto.getStatus();
+    }
+
+    public NovelDataDto parseDataDto() {
+        return NovelDataDto.builder()
+                .id(this.id)
+                .title(this.title)
+                .description(this.description)
+                .authorName(this.author.getNickName())
+                .status(this.status)
+                .build();
     }
 }

@@ -1,24 +1,17 @@
 package com.ham.netnovel.novel.dto;
 
-import com.ham.netnovel.episode.Episode;
-import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.NovelStatus;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
 @Builder
-public class NovelResponseDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class NovelDataDto {
 
     private Long id;
 
