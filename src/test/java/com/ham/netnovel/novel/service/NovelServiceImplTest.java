@@ -34,10 +34,7 @@ class NovelServiceImplTest {
         novelRepository.save(newNovel);
 
         // then
-        Optional<Novel> loadNovel = novelService.getNovel(1L);
-
-        if (loadNovel.isPresent()) {
-            System.out.println(">> Novel Model: " + loadNovel.toString());
-        }
+        Novel loadNovel = novelService.getNovel(1L);
+        System.out.println(">> Novel Model: " + loadNovel.toString());
     }
 }

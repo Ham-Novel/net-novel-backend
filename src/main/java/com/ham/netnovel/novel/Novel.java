@@ -42,9 +42,10 @@ public class Novel {
     private List<Episode> episodes = new ArrayList<>();
 
     @Builder
-    public Novel(String title, String description, Member author) {
+    public Novel(String title, String description, NovelStatus status, Member author) {
         this.title = title;
         this.description = description;
+        this.status = status;
         this.author = author;
     }
 
