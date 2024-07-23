@@ -1,18 +1,14 @@
 package com.ham.netnovel.novel;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.ham.netnovel.episode.EpisodeService;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
+import com.ham.netnovel.novel.dto.NovelResponseDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novel.service.NovelService;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -34,30 +30,41 @@ public class NovelController {
      * @return
      */
     @GetMapping("/{novelId}")
-    public ResponseEntity<Novel> getNovel(
-            @PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(novelService.getNovel(novelId));
+    public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId) {
+        NovelResponseDto responseData = parseResponseData(novelService.getNovel(novelId));
+        log.debug("Get {}", responseData.toString());
+        return ResponseEntity.ok(responseData);
     }
 
     @PostMapping
-    public ResponseEntity<Novel> createNovel(@RequestBody NovelCreateDto reqBody) {
-        return ResponseEntity.ok(novelService.createNovel(reqBody));
+    public ResponseEntity<NovelResponseDto> createNovel(@RequestBody NovelCreateDto reqBody) {
+        NovelResponseDto responseData = parseResponseData(novelService.createNovel(reqBody));
+        return ResponseEntity.ok(responseData);
     }
 
     @PutMapping
-    public ResponseEntity<Novel> createNovel(@RequestBody NovelUpdateDto reqBody) {
-        return ResponseEntity.ok(novelService.updateNovel(reqBody));
+    public ResponseEntity<NovelResponseDto> createNovel(@RequestBody NovelUpdateDto reqBody) {
+        NovelResponseDto responseData = parseResponseData(novelService.updateNovel(reqBody));
+        return ResponseEntity.ok(responseData);
     }
 
     @DeleteMapping("/{novelId}")
-    public ResponseEntity<Novel> deleteNovel(
+    public ResponseEntity<NovelResponseDto> deleteNovel(
             @PathVariable("novelId") Long novelId,
             @RequestBody NovelDeleteDto reqBody) {
-        ;
-        return ResponseEntity.ok(novelService.deleteNovel(reqBody));
+        NovelResponseDto responseData = parseResponseData(novelService.deleteNovel(reqBody));
+        return ResponseEntity.ok(responseData);
     }
 
-
+    public NovelResponseDto parseResponseData(Novel novel) {
+        return NovelResponseDto.builder()
+                .id(novel.getId())
+                .title(novel.getTitle())
+                .description(novel.getDescription())
+                .authorName(novel.getAuthor().getNickName())
+                .status(novel.getStatus())
+                .build();
+    }
 
 /*
     // 등록된 모든 Novel List로 GET 요청

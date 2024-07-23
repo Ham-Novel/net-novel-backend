@@ -48,5 +48,4 @@ public class Novel {
         this.status = status;
         this.author = author;
     }
-
 }
