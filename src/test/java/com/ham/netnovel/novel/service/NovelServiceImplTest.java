@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
+
 @SpringBootTest
 class NovelServiceImplTest {
     @Autowired
@@ -58,5 +60,34 @@ class NovelServiceImplTest {
 
         // then
         System.out.println(">> Novel Model: " + responseDto.toString());
+    }
+
+
+    @Test
+    void getMemberFavoriteNovels(){
+
+        //테스트 providerId 입력
+//        String providerId = "-";
+        String providerId = "3333";
+
+        List<Novel> favoriteNovels = novelService.getFavoriteNovels(providerId);
+
+        if (favoriteNovels.isEmpty()){
+            System.out.println("List 비었음");
+
+
+        }else {
+
+            for (Novel favoriteNovel : favoriteNovels) {
+                System.out.println("소설정보");
+                System.out.println(favoriteNovel.toString());
+            }
+
+
+        }
+
+
+
+
     }
 }
