@@ -3,7 +3,7 @@ package com.ham.netnovel.novel;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.data.NovelStatus;
-import com.ham.netnovel.novel.dto.NovelDataDto;
+import com.ham.netnovel.novel.dto.NovelResponseDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -55,13 +55,15 @@ public class Novel {
         this.status = updateDto.getStatus();
     }
 
-    public NovelDataDto parseDataDto() {
-        return NovelDataDto.builder()
-                .id(this.id)
+    public NovelResponseDto parseResponseDto() {
+        return NovelResponseDto.builder()
+                .novelId(this.id)
                 .title(this.title)
                 .description(this.description)
                 .authorName(this.author.getNickName())
                 .status(this.status)
+                .view(episodes.stream().mapToInt(epi->epi.getView()).sum())
+                .episodeAmount(episodes.size())
                 .build();
     }
 }

@@ -5,6 +5,7 @@ import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
+import com.ham.netnovel.novel.dto.NovelResponseDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,7 +39,7 @@ class NovelServiceImplTest {
         novelRepository.save(newNovel);
 
         // then
-        Novel loadNovel = novelService.getNovel(1L);
+        Novel loadNovel = novelService.getNovelEntity(1L).get();
         System.out.println(">> Novel Model: " + loadNovel.toString());
     }
 
@@ -48,14 +49,14 @@ class NovelServiceImplTest {
         NovelCreateDto novelCreateDto = NovelCreateDto.builder()
                 .title("전형적인 빙의물")
                 .description("그냥 평범한 판타지 빙의물입니다.")
-                .authorProviderId("1111")
+                .accessorProviderId("1111")
                 .build();
         System.out.println(">> Novel Create " + novelCreateDto.toString());
 
         // when
-        Novel novel = novelService.createNovel(novelCreateDto);
+        NovelResponseDto responseDto = novelService.createNovel(novelCreateDto);
 
         // then
-        System.out.println(">> Novel Model: " + novel.toString());
+        System.out.println(">> Novel Model: " + responseDto.toString());
     }
 }
