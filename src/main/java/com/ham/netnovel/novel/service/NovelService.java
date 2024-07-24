@@ -8,6 +8,7 @@ import com.ham.netnovel.novel.dto.NovelResponseDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface NovelService {
 
@@ -20,15 +21,9 @@ public interface NovelService {
 
     NovelResponseDto createNovel(NovelCreateDto novelCreateDto);
 
-    Novel deleteNovel(NovelDeleteDto novelDeleteDto);
-
-
-    List<Novel> getFavoriteNovels(String providerId);
-
-
-
-
     NovelResponseDto updateNovel(NovelUpdateDto novelUpdateDto);
 
     NovelResponseDto deleteNovel(NovelDeleteDto novelDeleteDto);
+
+    List<Novel> getFavoriteNovels(String providerId);
 }
