@@ -22,6 +22,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+//ToDo 에피소드 생성, 삭제, 이동 시 episodeNumber 자동 넘버링 및 재정렬 로직 구현
 @Service
 @Slf4j
 public class EpisodeServiceImpl implements EpisodeService {
@@ -58,6 +59,7 @@ public class EpisodeServiceImpl implements EpisodeService {
                 .title(episodeCreateDto.getTitle())
                 .content(episodeCreateDto.getContent())
                 .novel(novelFrom)
+                .episodeNumber(novelFrom.getEpisodes().size()+1) //자동으로 넘버링 증가
                 .build();
         return episodeRepository.save(targetEpisode).parseDataDto();
     }

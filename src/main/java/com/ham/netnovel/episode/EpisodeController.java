@@ -24,7 +24,7 @@ public class EpisodeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EpisodeDataDto>> getEpisodeListByNovel(@RequestParam Long novelId) {
+    public ResponseEntity<List<EpisodeDataDto>> getEpisodeListByNovel(@RequestParam("novelId") Long novelId) {
         List<EpisodeDataDto> episodesByNovel = episodeService.getEpisodesByNovel(novelId);
         return ResponseEntity.ok(episodesByNovel);
     }

@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -46,6 +47,8 @@ public class Episode {
 //    private Integer coinCost;
 
     //에피소드 조회수
+    @Column(nullable = false)
+    @ColumnDefault("0")
     private Integer view;
 
 
@@ -81,6 +84,7 @@ public class Episode {
         this.title = title;
         this.content = content;
         this.novel = novel;
+        this.view = 0;
     }
 
     public EpisodeDataDto parseDataDto() {

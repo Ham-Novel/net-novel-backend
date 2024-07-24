@@ -27,6 +27,8 @@ public class EpisodeDataDto {
 
     private Integer view;
 
+    private Integer commentAmount;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
