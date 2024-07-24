@@ -1,6 +1,7 @@
 package com.ham.netnovel.member.service;
 
 
+import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 
@@ -15,6 +16,8 @@ public interface MemberMyPageService {
 
 //    List<FavoriteNovelListDto> getMemberFavoriteNovel
 
+
+    List<MemberCoinUseHistoryDto> getMemberCoinUseHistory(String providerId);
 
 
 
