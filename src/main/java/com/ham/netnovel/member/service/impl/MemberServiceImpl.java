@@ -1,6 +1,7 @@
 package com.ham.netnovel.member.service.impl;
 
 
+import com.ham.netnovel.common.exception.NotEnoughCoinsException;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.MemberRepository;
@@ -100,6 +101,48 @@ class MemberServiceImpl implements MemberService {
         }
 
         //DB에 변경사항 저장
+
+
+    }
+
+    @Override
+    @Transactional
+    public void deductMemberCoins(String providerId, Integer coinAmount) {
+
+        //사용한 코인 수가 올바르지 않을때 예외로 던짐
+        if (coinAmount==null || coinAmount<0){
+            throw new IllegalArgumentException("deductMemberCoins 에러, coinAmount 값이 유효하지 않습니다.");
+        }
+
+        Optional<Member> optionalMember = getMember(providerId);
+        if (optionalMember.isEmpty()){
+            throw new NoSuchElementException("deductMemberCoins 에러, 유저 정보가 없습니다.");
+        }
+        //Optional 벗기기
+        Member member = optionalMember.get();
+
+        //유저의 전체 코인수 변수에 저장
+        Integer totalCoin = member.getCoinCount();
+
+        //유저의 코인이 null일경우 예외처리
+        if (totalCoin ==null){
+            throw new NoSuchElementException("deductMemberCoins 에러, 유저 정보가 없습니다.");
+        //유저의 코인이 사용한 코인수보다 적을때 예외처리
+        } else if (totalCoin<coinAmount) {
+            throw new NotEnoughCoinsException("deductMemberCoins 에러, 유저의 코인이 부족합니다.");
+        }
+
+        try {
+            //엔티티의 coinAmount 차감
+            member.deductCoins(coinAmount);
+            //엔티티 DB에 저장
+            memberRepository.save(member);
+        }catch (Exception ex){
+            throw new ServiceMethodException("deductMemberCoins 메서드 에러 발생" + ex.getMessage());
+        }
+
+
+
 
 
     }
