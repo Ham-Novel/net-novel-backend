@@ -62,7 +62,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional
-    public EpisodeDataDto deleteEpisode(EpisodeUpdateDto episodeUpdateDto) {
+    public EpisodeDataDto updateEpisode(EpisodeUpdateDto episodeUpdateDto) {
         Episode targetEpisode = episodeRepository.findById(episodeUpdateDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Episode입니다."));
 
@@ -72,7 +72,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional
-    public EpisodeDataDto updateEpisode(EpisodeDeleteDto episodeDeleteDto) {
+    public EpisodeDataDto deleteEpisode(EpisodeDeleteDto episodeDeleteDto) {
         Episode targetEpisode = episodeRepository.findById(episodeDeleteDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Episode입니다."));
 
