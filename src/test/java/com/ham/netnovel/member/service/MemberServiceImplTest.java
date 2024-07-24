@@ -38,4 +38,25 @@ class MemberServiceImplTest {
 
 
     }
+
+    //테스트 완료
+    @Test
+    public void deductMemberCoins(){
+
+//        String providerId = "";
+        //존재하지않은 사용자 테스트
+        String providerId = "testtest";//NoSuchElementException로 던져짐
+
+        Integer coinAmount = 3;
+
+        //null체크 테스트
+//        Integer coinAmount = null; //IllegalArgumentException로 던져짐
+//        Integer coinAmount = 0;
+
+
+        memberService.deductMemberCoins(providerId,coinAmount);
+
+
+
+    }
 }
