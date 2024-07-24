@@ -1,22 +1,18 @@
 package com.ham.netnovel.episode.service;
 
 
-import com.ham.netnovel.comment.data.CommentType;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.dto.EpisodeCreateDto;
 import com.ham.netnovel.episode.dto.EpisodeDataDto;
 import com.ham.netnovel.episode.dto.EpisodeDeleteDto;
 import com.ham.netnovel.episode.dto.EpisodeUpdateDto;
-import com.ham.netnovel.episode.service.EpisodeService;
-import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.service.NovelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.ham.netnovel.FavoriteNovel;
+package com.ham.netnovel.favoriteNovel;
 
 
 import com.ham.netnovel.member.Member;

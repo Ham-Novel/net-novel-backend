@@ -9,6 +9,7 @@ import org.mapstruct.factory.Mappers;
  * Novel Entity를 NovelResponseDto로 parsing해주는 static 객체.
  * MapStruct 라이브러리로 구현.
  */
+//ToDo 아직 사용 X 점차 대체할 예정.
 @Mapper
 public interface NovelMapper {
     NovelMapper INSTANCE = Mappers.getMapper(NovelMapper.class);
