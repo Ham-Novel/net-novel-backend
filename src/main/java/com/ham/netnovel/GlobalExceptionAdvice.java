@@ -1,5 +1,6 @@
 package com.ham.netnovel;
 
+import com.ham.netnovel.common.exception.NotEnoughCoinsException;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -77,7 +78,16 @@ public class GlobalExceptionAdvice {
     }
 
 
-
+    /**
+     * 결제시 코인이 부족할 경우 예외처리
+     * @param ex NotEnoughCoinsException 커스텀 Exception, RunTimeException 상속받아 사용
+     * @return ResponseEntity 에러 메시지 유저에게 전달
+     */
+    @ExceptionHandler(NotEnoughCoinsException.class)
+    public ResponseEntity<String> handleNotEnoughCoinsException(NotEnoughCoinsException ex) {
+        log.error("errorMessage NotEnoughCoinsException: {} ",ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("코인이 부족합니다. 코인을 충전해 주세요");
+    }
 
 
     //    RuntimeException 핸들링
