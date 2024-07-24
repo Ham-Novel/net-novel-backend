@@ -1,8 +1,8 @@
 package com.ham.netnovel.episode;
 
 
+import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.episode.dto.EpisodeDataDto;
-import com.ham.netnovel.episode.dto.EpisodeUpdateDto;
 import com.ham.netnovel.episodeRating.EpisodeRating;
 import com.ham.netnovel.coinUseHistory.CoinUseHistory;
 import com.ham.netnovel.novel.Novel;
@@ -63,6 +63,8 @@ public class Episode {
     @JoinColumn(name = "novel_id")
     private Novel novel;
 
+    @OneToMany(mappedBy = "episode")
+    private List<Comment> comments = new ArrayList<>();
 
     //junction table 연결, 에피소드 별점
     @OneToMany(mappedBy = "episode")
@@ -90,6 +92,7 @@ public class Episode {
                 .view(this.view)
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
+                .commentAmount(comments.size())
                 .build();
     }
 
