@@ -4,14 +4,18 @@ package com.ham.netnovel.coinChargeHistory;
 import com.ham.netnovel.member.Member;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class CoinChargeHistory {
 
     @Id
@@ -24,8 +28,9 @@ public class CoinChargeHistory {
     private Integer amount;
 
     @NotNull
+    @Column(precision = 10, scale = 2)
     //지불금액
-    private Integer payment;
+    private BigDecimal payment;
 
 
     @CreationTimestamp
@@ -39,8 +44,11 @@ public class CoinChargeHistory {
     private Member member;
 
 
-
-
-
+    @Builder
+    public CoinChargeHistory(Integer amount, BigDecimal payment, Member member) {
+        this.amount = amount;
+        this.payment = payment;
+        this.member = member;
+    }
 
 }
