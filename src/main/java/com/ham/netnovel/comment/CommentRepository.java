@@ -25,6 +25,18 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
     List<Comment> findByMember(@Param("providerId")String providerId);
 
 
+    /**
+     * 소설(novel)의 에피소드에 달린 댓글을 DB에서 찾는 메서드
+     * @param novelId 소설의 PK
+     * @return List<Comment>
+     */
+    @Query("select c from Comment c " +
+            "where c.episode.id in " +
+            "(select e.id from Episode e " +
+            "where e.novel.id = :novelId)")
+    List<Comment> findByNovel(@Param("novelId")Long novelId);
+
+
 
 
 
