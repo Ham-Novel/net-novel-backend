@@ -1,6 +1,7 @@
 package com.ham.netnovel.member;
 
 
+import com.ham.netnovel.coinUseHistory.CoinUseHistory;
 import com.ham.netnovel.episodeRating.EpisodeRating;
 import com.ham.netnovel.coinChargeHistory.CoinChargeHistory;
 import com.ham.netnovel.comment.Comment;
@@ -25,8 +26,7 @@ public class Member {
     private Long id;
 
 
-
-//  유저 email, naver는 설정값에 따라 도메인이 naver가 아닐수도 있음
+    //  유저 email, naver는 설정값에 따라 도메인이 naver가 아닐수도 있음
     @Column(unique = true)
     private String email;
 
@@ -53,7 +53,6 @@ public class Member {
     private Gender gender;
 
 
-
     //보유한 코인의 갯수
     private Integer coinCount;
     //junction table 연결, 관심 소설
@@ -69,12 +68,17 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<CoinChargeHistory> coinChargeHistories = new ArrayList<>();
 
+    //junction table 연결, 코인 사용 기록
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<CoinUseHistory> coinUseHistories = new ArrayList<>();
+
+
     //junction table 연결, 에피소드 댓글
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
     @Builder
-    public Member(String email, OAuthProvider provider, String providerId, MemberRole role, String nickName, Gender gender,Integer coinCount) {
+    public Member(String email, OAuthProvider provider, String providerId, MemberRole role, String nickName, Gender gender, Integer coinCount) {
         this.email = email;
         this.provider = provider;
         this.providerId = providerId;
@@ -83,7 +87,28 @@ public class Member {
         this.gender = gender;
     }
 
-    public void changeNickName(String nickName){
+    public void changeNickName(String nickName) {
         this.nickName = nickName;
     }
+
+    /**
+     * Member 엔티티 코인 수를 감수시키는 메서드
+     * 파라미터 체크는 메서드를 사용하는 비즈니스 로직에서 진행
+     * @param coinCount
+     */
+    public void deductMemberCoins(int coinCount) {
+        Integer totalCoin = this.getCoinCount();
+        this.coinCount = totalCoin - coinCount;
+    }
+
+    /**
+     * Member 엔티티 코인 수를 증가 시키는 메서드
+     * 파라미터 체크는 메서드를 사용하는 비즈니스 로직에서 진행
+     * @param coinCount 증가시키려는 코인 수
+     */
+    public void increaseMemberCoins(int coinCount){
+        Integer totalCoin = this.getCoinCount();
+        this.coinCount = totalCoin + coinCount;
+    }
+
 }

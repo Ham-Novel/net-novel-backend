@@ -134,7 +134,7 @@ class MemberServiceImpl implements MemberService {
 
         try {
             //엔티티의 coinAmount 차감
-            member.deductCoins(coinAmount);
+            member.deductMemberCoins(coinAmount);
             //엔티티 DB에 저장
             memberRepository.save(member);
         }catch (Exception ex){
@@ -142,6 +142,22 @@ class MemberServiceImpl implements MemberService {
         }
 
 
+
+
+
+    }
+
+    @Override
+    @Transactional
+    public void increaseMemberCoins(Member member, int coinAmount) {
+       try {
+           //멤버 엔티티 코인수 증가
+           member.increaseMemberCoins(coinAmount);
+           //엔티티 저장
+           memberRepository.save(member);
+       }catch (Exception ex){
+           throw new ServiceMethodException("increaseMemberCoins 메서드 에러 발생" + ex.getMessage());
+       }
 
 
 
