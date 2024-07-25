@@ -1,7 +1,9 @@
 package com.ham.netnovel.member.service.impl;
 
+import com.ham.netnovel.coinUseHistory.service.CoinUseHistoryService;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.member.MemberRepository;
+import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
@@ -25,12 +27,16 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
 
     private final MemberRepository memberRepository;
 
+    private final CoinUseHistoryService coinUseHistoryService;
+
     private final NovelService novelService;
 
-    public MemberMyPageServiceImpl(CommentService commentService, ReCommentService reCommentService, MemberRepository memberRepository, NovelService novelService) {
+
+    public MemberMyPageServiceImpl(CommentService commentService, ReCommentService reCommentService, MemberRepository memberRepository, CoinUseHistoryService coinUseHistoryService, NovelService novelService) {
         this.commentService = commentService;
         this.reCommentService = reCommentService;
         this.memberRepository = memberRepository;
+        this.coinUseHistoryService = coinUseHistoryService;
         this.novelService = novelService;
     }
 
@@ -65,6 +71,15 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
                         .status(novel.getStatus())
                         .build()
                 ).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MemberCoinUseHistoryDto> getMemberCoinUseHistory(String providerId) {
+        if (providerId.isEmpty()) {
+            throw new IllegalArgumentException("잘못된 유저 providerId 정보 확인 필요");
+        }
+      return coinUseHistoryService.getMemberCoinUseHistory(providerId);
+
     }
 
 

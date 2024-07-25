@@ -142,22 +142,8 @@ public class CommentServiceImpl implements CommentService {
         try {
             return commentRepository.findByEpisodeId(episodeId)
                     .stream()
-                    .map(comment -> CommentEpisodeListDto.builder()
-                            .nickName(comment.getMember().getNickName())
-                            .content(comment.getContent())
-                            .commentId(comment.getId())
-                            .updatedAt(comment.getUpdatedAt())
-                            .reCommentList(Optional.ofNullable(comment.getReComments())//대댓글 null 체크
-                                    .orElse(Collections.emptyList()) // null일 경우 빈 리스트 반환
-                                    .stream()//연관된 대댓글 엔티티를 DTO 형태로 변환하여 List로 반환
-                                    .map(reComment -> ReCommentListDto.builder()
-                                            .nickName(reComment.getMember().getNickName())
-                                            .content(reComment.getContent())
-                                            .reCommentId(reComment.getComment().getId())
-                                            .updatedAt(reComment.getUpdatedAt())
-                                            .build())
-                                    .collect(Collectors.toList())) // List로 변환
-                            .build())
+                    //엔티티 DTO로 convert
+                    .map(this::convertToCommentEpisodeListDto)
                     //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
                     .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt))
                     .collect(Collectors.toList()); // List로 변환
@@ -194,6 +180,54 @@ public class CommentServiceImpl implements CommentService {
         }
 
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentEpisodeListDto> getNovelCommentList(Long novelId) {
+        try {
+            return commentRepository.findByNovel(novelId).stream()
+                //엔티티 DTO로 convert
+                .map(this::convertToCommentEpisodeListDto)
+                //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
+                .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt))
+                .collect(Collectors.toList());
+
+        }catch (Exception e) {
+            throw new ServiceMethodException("getMemberCommentList 메서드 에러 발생"); // 예외 던지기
+        }
+
+    }
+
+
+
+    /**
+     * Comment 엔티티를 CommentEpisodeListDto로 convert하는 메서드
+     * 댓글(Comment)에 달린 대댓글(reComment) 정보도 List로 포함됨
+     * @param comment
+     * @return
+     */
+
+    private CommentEpisodeListDto convertToCommentEpisodeListDto(Comment comment) {
+        return CommentEpisodeListDto.builder()
+                .nickName(comment.getMember().getNickName())
+                .content(comment.getContent())
+                .commentId(comment.getId())
+                .updatedAt(comment.getUpdatedAt())
+                .createdAt(comment.getCreatedAt())
+                .reCommentList(Optional.ofNullable(comment.getReComments())//대댓글 null 체크
+                        .orElse(Collections.emptyList()) // null일 경우 빈 리스트 반환
+                        .stream()//연관된 대댓글 엔티티를 DTO 형태로 변환하여 List로 반환
+                        .map(reComment -> ReCommentListDto.builder()
+                                .nickName(reComment.getMember().getNickName())
+                                .content(reComment.getContent())
+                                .reCommentId(reComment.getComment().getId())
+                                .createdAt(reComment.getCreatedAt())
+                                .updatedAt(reComment.getUpdatedAt())
+                                .build())
+                        .collect(Collectors.toList())) // List로 변환
+                .build();
+    }
+
 
 
 }

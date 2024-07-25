@@ -2,6 +2,7 @@ package com.ham.netnovel.member;
 
 
 import com.ham.netnovel.OAuth.CustomOAuth2User;
+import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
@@ -50,9 +51,10 @@ public class MemberController {
 
     /**
      * 유저의 닉네임을 수정하는 API
+     *
      * @param changeNickNameDto 닉네임 변경을 위한 DTO, 유저의 providerId값과 새로운 닉네임 값을 멤버변수로 가짐
-     * @param bindingResult ChangeNickNameDto 검증 에러를 담는 객체
-     * @param authentication 유저의 인증 정보
+     * @param bindingResult     ChangeNickNameDto 검증 에러를 담는 객체
+     * @param authentication    유저의 인증 정보
      * @return ResponseEntity 결과를 헤더에 담아 전송
      */
     @PatchMapping("/members/nickname")
@@ -105,11 +107,12 @@ public class MemberController {
     /**
      * 유저가 작성한 댓글, 대댓글을 반환하는 API
      * API 요청시 인증 정보를 확인 한 후, 인증된 유저가 작성한 댓글,대댓글을 DTO 변환후 List 형태로 반환
+     *
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 댓글과 대댓글의 정보를 body에 담아 반환
      */
     @PostMapping("/members/comment")
-    public ResponseEntity<?> postMemberCommentList(Authentication authentication){
+    public ResponseEntity<?> postMemberCommentList(Authentication authentication) {
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
@@ -118,7 +121,7 @@ public class MemberController {
         List<MemberCommentDto> commentList = memberMyPageService.getMemberCommentAndReCommentList(principal.getName());
 
         for (MemberCommentDto memberCommentDto : commentList) {
-            log.info("정보{}",memberCommentDto.toString());
+            log.info("정보{}", memberCommentDto.toString());
 
         }
 
@@ -131,11 +134,12 @@ public class MemberController {
 
     /**
      * 유저가 좋아요 누른 소설 리스트를 전송하는 API
+     *
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity
      */
     @PostMapping("/members/novel")
-    public ResponseEntity<?> postFavoriteNovels(Authentication authentication){
+    public ResponseEntity<?> postFavoriteNovels(Authentication authentication) {
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
@@ -148,39 +152,52 @@ public class MemberController {
 
     }
 
+    @PostMapping("/members/coin-use-history")
+    public ResponseEntity<?> postMemberCoinUseHistory(Authentication authentication) {
+        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
+        //유저 코인 사용 기록 조회
+        List<MemberCoinUseHistoryDto> coinUseHistory = memberMyPageService.getMemberCoinUseHistory(principal.getName());
+
+        // 응답 반환
+        return ResponseEntity.ok(coinUseHistory);
+
+    }
+
 
     //테스트 API
     @GetMapping("/members/novel/test")
-    public String memberNovelTest(){
+    public String memberNovelTest() {
 
         return "/member/novel-test";
     }
 
 
     @GetMapping("/members/comment/test")
-    public String memberCommentTest(){
+    public String memberCommentTest() {
 
         return "/member/comment-test";
     }
 
     @GetMapping("/members/nickname/test")
-    public String nickNameChangeTest(){
+    public String nickNameChangeTest() {
 
         return "/member/nickname-test";
     }
 
     @GetMapping("/members/session/test")
     @ResponseBody
-    public String sessionTest(Authentication authentication){
+    public String sessionTest(Authentication authentication) {
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
         log.info("로그인한 유저 정보");
-        log.info("로그인한 유저 providerId={}",principal.getName());
-        log.info("로그인한 유저 nickName={}",principal.getNickName());
-        log.info("로그인한 유저 role={}",principal.getRole());
-        log.info("로그인한 유저 gender={}",principal.getGender());
-        log.info("로그인한 유저 Attributes={}",principal.getAttributes());
-        log.info("로그인한 유저 Authorities={}",principal.getAuthorities());
+        log.info("로그인한 유저 providerId={}", principal.getName());
+        log.info("로그인한 유저 nickName={}", principal.getNickName());
+        log.info("로그인한 유저 role={}", principal.getRole());
+        log.info("로그인한 유저 gender={}", principal.getGender());
+        log.info("로그인한 유저 Attributes={}", principal.getAttributes());
+        log.info("로그인한 유저 Authorities={}", principal.getAuthorities());
 
         return "ok";
 

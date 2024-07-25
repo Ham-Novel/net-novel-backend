@@ -13,7 +13,7 @@ public interface MemberService {
     /**
      * Member 엔티티를 조회하는 메서드, null체크는 해당 메서드를 사용하는 메서드에서 진행
      * @param providerId
-     * @return
+     * @return Optional<Member>
      */
    Optional<Member> getMember(String providerId);
 
@@ -21,7 +21,7 @@ public interface MemberService {
     /**
      * 로그인시 인증정보를 위한 유저정보를 가져오는 메서드
      * @param providerId 인증 제공자(naver등)에서의 유저 ID값
-     * @return
+     * @return MemberLoginDto
      */
     MemberLoginDto getMemberLoginInfo(String providerId);
 
@@ -39,6 +39,15 @@ public interface MemberService {
      * @param changeNickNameDto providerId, 변경할 닉네임을 포함하는 DTO
      */
     void updateMemberNickName(ChangeNickNameDto changeNickNameDto);
+
+
+    /**
+     * 유저의 코인을 차감하는 메서드
+     * @param providerId 유저의 providerId 정보
+     * @param coinAmount 차감할 코인 수
+     */
+    void deductMemberCoins(String providerId, Integer coinAmount);
+
 
 
 

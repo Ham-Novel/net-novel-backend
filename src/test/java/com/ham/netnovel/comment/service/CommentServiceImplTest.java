@@ -139,4 +139,29 @@ class CommentServiceImplTest {
 
     }
 
+    //테스트 성공
+    @Test
+    public void getNovelCommentList(){
+//        Long novelId =8L;
+        Long novelId =7L;
+        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentList(novelId);
+        for (CommentEpisodeListDto commentEpisodeListDto : novelCommentList) {
+            System.out.println("*****댓글 정보******");
+            System.out.println(commentEpisodeListDto.getNickName());
+            System.out.println(commentEpisodeListDto.getContent());
+            System.out.println(commentEpisodeListDto.getCreatedAt());
+
+            List<ReCommentListDto> reCommentList = commentEpisodeListDto.getReCommentList();
+            for (ReCommentListDto reCommentListDto : reCommentList) {
+                System.out.println("******대댓글 정보*******");
+                System.out.println(reCommentListDto.getNickName());
+                System.out.println(reCommentListDto.getContent());
+                System.out.println(reCommentListDto.getCreatedAt());
+
+            }
+
+
+        }
+    }
+
 }
