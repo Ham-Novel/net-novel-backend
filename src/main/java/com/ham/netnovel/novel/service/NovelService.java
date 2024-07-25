@@ -4,26 +4,26 @@ import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
+import com.ham.netnovel.novel.dto.NovelResponseDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface NovelService {
 
     List<Novel> getAllNovels();
 
-    Novel getNovel(Long id);
+    NovelResponseDto getNovel(Long id);
 
-    Novel createNovel(NovelCreateDto novelCreateDto);
+    //Novel Entity가 필요한 경우. Service 단에서만 사용.
+    Optional<Novel> getNovelEntity(Long id);
 
-    Novel updateNovel(NovelUpdateDto novelUpdateDto);
+    NovelResponseDto createNovel(NovelCreateDto novelCreateDto);
 
-    Novel deleteNovel(NovelDeleteDto novelDeleteDto);
+    NovelResponseDto updateNovel(NovelUpdateDto novelUpdateDto);
 
+    NovelResponseDto deleteNovel(NovelDeleteDto novelDeleteDto);
 
     List<Novel> getFavoriteNovels(String providerId);
-
-
-
-
 }

@@ -10,7 +10,7 @@ import com.ham.netnovel.comment.dto.CommentDeleteDto;
 import com.ham.netnovel.comment.dto.CommentEpisodeListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.episode.Episode;
-import com.ham.netnovel.episode.EpisodeService;
+import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.service.MemberService;
@@ -55,7 +55,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new NoSuchElementException("Member 정보 없음"));
 
         //Member 엔티티 조회, null이면 예외로 던짐
-        Episode episode = episodeService.getEpisode(commentCreateDto.getEpisodeId())
+        Episode episode = episodeService.getEpisodeEntity(commentCreateDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("Episode 정보 없음"));
 
         try {

@@ -1,6 +1,6 @@
 package com.ham.netnovel.novel;
 
-import com.ham.netnovel.episode.EpisodeService;
+import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
@@ -9,6 +9,10 @@ import com.ham.netnovel.novel.service.NovelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -20,59 +24,35 @@ public class NovelController {
         this.novelService = novelService;
     }
 
-    /**
-     * 소설 상세 페이지 관련 정보 모두 요청
-     * Novel: 엔티티 전체
-     * Episode: 해당 Novel 총 화수, 총 조회수
-     * EpisodeRating: 해당 Novel 별점
-     * FavoriteNovel: 유저 관심 등록 수
-     * @param novelId
-     * @return
-     */
+    //ToDo @Valid 유저 인증 코드 추가
     @GetMapping("/{novelId}")
     public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId) {
-        NovelResponseDto responseData = parseResponseData(novelService.getNovel(novelId));
-        log.debug("Get {}", responseData.toString());
-        return ResponseEntity.ok(responseData);
+        return ResponseEntity.ok(novelService.getNovel(novelId));
+    }
+
+    //ToDo List로 Novel 데이터들을 가져오는 getNovelList() 구현
+    @GetMapping
+    public ResponseEntity<List<NovelResponseDto>> getNovelList() {
+        return null;
     }
 
     @PostMapping
     public ResponseEntity<NovelResponseDto> createNovel(@RequestBody NovelCreateDto reqBody) {
-        NovelResponseDto responseData = parseResponseData(novelService.createNovel(reqBody));
-        return ResponseEntity.ok(responseData);
+        return ResponseEntity.ok(novelService.createNovel(reqBody));
     }
 
-    @PutMapping
-    public ResponseEntity<NovelResponseDto> createNovel(@RequestBody NovelUpdateDto reqBody) {
-        NovelResponseDto responseData = parseResponseData(novelService.updateNovel(reqBody));
-        return ResponseEntity.ok(responseData);
+    //ToDo updateNovel, deleteNovel MessageBody와 Url에 모두 novelId를 보내는 문제 해결해야 함
+    @PutMapping("/{novelId}")
+    public ResponseEntity<NovelResponseDto> updateNovel(
+            @PathVariable("novelId") Long novelId,
+            @RequestBody NovelUpdateDto reqBody) {
+        return ResponseEntity.ok(novelService.updateNovel(reqBody));
     }
 
     @DeleteMapping("/{novelId}")
     public ResponseEntity<NovelResponseDto> deleteNovel(
             @PathVariable("novelId") Long novelId,
             @RequestBody NovelDeleteDto reqBody) {
-        NovelResponseDto responseData = parseResponseData(novelService.deleteNovel(reqBody));
-        return ResponseEntity.ok(responseData);
+        return ResponseEntity.ok(novelService.deleteNovel(reqBody));
     }
-
-    public NovelResponseDto parseResponseData(Novel novel) {
-        return NovelResponseDto.builder()
-                .id(novel.getId())
-                .title(novel.getTitle())
-                .description(novel.getDescription())
-                .authorName(novel.getAuthor().getNickName())
-                .status(novel.getStatus())
-                .build();
-    }
-
-/*
-    // 등록된 모든 Novel List로 GET 요청
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<Novel> getNovelList () {
-        return novelService.getAllNovels();
-    }
-*/
-
 }

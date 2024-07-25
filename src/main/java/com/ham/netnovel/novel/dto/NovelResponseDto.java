@@ -1,26 +1,22 @@
 package com.ham.netnovel.novel.dto;
 
-import com.ham.netnovel.episode.Episode;
-import com.ham.netnovel.member.Member;
-import com.ham.netnovel.novel.NovelStatus;
-import jakarta.persistence.*;
+import com.ham.netnovel.novel.data.NovelStatus;
+import com.ham.netnovel.tag.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
 @ToString
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class NovelResponseDto {
 
-    private Long id;
+    private Long novelId;
 
     @NotBlank
     @Size(max = 30)
@@ -29,7 +25,17 @@ public class NovelResponseDto {
     @Size(max = 300)
     private String description;
 
+    private NovelStatus status;
+
     private String authorName;
 
-    private NovelStatus status;
+    //메타 데이터
+    private Integer view;
+
+    private Integer favoriteAmount;
+
+    private Integer episodeAmount;
+
+    private List<Tag> tags;
+
 }
