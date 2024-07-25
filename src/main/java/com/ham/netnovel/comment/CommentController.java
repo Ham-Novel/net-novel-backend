@@ -23,6 +23,7 @@ import java.util.Map;
 
 @Controller
 @Slf4j
+@RequestMapping("/api")
 public class CommentController {
 
 
@@ -45,7 +46,7 @@ public class CommentController {
      * @param authentication   유저의 인증정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
-    @PostMapping("/comment")
+    @PostMapping("/comments")
     public ResponseEntity<String> createComment(@Valid @RequestBody CommentCreateDto commentCreateDto,
                                                 BindingResult bindingResult,
                                                 Authentication authentication) {
@@ -80,7 +81,7 @@ public class CommentController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
-    @PatchMapping("/comment")
+    @PatchMapping("/comments")
     public ResponseEntity<String> updateComment(@Valid @RequestBody CommentUpdateDto commentUpdateDto,
                                                 BindingResult bindingResult,
                                                 Authentication authentication) {
@@ -115,7 +116,7 @@ public class CommentController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
-    @DeleteMapping("/comment")
+    @DeleteMapping("/comments")
     public ResponseEntity<String> deleteComment(@Valid @RequestBody CommentDeleteDto commentDeleteDto,
                                                 BindingResult bindingResult,
                                                 Authentication authentication) {
@@ -151,7 +152,7 @@ public class CommentController {
      * @param requestBody episodeId값을 저장할 객체
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
-    @PostMapping("/comment/list")
+    @PostMapping("/comments/episode")
     public ResponseEntity<?> getEpisodeCommentList(@RequestBody Map<String, String> requestBody) {
         String episodeId = requestBody.get("episodeId");
 
@@ -169,6 +170,37 @@ public class CommentController {
         }
 
     }
+
+    /**
+     * Novel(소설) 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API
+     * @param requestBody episodeId를 담는 객체
+     * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
+     */
+    @PostMapping("/comments/novel")
+    public ResponseEntity<?> postNovelCommentList(@RequestBody Map<String, String> requestBody){
+        //클라이언트에서 받는 값 객체에 저장, String 타입임
+        String novelIdStr = requestBody.get("novelId");
+        //novelId를 정수타입으로 바꿀때 사용할 변수
+        long novelIdLong;
+        try {
+            //Long 타입으로 타입 캐스팅
+            novelIdLong = Long.parseLong(novelIdStr);
+        }
+        catch (Exception ex) {
+            //예외 발생시 IllegalArgumentException로 던짐
+                throw new IllegalArgumentException("postNovelCommentList API 에러, novelId가 정수가 아닙니다, novelId 값 ="+novelIdStr);
+            }
+            //Novel의 Episode에 달린 댓글과 대댓글을 DTO List로 받음
+            List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentList(novelIdLong);
+
+            //클라이언트에 댓글,대댓글 정보 전송
+            return ResponseEntity.ok(novelCommentList);
+
+        }
+
+
+
+
 
     //댓글 생성 테스트용 API
     @GetMapping("/comment/test")
