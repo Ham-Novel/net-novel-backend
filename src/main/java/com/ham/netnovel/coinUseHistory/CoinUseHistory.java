@@ -5,20 +5,29 @@ import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class CoinUseHistory {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)//auto_increment 자동생성
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "episode_id")
+    private Episode episode;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @NotNull
     //코인 사용갯수
@@ -30,12 +39,12 @@ public class CoinUseHistory {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "episode_id")
-    private Episode episode;
+    @Builder
+    public CoinUseHistory(Episode episode, Member member, Integer amount) {
+        this.episode = episode;
+        this.member = member;
+        this.amount = amount;
+    }
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
 
 }
