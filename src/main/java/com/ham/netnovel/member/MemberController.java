@@ -2,12 +2,9 @@ package com.ham.netnovel.member;
 
 
 import com.ham.netnovel.OAuth.CustomOAuth2User;
-import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
+import com.ham.netnovel.member.dto.*;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.service.MemberService;
-import com.ham.netnovel.member.dto.ChangeNickNameDto;
-import com.ham.netnovel.member.dto.MemberCommentDto;
-import com.ham.netnovel.member.dto.MemberOAuthDto;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 import jakarta.validation.Valid;
@@ -107,7 +104,6 @@ public class MemberController {
     /**
      * 유저가 작성한 댓글, 대댓글을 반환하는 API
      * API 요청시 인증 정보를 확인 한 후, 인증된 유저가 작성한 댓글,대댓글을 DTO 변환후 List 형태로 반환
-     *
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 댓글과 대댓글의 정보를 body에 담아 반환
      */
@@ -152,6 +148,12 @@ public class MemberController {
 
     }
 
+
+    /**
+     * 유저가 코인 사용 기록 열람을 요청하면, body에 담아 전송하는 API
+     * @param authentication 유저의 인정 정보
+     * @return ResponseEntity 데이터를 List에 담아 반환
+     */
     @PostMapping("/members/coin-use-history")
     public ResponseEntity<?> postMemberCoinUseHistory(Authentication authentication) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
@@ -162,6 +164,22 @@ public class MemberController {
 
         // 응답 반환
         return ResponseEntity.ok(coinUseHistory);
+
+    }
+
+    /**
+     * 유저가 코인 충전 기록 열람을 요청하면, body에 담아 전송하는 API
+     * @param authentication 유저의 인정 정보
+     * @return ResponseEntity 데이터를 List에 담아 반환
+     */
+    @PostMapping("/members/coin-charge-history")
+    public ResponseEntity<List<MemberCoinChargeDto>> postMemberCoinChargeHistory(Authentication authentication){
+        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+        //유저 코인 충전 기록 조회
+        List<MemberCoinChargeDto> memberCoinChargeHistory = memberMyPageService.getMemberCoinChargeHistory(principal.getName());
+        // 응답 반환
+        return ResponseEntity.ok(memberCoinChargeHistory);
 
     }
 
