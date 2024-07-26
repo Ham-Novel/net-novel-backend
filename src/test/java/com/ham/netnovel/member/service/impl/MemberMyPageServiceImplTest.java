@@ -1,5 +1,6 @@
 package com.ham.netnovel.member.service.impl;
 
+import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
@@ -41,16 +42,35 @@ class MemberMyPageServiceImplTest {
     @Test
     void getFavoriteNovelsByMember() {
         //테스트용 계정
-//                String providerId= "U";
+                String providerId= "test";
 
         //에러 테스트, IllegalArgumentException로 던져짐
-        String providerId = "";
+//        String providerId = "";
 
 
         List<NovelFavoriteDto> favoriteNovelsByMember = memberMyPageService.getFavoriteNovelsByMember(providerId);
         for (NovelFavoriteDto novelFavoriteDto : favoriteNovelsByMember) {
-            System.out.println("소설정보");
+            System.out.println("***** 소설정보 *****");
             System.out.println(novelFavoriteDto.toString());
+
+        }
+
+
+    }
+
+    //테스트 성공
+    @Test
+    void getMemberCoinChargeHistory(){
+        //테스트용 계정
+//                String providerId= "test";
+
+        //Null 테스트 IllegalArgumentException로 던져짐
+        String providerId = null;
+
+        List<MemberCoinChargeDto> memberCoinChargeHistory = memberMyPageService.getMemberCoinChargeHistory(providerId);
+        for (MemberCoinChargeDto memberCoinChargeDto : memberCoinChargeHistory) {
+            System.out.println("***** 코인 충전 기록 *****");
+            System.out.println(memberCoinChargeDto.toString());
 
         }
 

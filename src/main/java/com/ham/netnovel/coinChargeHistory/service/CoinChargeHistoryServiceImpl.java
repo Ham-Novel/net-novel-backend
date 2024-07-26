@@ -5,22 +5,25 @@ import com.ham.netnovel.coinChargeHistory.CoinChargeHistoryRepository;
 import com.ham.netnovel.coinChargeHistory.dto.CoinChargeCreateDto;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
+import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.service.MemberService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
-public class CoinChargeHistoryImpl implements CoinChargeHistoryService {
+public class CoinChargeHistoryServiceImpl implements CoinChargeHistoryService {
 
     private final CoinChargeHistoryRepository coinChargeHistoryRepository;
 
     private final MemberService memberService;
 
-    public CoinChargeHistoryImpl(CoinChargeHistoryRepository coinChargeHistoryRepository, MemberService memberService) {
+    public CoinChargeHistoryServiceImpl(CoinChargeHistoryRepository coinChargeHistoryRepository, MemberService memberService) {
         this.coinChargeHistoryRepository = coinChargeHistoryRepository;
         this.memberService = memberService;
     }
@@ -42,34 +45,52 @@ public class CoinChargeHistoryImpl implements CoinChargeHistoryService {
 
         try {
             //엔티티 생성
-             CoinChargeHistory coinChargeHistory = CoinChargeHistory.builder()
+            CoinChargeHistory coinChargeHistory = CoinChargeHistory.builder()
                     .amount(coinAmount)
                     .payment(payment)
                     .member(member)
                     .build();
 
-             //엔티티 저장
+            //엔티티 저장
             coinChargeHistoryRepository.save(coinChargeHistory);
 
             //멤버 엔티티 코인 갯수 변경
-            memberService.increaseMemberCoins(member,coinAmount);
+            memberService.increaseMemberCoins(member, coinAmount);
 
 
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             //그외 예외처리
             throw new ServiceMethodException("saveCoinChargeHistory 메서드 에러 발생" + ex.getMessage()); // 예외 던지기
         }
 
 
+    }
+
+    @Override
+    public List<MemberCoinChargeDto> getCoinChargeHistoryByMember(String providerId) {
+        try {
+            //유저 정보로 DB에서 CoinChargeHistory 레코드를 찾아 DTO로 변환
+            return coinChargeHistoryRepository.findByMemberProviderId(providerId)
+                    .stream()
+                    .map(coinChargeHistory -> MemberCoinChargeDto.builder()
+                            .payment(coinChargeHistory.getPayment())
+                            .coinAmount(coinChargeHistory.getAmount())
+                            .createdAt(coinChargeHistory.getCreatedAt())
+                            .build()).collect(Collectors.toList());
+
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getCoinChargeHistoryByMember 메서드 에러 발생" + ex.getMessage()); // 예외 던지기
+
+        }
 
     }
 
     //구매한 코인 수 유효성 검사, null 또는 음수여서는 안됨
     //ToDo 최대 코인 갯수 제한
     private int validateCoinAmount(Integer coinAmount) {
-        if (coinAmount == null ){
+        if (coinAmount == null) {
             throw new IllegalArgumentException("saveCoinChargeHistory 메서드 에러 발생, coinAmount 가 null 입니다.");
-        }else if (coinAmount <=0){
+        } else if (coinAmount <= 0) {
             throw new IllegalArgumentException("saveCoinChargeHistory 메서드 에러 발생, coinAmount 가 음수 입니다.");
         }
         return coinAmount;
@@ -98,7 +119,7 @@ public class CoinChargeHistoryImpl implements CoinChargeHistoryService {
         // 소수점 자리수 제거
         BigDecimal integerPart = bigDecimalPayment.setScale(0, RoundingMode.DOWN);
         //정수 부분이 8자리인지 확인
-        if (!(integerPart.precision() <=8)){
+        if (!(integerPart.precision() <= 8)) {
             throw new IllegalArgumentException("payment 정수 자리수가 올바르지 않습니다.");
         }
 

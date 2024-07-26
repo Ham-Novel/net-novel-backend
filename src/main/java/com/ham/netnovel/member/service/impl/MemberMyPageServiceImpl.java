@@ -1,14 +1,17 @@
 package com.ham.netnovel.member.service.impl;
 
+import com.ham.netnovel.coinChargeHistory.service.CoinChargeHistoryService;
 import com.ham.netnovel.coinUseHistory.service.CoinUseHistoryService;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.member.MemberRepository;
+import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 import com.ham.netnovel.novel.service.NovelService;
 import com.ham.netnovel.reComment.service.ReCommentService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -18,6 +21,7 @@ import java.util.stream.Stream;
 
 
 @Service
+@Slf4j
 public class MemberMyPageServiceImpl implements MemberMyPageService {
 
 
@@ -29,14 +33,17 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
 
     private final CoinUseHistoryService coinUseHistoryService;
 
+    private final CoinChargeHistoryService coinChargeHistoryService;
+
     private final NovelService novelService;
 
 
-    public MemberMyPageServiceImpl(CommentService commentService, ReCommentService reCommentService, MemberRepository memberRepository, CoinUseHistoryService coinUseHistoryService, NovelService novelService) {
+    public MemberMyPageServiceImpl(CommentService commentService, ReCommentService reCommentService, MemberRepository memberRepository, CoinUseHistoryService coinUseHistoryService, CoinChargeHistoryService coinChargeHistoryService, NovelService novelService) {
         this.commentService = commentService;
         this.reCommentService = reCommentService;
         this.memberRepository = memberRepository;
         this.coinUseHistoryService = coinUseHistoryService;
+        this.coinChargeHistoryService = coinChargeHistoryService;
         this.novelService = novelService;
     }
 
@@ -60,9 +67,9 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
     //ToDo Author 엔티티 생성 후, 작가 정보도 DTO에 담아서 반환
     @Override
     public List<NovelFavoriteDto> getFavoriteNovelsByMember(String providerId) {
-        if (providerId == null || providerId.trim().isEmpty()) {
-            throw new IllegalArgumentException("getFavoriteNovelsByMember 파라미터 에러, 파라미터가 비어있음");
-        }
+        //유저 providerId 유효성 검사
+        validateProviderId(providerId, "getFavoriteNovelsByMember");
+
         return novelService.getFavoriteNovels(providerId)
                 .stream()
                 .map(novel -> NovelFavoriteDto.builder()
@@ -75,11 +82,39 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
 
     @Override
     public List<MemberCoinUseHistoryDto> getMemberCoinUseHistory(String providerId) {
-        if (providerId.isEmpty()) {
+        //유저 providerId 유효성 검사
+        validateProviderId(providerId, "getMemberCoinUseHistory");
+        return coinUseHistoryService.getMemberCoinUseHistory(providerId);
+
+    }
+
+    @Override
+    public List<MemberCoinChargeDto> getMemberCoinChargeHistory(String providerId) {
+
+        log.info("진입");
+        //유저 providerId 유효성 검사
+        validateProviderId(providerId, "getMemberCoinChargeHistory");
+
+        //유저 정보로 코인 충전 기록을 List로 가져와 반환
+
+        return coinChargeHistoryService.getCoinChargeHistoryByMember(providerId)
+                .stream()
+                .sorted(Comparator.comparing(MemberCoinChargeDto::getCreatedAt).reversed())//날짜순으로 정렬(최신 기록이 index 앞에위치)
+                .collect(Collectors.toList());
+
+    }
+
+    /**
+     * 유저 providerId 값을 검증하는 메서드, null 이거나 비어있으면 예외로 던짐
+     *
+     * @param providerId 유저 정보
+     * @param methodName 검증을 진행하는 메서드 이름
+     */
+    private void validateProviderId(String providerId, String methodName) {
+        if (providerId == null || providerId.trim().isEmpty()) {
+            log.error("유저 providerId 값 에러 메서드 명={}", methodName);
             throw new IllegalArgumentException("잘못된 유저 providerId 정보 확인 필요");
         }
-      return coinUseHistoryService.getMemberCoinUseHistory(providerId);
-
     }
 
 
