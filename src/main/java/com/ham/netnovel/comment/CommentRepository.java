@@ -10,6 +10,7 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
 
 
     @Query("select c from Comment c " +
+            "join fetch c.member m " +
             "where c.episode.id =:episodeId")
     List<Comment> findByEpisodeId(@Param("episodeId")Long episodeId);
 
@@ -20,7 +21,8 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
      * @return List Comment 엔티티 List로 반환
      */
     @Query("select c from Comment c " +
-            "where c.member.providerId =:providerId " +
+            "join fetch c.member m " +
+            "where m.providerId =:providerId " +
             "order by c.createdAt DESC ")//생성 날짜 내림차순 정렬(최신글이 위로오게설정)
     List<Comment> findByMember(@Param("providerId")String providerId);
 

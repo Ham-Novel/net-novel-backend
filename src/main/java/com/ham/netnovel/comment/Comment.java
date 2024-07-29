@@ -1,6 +1,8 @@
 package com.ham.netnovel.comment;
 
 
+import com.ham.netnovel.commentLike.CommentLike;
+import com.ham.netnovel.commentLike.LikeType;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.reComment.ReComment;
@@ -62,6 +64,10 @@ public class Comment {
     private Member member;
 
 
+    @OneToMany(mappedBy = "comment", fetch = FetchType.LAZY)
+    private List<CommentLike> commentLikes= new ArrayList<>();
+
+
 
 
 
@@ -83,5 +89,24 @@ public class Comment {
    public  void changeStatus(CommentStatus status) {
         this.status = status;
     }
+
+
+
+    //좋아요 수를 반환하는 메서드
+    public int getTotalLikes(){
+        return (int) commentLikes.stream()
+                .filter(commentLike -> commentLike.getLikeType() == LikeType.LIKE)
+                .count();
+
+    }
+    //싫어요 수를 반환하는 메서드
+    public int getTotalDisLikes(){
+        return (int) commentLikes.stream()
+                .filter(commentLike -> commentLike.getLikeType() == LikeType.DISLIKE)
+                .count();
+
+    }
+
+
 
 }

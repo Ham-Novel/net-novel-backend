@@ -8,6 +8,7 @@ import com.ham.netnovel.comment.dto.CommentEpisodeListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.common.utils.Authenticator;
+import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ import java.util.Map;
 
 @Controller
 @Slf4j
-@RequestMapping("/api")
+@RequestMapping("/api/comments")
 public class CommentController {
 
 
@@ -41,12 +42,13 @@ public class CommentController {
 
     /**
      * 유저가 작성한 댓글(comment)를 서버에 저장하는 API
+     *
      * @param commentCreateDto 클라이언트에서 보낸 내용을 담는 DTO
      *                         content(댓글내용), episodeId, providerId(유저정보)를 멤버변수로 가짐
      * @param authentication   유저의 인증정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
-    @PostMapping("/comments")
+    @PostMapping
     public ResponseEntity<String> createComment(@Valid @RequestBody CommentCreateDto commentCreateDto,
                                                 BindingResult bindingResult,
                                                 Authentication authentication) {
@@ -75,13 +77,14 @@ public class CommentController {
 
     /**
      * 유저가 작성한 댓글의 내용을 업데이트하는 API
+     *
      * @param commentUpdateDto 클라이언트에서 보낸 내용을 담는 DTO,
      *                         content(댓글내용), episodeId, commentId ,providerId(유저정보)를 멤버변수로 가짐
-     * @param bindingResult DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
-     * @param authentication 유저의 인증 정보
+     * @param bindingResult    DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
+     * @param authentication   유저의 인증 정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
-    @PatchMapping("/comments")
+    @PatchMapping
     public ResponseEntity<String> updateComment(@Valid @RequestBody CommentUpdateDto commentUpdateDto,
                                                 BindingResult bindingResult,
                                                 Authentication authentication) {
@@ -110,13 +113,14 @@ public class CommentController {
 
     /**
      * 유저가 작성한 댓글의 상태를 DELETED_BY_USER로 변경하는 API
+     *
      * @param commentDeleteDto 클라이언트에서 보낸 내용을 담는 DTO
      *                         episodeId, commentId ,providerId(유저정보)를 멤버변수로 가짐
-     * @param bindingResult DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
-     * @param authentication 유저의 인증 정보
+     * @param bindingResult    DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
+     * @param authentication   유저의 인증 정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
-    @DeleteMapping("/comments")
+    @DeleteMapping
     public ResponseEntity<String> deleteComment(@Valid @RequestBody CommentDeleteDto commentDeleteDto,
                                                 BindingResult bindingResult,
                                                 Authentication authentication) {
@@ -152,22 +156,21 @@ public class CommentController {
      * @param requestBody episodeId값을 저장할 객체
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
-    @PostMapping("/comments/episode")
+    @PostMapping("/episode")
     public ResponseEntity<?> getEpisodeCommentList(@RequestBody Map<String, String> requestBody) {
-        String episodeId = requestBody.get("episodeId");
+        //클라이언트에서 보낸 episodeId값 객체에 저장
 
-        try {
-            //Long 타입으로 타입 캐스팅
-            Long episodeIdLong = Long.valueOf(episodeId);
+        String episodeIdStr = requestBody.get("episodeId");
 
-            List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentList(episodeIdLong);
+        //episodeId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
+        Long episodeId = TypeValidationUtil.validateLong(episodeIdStr);
 
-            return ResponseEntity.ok(commentList);
+        //episode 에 달린 댓글 정보 List로 받음, 대댓글 정보도 포함
+        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentList(episodeId);
 
-        } catch (NumberFormatException e) {
-            log.error("Invalid episodeId id: {}", episodeId, e);
-            return ResponseEntity.badRequest().body("Invalid comment id: " + episodeId);
-        }
+        //body에 List 담아 반환
+        return ResponseEntity.ok(commentList);
+
 
     }
 
@@ -176,34 +179,28 @@ public class CommentController {
      * @param requestBody episodeId를 담는 객체
      * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
      */
-    @PostMapping("/comments/novel")
-    public ResponseEntity<?> postNovelCommentList(@RequestBody Map<String, String> requestBody){
-        //클라이언트에서 받는 값 객체에 저장, String 타입임
+    @PostMapping("/novel")
+    public ResponseEntity<?> postNovelCommentList(@RequestBody Map<String, String> requestBody) {
+
+
+        //클라이언트에서 보낸 novelId값 객체에 저장
         String novelIdStr = requestBody.get("novelId");
-        //novelId를 정수타입으로 바꿀때 사용할 변수
-        long novelIdLong;
-        try {
-            //Long 타입으로 타입 캐스팅
-            novelIdLong = Long.parseLong(novelIdStr);
-        }
-        catch (Exception ex) {
-            //예외 발생시 IllegalArgumentException로 던짐
-                throw new IllegalArgumentException("postNovelCommentList API 에러, novelId가 정수가 아닙니다, novelId 값 ="+novelIdStr);
-            }
-            //Novel의 Episode에 달린 댓글과 대댓글을 DTO List로 받음
-            List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentList(novelIdLong);
-
-            //클라이언트에 댓글,대댓글 정보 전송
-            return ResponseEntity.ok(novelCommentList);
-
-        }
 
 
+        //novelId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
+        Long novelId = TypeValidationUtil.validateLong(novelIdStr);
 
+        //Novel의 Episode에 달린 댓글과 대댓글을 DTO List로 받음
+        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentList(novelId);
+
+        //클라이언트에 댓글,대댓글 정보 전송
+        return ResponseEntity.ok(novelCommentList);
+
+    }
 
 
     //댓글 생성 테스트용 API
-    @GetMapping("/comment/test")
+    @GetMapping("/test")
     public String commentTest() {
 
 
