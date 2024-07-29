@@ -203,17 +203,21 @@ public class CommentServiceImpl implements CommentService {
     /**
      * Comment 엔티티를 CommentEpisodeListDto로 convert하는 메서드
      * 댓글(Comment)에 달린 대댓글(reComment) 정보도 List로 포함됨
-     * @param comment
-     * @return
+     *
+     * @param comment 파라미터로 받을 댓글 엔티티
+     * @return CommentEpisodeListDto DTO로 변환하여 반환
      */
 
     private CommentEpisodeListDto convertToCommentEpisodeListDto(Comment comment) {
+
         return CommentEpisodeListDto.builder()
-                .nickName(comment.getMember().getNickName())
+                .nickName(comment.getMember().getNickName())//작성자 닉네임
                 .content(comment.getContent())
                 .commentId(comment.getId())
                 .updatedAt(comment.getUpdatedAt())
                 .createdAt(comment.getCreatedAt())
+                .likes(comment.getTotalLikes())//댓글에 달린  좋아요 수
+                .disLikes(comment.getTotalDisLikes())//댓글에 달린 싫어요 수
                 .reCommentList(Optional.ofNullable(comment.getReComments())//대댓글 null 체크
                         .orElse(Collections.emptyList()) // null일 경우 빈 리스트 반환
                         .stream()//연관된 대댓글 엔티티를 DTO 형태로 변환하여 List로 반환
@@ -227,7 +231,6 @@ public class CommentServiceImpl implements CommentService {
                         .collect(Collectors.toList())) // List로 변환
                 .build();
     }
-
 
 
 }
