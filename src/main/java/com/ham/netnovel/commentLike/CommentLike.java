@@ -13,10 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CommentLike {
 
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)//auto_increment 자동생성
-//    private Long id;
-
     @EmbeddedId
     private CommentLikeKey id;
 
