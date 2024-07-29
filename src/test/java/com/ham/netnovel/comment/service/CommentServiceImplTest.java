@@ -1,5 +1,6 @@
 package com.ham.netnovel.comment.service;
 
+import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
 import com.ham.netnovel.comment.dto.CommentEpisodeListDto;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @SpringBootTest
@@ -24,7 +26,6 @@ class CommentServiceImplTest {
         this.commentService = commentService;
     }
 
-
     //2024-07-18 테스트 성공
     @Test
     public void createCommentTest() {
@@ -33,7 +34,7 @@ class CommentServiceImplTest {
         CommentCreateDto build = CommentCreateDto.builder()
                 .episodeId(2306L)//테스트용 episdoe
                 .content("테스트 댓글")
-                .providerId("UEqG1Al3FwPQTqDy6tfFb2MGZyEUd-weiJUzyxnkJhM")//테스트용 유저
+                .providerId("")//테스트용 유저
                 .build();
 
         commentService.createComment(build);
@@ -53,7 +54,7 @@ class CommentServiceImplTest {
         CommentUpdateDto build = CommentUpdateDto.builder()
                 .content("수정 테스트")
                 .episodeId(2306L)//테스트용 episdoe
-                .providerId("UEqG1Al3FwPQTqDy6tfFb2MGZyEUd-weiJUzyxnkJhM")//테스트용 유저
+                .providerId("")//테스트용 유저
                 .commentId(16L)
                 .build();
         commentService.updateComment(build);
@@ -68,7 +69,7 @@ class CommentServiceImplTest {
         System.out.println("삭제 상태 변경 테스트");
         CommentDeleteDto build = CommentDeleteDto.builder()
                 .episodeId(2306L)//테스트용 episdoe
-                .providerId("UEqG1Al3FwPQTqDy6tfFb2MGZyEUd-weiJUzyxnkJhM")//테스트용 유저
+                .providerId("")//테스트용 유저
                 .commentId(16L)
                 .build();
         commentService.deleteComment(build);
@@ -81,31 +82,36 @@ class CommentServiceImplTest {
     테스트 성공
      */
     @Test
-    public void getCommentListTest(){
+    public void getEpisodeCommentList(){
         System.out.println("댓글 불러오기 테스트");
 
-        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentList(2306L);
+        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentList(2309L);
 //        List<CommentEpisodeListDto> commentList = commentService.getCommentList(909090909L);//존재하지 않는 에피소드 테스트, 빈리스트 반환됨
 
-
         for (CommentEpisodeListDto commentEpisodeListDto : commentList) {
-            System.out.println("댓글정보");
+
+            System.out.println("*****댓글 정보******");
+            System.out.println("작성자 닉네임= "+commentEpisodeListDto.getNickName());
+            System.out.println("댓글내용 = "+commentEpisodeListDto.getContent());
+            System.out.println("댓글 작성시간= "+commentEpisodeListDto.getCreatedAt());
+            System.out.println("좋아요 수 ="+commentEpisodeListDto.getLikes());
+            System.out.println("싫어요 수 ="+commentEpisodeListDto.getDisLikes());
 
             List<ReCommentListDto> reCommentList = commentEpisodeListDto.getReCommentList();
-            System.out.println(commentEpisodeListDto.toString());
-
-
-            //대댓글 정보 출력
-            System.out.println("대댓글 정보");
             for (ReCommentListDto reCommentListDto : reCommentList) {
-
-                System.out.println(reCommentListDto.toString());
-
+                System.out.println("******대댓글 정보*******");
+                System.out.println("작성자 닉네임="+reCommentListDto.getNickName());
+                System.out.println("댓글내용 = "+reCommentListDto.getContent());
+                System.out.println("댓글 작성시간= "+reCommentListDto.getCreatedAt());
+                System.out.println("좋아요 수 ="+reCommentListDto.getLikes());
+                System.out.println("싫어요 수 ="+reCommentListDto.getDisLikes());
             }
 
 
-
         }
+
+
+
 
 
     }
@@ -118,7 +124,7 @@ class CommentServiceImplTest {
     public void getMemberCommentList(){
 
 
-        String providerId= "UEqG1Al3FwPQTqDy6tfFb2MGZyEUd-weiJUzyxnkJhM";
+        String providerId= "";
         //댓글을 작성한적이 없는 유저 테스트
 //        String providerId= "ttt";
 
@@ -142,22 +148,26 @@ class CommentServiceImplTest {
     //테스트 성공
     @Test
     public void getNovelCommentList(){
-//        Long novelId =8L;
-        Long novelId =7L;
+        Long novelId =1L;
+//        Long novelId =7L;
         List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentList(novelId);
         for (CommentEpisodeListDto commentEpisodeListDto : novelCommentList) {
+
             System.out.println("*****댓글 정보******");
-            System.out.println(commentEpisodeListDto.getNickName());
-            System.out.println(commentEpisodeListDto.getContent());
-            System.out.println(commentEpisodeListDto.getCreatedAt());
+            System.out.println("작성자 닉네임= "+commentEpisodeListDto.getNickName());
+            System.out.println("댓글내용 = "+commentEpisodeListDto.getContent());
+            System.out.println("댓글 작성시간= "+commentEpisodeListDto.getCreatedAt());
+            System.out.println("좋아요 수 ="+commentEpisodeListDto.getLikes());
+            System.out.println("싫어요 수 ="+commentEpisodeListDto.getDisLikes());
 
             List<ReCommentListDto> reCommentList = commentEpisodeListDto.getReCommentList();
             for (ReCommentListDto reCommentListDto : reCommentList) {
                 System.out.println("******대댓글 정보*******");
-                System.out.println(reCommentListDto.getNickName());
-                System.out.println(reCommentListDto.getContent());
-                System.out.println(reCommentListDto.getCreatedAt());
-
+                System.out.println("작성자 닉네임="+reCommentListDto.getNickName());
+                System.out.println("댓글내용 = "+reCommentListDto.getContent());
+                System.out.println("댓글 작성시간= "+reCommentListDto.getCreatedAt());
+                System.out.println("좋아요 수 ="+reCommentListDto.getLikes());
+                System.out.println("싫어요 수 ="+reCommentListDto.getDisLikes());
             }
 
 
