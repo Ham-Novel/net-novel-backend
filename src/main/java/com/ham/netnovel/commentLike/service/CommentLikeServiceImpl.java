@@ -37,11 +37,11 @@ public class CommentLikeServiceImpl implements CommentLikeService {
 
         //멤버 엔티티 조회, 없을경우 예외로 던짐
         Member member = memberService.getMember(commentLikeToggleDto.getProviderId())
-                .orElseThrow(() -> new NoSuchElementException("saveCommentLikeStatus 메서드 에러, 유저 정보가 null입니다. providerId=" + commentLikeToggleDto.getProviderId()));
+                .orElseThrow(() -> new NoSuchElementException("toggleCommentLikeStatus 메서드 에러, 유저 정보가 null입니다. providerId=" + commentLikeToggleDto.getProviderId()));
 
         //댓글 엔티티 조회, 없을경우 예외로 던짐
         Comment comment = commentService.getComment(commentLikeToggleDto.getCommentId())
-                .orElseThrow(() -> new NoSuchElementException("saveCommentLikeStatus 메서드 에러, 댓글 정보가 null입니다. commentId=" + commentLikeToggleDto.getCommentId()));
+                .orElseThrow(() -> new NoSuchElementException("toggleCommentLikeStatus 메서드 에러, 댓글 정보가 null입니다. commentId=" + commentLikeToggleDto.getCommentId()));
 
         try {
             //CommentLike 엔티티 조회를 위한 composite key 생성
@@ -67,7 +67,7 @@ public class CommentLikeServiceImpl implements CommentLikeService {
 
         } catch (Exception ex) {
             // 그 외의 예외는 ServiceMethodException으로 래핑하여 던짐
-            throw new ServiceMethodException("saveCommentLikeStatus 메서드 에러 발생" + ex.getMessage());
+            throw new ServiceMethodException("toggleCommentLikeStatus 메서드 에러 발생" + ex.getMessage());
         }
 
 

@@ -135,6 +135,8 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
+    //ToDo 댓글 좋아요 순서로 정렬
+    //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
     public List<CommentEpisodeListDto> getEpisodeCommentList(Long episodeId) {
@@ -156,6 +158,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
 
+    //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
     public List<MemberCommentDto> getMemberCommentList(String providerId) {
@@ -181,6 +184,8 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
+    //ToDo 댓글 좋아요 순서로 정렬
+    //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
     public List<CommentEpisodeListDto> getNovelCommentList(Long novelId) {
@@ -227,6 +232,8 @@ public class CommentServiceImpl implements CommentService {
                                 .reCommentId(reComment.getComment().getId())
                                 .createdAt(reComment.getCreatedAt())
                                 .updatedAt(reComment.getUpdatedAt())
+                                .likes(reComment.getTotalLikes())//댓글에 달린 싫어요 수
+                                .disLikes(reComment.getTotalDisLikes())//대댓글에 달린 싫어요 수
                                 .build())
                         .collect(Collectors.toList())) // List로 변환
                 .build();
