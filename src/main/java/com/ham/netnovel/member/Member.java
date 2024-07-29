@@ -60,7 +60,7 @@ public class Member {
     private List<FavoriteNovel> favoriteNovels = new ArrayList<>();
 
 
-    //junction table 연결,별 점준 에피소드
+    //1:N 연결,,별 점준 에피소드
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<EpisodeRating> episodeRatings = new ArrayList<>();
 
@@ -73,7 +73,7 @@ public class Member {
     private List<CoinUseHistory> coinUseHistories = new ArrayList<>();
 
 
-    //junction table 연결, 에피소드 댓글
+    //1:N 연결, 에피소드 댓글
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
