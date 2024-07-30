@@ -33,9 +33,9 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
      * @return List<Comment>
      */
     @Query("select c from Comment c " +
-            "where c.episode.id in " +
-            "(select e.id from Episode e " +
-            "where e.novel.id = :novelId)")
+            "join fetch c.episode e " +
+            "join fetch c.member m " +
+            "where e.novel.id = :novelId")
     List<Comment> findByNovel(@Param("novelId")Long novelId);
 
 

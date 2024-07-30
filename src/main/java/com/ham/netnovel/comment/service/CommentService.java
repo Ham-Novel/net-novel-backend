@@ -43,28 +43,44 @@ public interface CommentService {
 
 
     /**
-     * Episode에 달린 댓글들을 List로 반환하는 메서드
-     * @param episodeId episode의 PK값
-     * @return CommentEpisodeListDto List 형태로 반환
-     */
-    List<CommentEpisodeListDto> getEpisodeCommentList(Long episodeId);
-
-
-    /**
      * 유저가 작성한 댓글을 DB에서 찾아 반환하는 메서드
      * @param providerId
      * @return
      */
     List<MemberCommentDto> getMemberCommentList(String providerId);
 
+
+
     /**
-     * Novel에 달린 댓글과 대댓글을 List로 반환하는 메서드
-     * Episode와 상관 없이 댓글 최신순으로 정렬
+     * Episode에 달린 댓글과 대댓글을 최신순으로 반환하는 메서드
+     * @param episodeId episode의 PK값
+     * @return CommentEpisodeListDto List 형태로 반환
+     */
+    List<CommentEpisodeListDto> getEpisodeCommentListByRecent(Long episodeId);
+
+
+    /**
+     * Episode에 달린 댓글과 대댓글을 좋아요 순으로 반환하는 메서드
+     * @param episodeId episode의 PK값
+     * @return CommentEpisodeListDto List 형태로 반환
+     */
+    List<CommentEpisodeListDto> getEpisodeCommentListByLikes(Long episodeId);
+
+
+
+    /**
+     * Novel에 달린 댓글과 대댓글을 최신순으로 반환하는 메서드
      * @param novelId Novel 의 PK 값
      * @return List 댓글과 대댓글 정보를 담은 DTO List
      */
-    List<CommentEpisodeListDto> getNovelCommentList(Long novelId);
+    List<CommentEpisodeListDto> getNovelCommentListByRecent(Long novelId);
 
+    /**
+     * Novel에 달린 댓글과 대댓글을 좋아요 순으로 반환하는 메서드
+     * @param novelId Novel 의 PK 값
+     * @return List 댓글과 대댓글 정보를 담은 DTO List
+     */
+    List<CommentEpisodeListDto> getNovelCommentListByLikes(Long novelId);
 
 
 
