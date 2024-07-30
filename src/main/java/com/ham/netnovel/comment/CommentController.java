@@ -152,46 +152,89 @@ public class CommentController {
 
     /**
      * 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API
+     * 댓글은 최신 순으로 정렬하여 전송
      * 댓글과 대댓글 DTO는 엔티티PK, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
      * @param requestBody episodeId값을 저장할 객체
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
-    @PostMapping("/episode")
-    public ResponseEntity<?> getEpisodeCommentList(@RequestBody Map<String, String> requestBody) {
+    @PostMapping("/episode/recent")
+    public ResponseEntity<?> postEpisodeCommentsByRecent(@RequestBody Map<String, String> requestBody) {
         //클라이언트에서 보낸 episodeId값 객체에 저장
-
         String episodeIdStr = requestBody.get("episodeId");
 
         //episodeId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
         Long episodeId = TypeValidationUtil.validateLong(episodeIdStr);
 
-        //episode 에 달린 댓글 정보 List로 받음, 대댓글 정보도 포함
-        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentList(episodeId);
+        //episode 에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 최신순으로 정렬
+        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByRecent(episodeId);
 
-        //body에 List 담아 반환
+        //클라이언트에 댓글,대댓글 정보 전송
         return ResponseEntity.ok(commentList);
-
 
     }
 
     /**
-     * Novel(소설) 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API
+     * 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API
+     * 댓글은 좋아요 순으로 정렬하여 전송
+     * 댓글과 대댓글 DTO는 엔티티PK, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
+     * @param requestBody episodeId값을 저장할 객체
+     * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
+     */
+    @PostMapping("/episode/likes")
+    public ResponseEntity<?> postEpisodeCommentsByLikes(@RequestBody Map<String, String> requestBody){
+        //클라이언트에서 보낸 episodeId값 객체에 저장
+        String episodeIdStr = requestBody.get("episodeId");
+        //episodeId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
+        Long episodeId = TypeValidationUtil.validateLong(episodeIdStr);
+
+        //episode 에 달린 댓글,대댓글 정보를 List에 담음 댓글은 좋아요 순으로 정렬
+        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByLikes(episodeId);
+
+        //클라이언트에 댓글,대댓글 정보 전송
+        return ResponseEntity.ok(commentList);
+
+    }
+
+    /**
+     * Novel(소설) Episode 에 달린 댓글과 대댓글 정보를 전송하는 API
+     * 댓글은 최신 순으로 정렬
      * @param requestBody episodeId를 담는 객체
      * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
      */
-    @PostMapping("/novel")
-    public ResponseEntity<?> postNovelCommentList(@RequestBody Map<String, String> requestBody) {
-
+    @PostMapping("/novel/recent")
+    public ResponseEntity<List<CommentEpisodeListDto>> postNovelCommentsRecent(@RequestBody Map<String, String> requestBody) {
 
         //클라이언트에서 보낸 novelId값 객체에 저장
         String novelIdStr = requestBody.get("novelId");
 
+        //novelId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
+        Long novelId = TypeValidationUtil.validateLong(novelIdStr);
+
+        //Novel의 Episode 에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 최신순으로 정렬
+        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByRecent(novelId);
+
+        //클라이언트에 댓글,대댓글 정보 전송
+        return ResponseEntity.ok(novelCommentList);
+
+    }
+
+    /**
+     * Novel(소설) Episode 에 달린 댓글과 대댓글 정보를 전송하는 API
+     * 댓글은 좋아요 순으로 정렬
+     * @param requestBody episodeId를 담는 객체
+     * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
+     */
+    @PostMapping("/novel/likes")
+    public ResponseEntity<List<CommentEpisodeListDto>> postNovelCommentsLikes(@RequestBody Map<String, String> requestBody) {
+
+        //클라이언트에서 보낸 novelId값 객체에 저장
+        String novelIdStr = requestBody.get("novelId");
 
         //novelId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
         Long novelId = TypeValidationUtil.validateLong(novelIdStr);
 
-        //Novel의 Episode에 달린 댓글과 대댓글을 DTO List로 받음
-        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentList(novelId);
+        //Novel의 Episode 에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 좋아요 순으로 정렬
+        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByLikes(novelId);
 
         //클라이언트에 댓글,대댓글 정보 전송
         return ResponseEntity.ok(novelCommentList);
