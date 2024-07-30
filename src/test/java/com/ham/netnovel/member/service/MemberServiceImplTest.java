@@ -1,6 +1,7 @@
 package com.ham.netnovel.member.service;
 
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
+import com.ham.netnovel.member.dto.MemberMyPageDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +18,7 @@ class MemberServiceImplTest {
 
 
     @Test
-    public void updateMemberNickName(){
+    public void updateMemberNickName() {
 
         ChangeNickNameDto changeNickNameDto = new ChangeNickNameDto();
 //        changeNickNameDto.setNewNickName("변경테스트");
@@ -41,7 +42,7 @@ class MemberServiceImplTest {
 
     //테스트 완료
     @Test
-    public void deductMemberCoins(){
+    public void deductMemberCoins() {
 
 //        String providerId = "";
         //존재하지않은 사용자 테스트
@@ -54,9 +55,24 @@ class MemberServiceImplTest {
 //        Integer coinAmount = 0;
 
 
-        memberService.deductMemberCoins(providerId,coinAmount);
+        memberService.deductMemberCoins(providerId, coinAmount);
 
 
+    }
+
+    //테스트 성공
+    @Test
+    public void getMemberMyPageInfo() {
+
+        //테스트 유저
+//        String providerId = "test";
+
+        //존재하지않은 사용자 테스트
+        String providerId = "testtest";//NoSuchElementException로 던져짐
+
+
+        MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo(providerId);
+        System.out.println(memberMyPageInfo.toString());
 
     }
 }

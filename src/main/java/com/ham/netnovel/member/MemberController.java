@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @Slf4j
+@RequestMapping("/api/member")
 public class MemberController {
 
     private final Authenticator authenticator;
@@ -38,23 +39,33 @@ public class MemberController {
     }
 
 
-    @GetMapping("/login")
-    public String showLoginPage() {
+    /**
+     * 마이페이지 GET 요청시 유저 정보를 전달하는 API
+     * @param authentication 유저의 인증 정보
+     * @return  ResponseEntity 유저 정보 담은 응답 객체
+     */
+    @GetMapping("/mypage")
+    @ResponseBody
+    public ResponseEntity<?> showMyPage(Authentication authentication){
 
-        return "/member/login";
+        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
+        //유저 정보 DB에서 찾아 반환, 닉네임, 코인갯수, 이메일 정보 포함
+        MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo(principal.getName());
 
+        //유저 정보 전송
+        return ResponseEntity.ok(memberMyPageInfo);
     }
 
     /**
      * 유저의 닉네임을 수정하는 API
-     *
-     * @param changeNickNameDto 닉네임 변경을 위한 DTO, 유저의 providerId값과 새로운 닉네임 값을 멤버변수로 가짐
+     * @param changeNickNameDto 닉네임 변경을 위한 DTO, 유저의 providerId 값과 새로운 닉네임 값을 멤버변수로 가짐
      * @param bindingResult     ChangeNickNameDto 검증 에러를 담는 객체
      * @param authentication    유저의 인증 정보
-     * @return ResponseEntity 결과를 헤더에 담아 전송
+     * @return ResponseEntity 요청 결과를 담은 응답 객체
      */
-    @PatchMapping("/members/nickname")
+    @PatchMapping("/nickname")
     public ResponseEntity<?> updateNickname(@Valid @RequestBody ChangeNickNameDto changeNickNameDto,
                                             BindingResult bindingResult,
                                             Authentication authentication) {
@@ -103,11 +114,11 @@ public class MemberController {
 
     /**
      * 유저가 작성한 댓글, 대댓글을 반환하는 API
-     * API 요청시 인증 정보를 확인 한 후, 인증된 유저가 작성한 댓글,대댓글을 DTO 변환후 List 형태로 반환
+     * 유저 인증 정보가 올바르면 작성한 댓글,대댓글 정보 반환
      * @param authentication 유저의 인증 정보
-     * @return ResponseEntity 댓글과 대댓글의 정보를 body에 담아 반환
+     * @return ResponseEntity 댓글과 대댓글의 정보 리스트를 담은 응답 객체
      */
-    @PostMapping("/members/comment")
+    @PostMapping("/comment")
     public ResponseEntity<?> postMemberCommentList(Authentication authentication) {
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
@@ -130,11 +141,10 @@ public class MemberController {
 
     /**
      * 유저가 좋아요 누른 소설 리스트를 전송하는 API
-     *
      * @param authentication 유저의 인증 정보
-     * @return ResponseEntity
+     * @return ResponseEntity 유저가 좋아요를 누른 소설 리스트를 담은 응답 객체
      */
-    @PostMapping("/members/novel")
+    @PostMapping("/novel")
     public ResponseEntity<?> postFavoriteNovels(Authentication authentication) {
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
@@ -143,7 +153,7 @@ public class MemberController {
         //유저가 좋아요 누른 소설 반환
         List<NovelFavoriteDto> novels = memberMyPageService.getFavoriteNovelsByMember(principal.getName());
 
-        //클라이언트로 정보 전송
+        //정보 전송
         return ResponseEntity.ok(novels);
 
     }
@@ -154,7 +164,7 @@ public class MemberController {
      * @param authentication 유저의 인정 정보
      * @return ResponseEntity 데이터를 List에 담아 반환
      */
-    @PostMapping("/members/coin-use-history")
+    @PostMapping("/coin-use-history")
     public ResponseEntity<?> postMemberCoinUseHistory(Authentication authentication) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
@@ -162,7 +172,7 @@ public class MemberController {
         //유저 코인 사용 기록 조회
         List<MemberCoinUseHistoryDto> coinUseHistory = memberMyPageService.getMemberCoinUseHistory(principal.getName());
 
-        // 응답 반환
+        //정보 전송
         return ResponseEntity.ok(coinUseHistory);
 
     }
@@ -172,20 +182,20 @@ public class MemberController {
      * @param authentication 유저의 인정 정보
      * @return ResponseEntity 데이터를 List에 담아 반환
      */
-    @PostMapping("/members/coin-charge-history")
+    @PostMapping("/coin-charge-history")
     public ResponseEntity<List<MemberCoinChargeDto>> postMemberCoinChargeHistory(Authentication authentication){
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
         //유저 코인 충전 기록 조회
         List<MemberCoinChargeDto> memberCoinChargeHistory = memberMyPageService.getMemberCoinChargeHistory(principal.getName());
-        // 응답 반환
+        //정보 전송
         return ResponseEntity.ok(memberCoinChargeHistory);
 
     }
 
 
     //테스트 API
-    @GetMapping("/members/novel/test")
+    @GetMapping("/member/novel/test")
     public String memberNovelTest() {
 
         return "/member/novel-test";
@@ -222,16 +232,5 @@ public class MemberController {
     }
 
 
-//    @GetMapping("/mypage")
-//    @ResponseBody
-//    public String showMyPage(Authentication authentication){
-//       if (authentication.isAuthenticated()){
-//       CustomOAuth2User principal = (CustomOAuth2User) authentication.getPrincipal();
-//           log.info(principal.getNickName());
-//       }
-//
-//        return "ok";
-//
-//    }
 
 }

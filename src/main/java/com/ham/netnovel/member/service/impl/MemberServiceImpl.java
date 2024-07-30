@@ -5,6 +5,7 @@ import com.ham.netnovel.common.exception.NotEnoughCoinsException;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.MemberRepository;
+import com.ham.netnovel.member.dto.MemberMyPageDto;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
 import com.ham.netnovel.member.dto.MemberCreateDto;
@@ -19,7 +20,6 @@ import java.util.Optional;
 class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-
 
 
     public MemberServiceImpl(MemberRepository memberRepository) {
@@ -110,12 +110,12 @@ class MemberServiceImpl implements MemberService {
     public void deductMemberCoins(String providerId, Integer coinAmount) {
 
         //사용한 코인 수가 올바르지 않을때 예외로 던짐
-        if (coinAmount==null || coinAmount<0){
+        if (coinAmount == null || coinAmount < 0) {
             throw new IllegalArgumentException("deductMemberCoins 에러, coinAmount 값이 유효하지 않습니다.");
         }
 
         Optional<Member> optionalMember = getMember(providerId);
-        if (optionalMember.isEmpty()){
+        if (optionalMember.isEmpty()) {
             throw new NoSuchElementException("deductMemberCoins 에러, 유저 정보가 없습니다.");
         }
         //Optional 벗기기
@@ -125,10 +125,10 @@ class MemberServiceImpl implements MemberService {
         Integer totalCoin = member.getCoinCount();
 
         //유저의 코인이 null일경우 예외처리
-        if (totalCoin ==null){
+        if (totalCoin == null) {
             throw new NoSuchElementException("deductMemberCoins 에러, 유저 정보가 없습니다.");
-        //유저의 코인이 사용한 코인수보다 적을때 예외처리
-        } else if (totalCoin<coinAmount) {
+            //유저의 코인이 사용한 코인수보다 적을때 예외처리
+        } else if (totalCoin < coinAmount) {
             throw new NotEnoughCoinsException("deductMemberCoins 에러, 유저의 코인이 부족합니다.");
         }
 
@@ -137,12 +137,9 @@ class MemberServiceImpl implements MemberService {
             member.deductMemberCoins(coinAmount);
             //엔티티 DB에 저장
             memberRepository.save(member);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             throw new ServiceMethodException("deductMemberCoins 메서드 에러 발생" + ex.getMessage());
         }
-
-
-
 
 
     }
@@ -150,15 +147,35 @@ class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void increaseMemberCoins(Member member, int coinAmount) {
-       try {
-           //멤버 엔티티 코인수 증가
-           member.increaseMemberCoins(coinAmount);
-           //엔티티 저장
-           memberRepository.save(member);
-       }catch (Exception ex){
-           throw new ServiceMethodException("increaseMemberCoins 메서드 에러 발생" + ex.getMessage());
-       }
+        try {
+            //멤버 엔티티 코인수 증가
+            member.increaseMemberCoins(coinAmount);
+            //엔티티 저장
+            memberRepository.save(member);
+        } catch (Exception ex) {
+            throw new ServiceMethodException("increaseMemberCoins 메서드 에러 발생" + ex.getMessage());
+        }
 
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MemberMyPageDto getMemberMyPageInfo(String providerId) {
+
+        //유저 정보가 없을경우 예외로 던짐
+        Member member = getMember(providerId)
+                .orElseThrow(() -> new NoSuchElementException("유저 정보 없음"));
+        try {
+            //유저 정보 DTO로 변환하여 반환
+            return MemberMyPageDto.builder()
+                    .email(member.getEmail())
+                    .coinCount(member.getCoinCount())
+                    .nickName(member.getNickName())
+                    .build();
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getMemberMyPageInfo 메서드 에러 발생" + ex.getMessage());
+        }
 
 
     }

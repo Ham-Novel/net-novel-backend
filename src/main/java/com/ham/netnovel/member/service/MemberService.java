@@ -4,6 +4,7 @@ import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
 import com.ham.netnovel.member.dto.MemberCreateDto;
 import com.ham.netnovel.member.dto.MemberLoginDto;
+import com.ham.netnovel.member.dto.MemberMyPageDto;
 
 import java.util.Optional;
 
@@ -12,10 +13,10 @@ public interface MemberService {
 
     /**
      * Member 엔티티를 조회하는 메서드, null체크는 해당 메서드를 사용하는 메서드에서 진행
-     * @param providerId
-     * @return Optional<Member>
+     * @param providerId 유저의 인증 정보
+     * @return Optional<Member> DB에서 찾은 유저 엔티티 객체
      */
-   Optional<Member> getMember(String providerId);
+    Optional<Member> getMember(String providerId);
 
 
     /**
@@ -51,14 +52,13 @@ public interface MemberService {
     /**
      * 유저의 코인을 증가시키는 메서드
      * 파라미터로 받는 member, coinAmount 유효성 검사는 이 메서드를 사용하는 메서드에서 진행 필
-     * @param member 코인을 증가시킬 유저 엔티티
+     * @param member     코인을 증가시킬 유저 엔티티
      * @param coinAmount 증가시킬 코인의 갯수
      */
     void increaseMemberCoins(Member member, int coinAmount);
 
 
-
-
+    MemberMyPageDto getMemberMyPageInfo(String providerId);
 
 
 }
