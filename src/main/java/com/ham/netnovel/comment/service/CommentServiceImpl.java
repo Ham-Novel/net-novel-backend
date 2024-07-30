@@ -135,27 +135,7 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<CommentEpisodeListDto> getEpisodeCommentList(Long episodeId) {
-
-        try {
-            return commentRepository.findByEpisodeId(episodeId)
-                    .stream()
-                    //엔티티 DTO로 convert
-                    .map(this::convertToCommentEpisodeListDto)
-                    //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
-                    .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt))
-                    .collect(Collectors.toList()); // List로 변환
-
-        } catch (Exception e) {
-            throw new ServiceMethodException("getReCommentList 메서드 에러 발생"); // 예외 던지기
-        }
-
-
-    }
-
-
+    //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
     public List<MemberCommentDto> getMemberCommentList(String providerId) {
@@ -181,15 +161,58 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
+
+
+    //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
-    public List<CommentEpisodeListDto> getNovelCommentList(Long novelId) {
+    public List<CommentEpisodeListDto> getEpisodeCommentListByRecent(Long episodeId) {
+
+        try {
+            return commentRepository.findByEpisodeId(episodeId)
+                    .stream()
+                    //엔티티 DTO로 convert
+                    .map(this::convertToCommentEpisodeListDto)
+                    //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
+                    .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt).reversed())
+                    .collect(Collectors.toList()); // List로 변환
+
+        } catch (Exception e) {
+            throw new ServiceMethodException("getReCommentList 메서드 에러 발생"); // 예외 던지기
+        }
+
+
+    }
+    //ToDo 댓글 페이지네이션
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentEpisodeListDto> getEpisodeCommentListByLikes(Long episodeId) {
+        try {
+            return commentRepository.findByEpisodeId(episodeId)
+                    .stream()
+                    //엔티티 DTO로 convert
+                    .map(this::convertToCommentEpisodeListDto)
+                    //좋아요 순으로 정렬, 기본값은 오름차순 정렬이므로 reversed 추가
+                    .sorted(Comparator.comparing(CommentEpisodeListDto::getLikes).reversed())
+                    .collect(Collectors.toList()); // List로 변환
+
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getReCommentList 메서드 에러 발생" + ex.getMessage()); // 예외 던지기
+        }
+    }
+
+
+
+    //ToDo 댓글 페이지네이션
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentEpisodeListDto> getNovelCommentListByRecent(Long novelId) {
         try {
             return commentRepository.findByNovel(novelId).stream()
                 //엔티티 DTO로 convert
                 .map(this::convertToCommentEpisodeListDto)
                 //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
-                .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt))
+                .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt).reversed())
                 .collect(Collectors.toList());
 
         }catch (Exception e) {
@@ -198,6 +221,22 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
+    //ToDo 댓글 페이지네이션
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentEpisodeListDto> getNovelCommentListByLikes(Long novelId) {
+        try {
+            return commentRepository.findByNovel(novelId).stream()
+                    //엔티티 DTO로 convert
+                    .map(this::convertToCommentEpisodeListDto)
+                    //좋아요 순으로 정렬, 기본값은 오름차순 정렬이므로 reversed 추가
+                    .sorted(Comparator.comparing(CommentEpisodeListDto::getLikes).reversed())
+                    .collect(Collectors.toList());
+        }catch (Exception e) {
+            throw new ServiceMethodException("getMemberCommentList 메서드 에러 발생"); // 예외 던지기
+        }
+
+    }
 
 
     /**
@@ -212,6 +251,7 @@ public class CommentServiceImpl implements CommentService {
 
         return CommentEpisodeListDto.builder()
                 .nickName(comment.getMember().getNickName())//작성자 닉네임
+                .episodeTitle(comment.getEpisode().getTitle())//에피소드 제목
                 .content(comment.getContent())
                 .commentId(comment.getId())
                 .updatedAt(comment.getUpdatedAt())
@@ -227,6 +267,8 @@ public class CommentServiceImpl implements CommentService {
                                 .reCommentId(reComment.getComment().getId())
                                 .createdAt(reComment.getCreatedAt())
                                 .updatedAt(reComment.getUpdatedAt())
+                                .likes(reComment.getTotalLikes())//댓글에 달린 싫어요 수
+                                .disLikes(reComment.getTotalDisLikes())//대댓글에 달린 싫어요 수
                                 .build())
                         .collect(Collectors.toList())) // List로 변환
                 .build();

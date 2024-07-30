@@ -10,7 +10,8 @@ public class Authenticator {
 
     public CustomOAuth2User checkAuthenticate(Authentication authentication) {
 
-        if (!authentication.isAuthenticated()) {
+        //authentication 가 null 이거나 인증정보가 없으면 예외로 던짐
+        if (authentication==null || !authentication.isAuthenticated()) {
             throw new AuthenticationCredentialsNotFoundException("User is not authenticated");
         }
 

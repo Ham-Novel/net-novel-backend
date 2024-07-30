@@ -1,8 +1,8 @@
-package com.ham.netnovel.commentLike;
+package com.ham.netnovel.reComment;
 
-
-import com.ham.netnovel.comment.Comment;
+import com.ham.netnovel.commentLike.LikeType;
 import com.ham.netnovel.member.Member;
+import com.ham.netnovel.reCommentLike.ReCommentLikeKey;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,11 +11,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class CommentLike {
+public class ReCommentLike {
 
     @EmbeddedId
-    private CommentLikeKey id;
-
+    private ReCommentLikeKey id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("memberId") // 복합 키의 memberId 필드와 매핑
@@ -24,19 +23,19 @@ public class CommentLike {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("commentId") // 복합 키의 commentId 필드와 매핑
-    @JoinColumn(name = "comment_id")
-    private Comment comment;
+    @MapsId("reCommentId")// 복합 키의 reCommentId 필드와 매핑
+    @JoinColumn(name="re_comment_id")
+    private ReComment reComment;
 
     //LIKE, DISLIKE 두가지 타입
     @Enumerated(EnumType.STRING)
     private LikeType likeType;
 
     @Builder
-    public CommentLike(CommentLikeKey id, Member member, Comment comment, LikeType likeType) {
+    public ReCommentLike(ReCommentLikeKey id, Member member, ReComment reComment, LikeType likeType) {
         this.id = id;
         this.member = member;
-        this.comment = comment;
+        this.reComment = reComment;
         this.likeType = likeType;
     }
 }

@@ -1,5 +1,6 @@
 package com.ham.netnovel.reComment.dto;
 
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,14 @@ public class ReCommentListDto {
 
     //작성자 닉네임
     private String nickName;
+
+
+    @Min(0)
+    //좋아요 수
+    private int likes;
+    @Min(0)
+    //싫어요 수
+    private int disLikes;
 
     private LocalDateTime createdAt;
 

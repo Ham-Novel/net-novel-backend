@@ -50,7 +50,6 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
             CoinUseHistory coinUseHistory = CoinUseHistory.builder()
                     .member(member)
                     .episode(episode)
-                    .amount(episode.getCoinCost())
                     .build();
             //DB에 저장
             coinUseHistoryRepository.save(coinUseHistory);

@@ -3,6 +3,7 @@ package com.ham.netnovel.reComment;
 
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.CommentStatus;
+import com.ham.netnovel.commentLike.LikeType;
 import com.ham.netnovel.member.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -12,6 +13,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -48,6 +51,8 @@ public class ReComment {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @OneToMany(mappedBy = "reComment", fetch = FetchType.LAZY)
+    private List<ReCommentLike>  reCommentLikes =new ArrayList<>();
 
     @Builder
     public ReComment(String content, Comment comment, Member member) {
@@ -65,6 +70,22 @@ public class ReComment {
     public  void changeReStatus(CommentStatus status) {
         this.status = status;
     }
+
+    //좋아요 수를 반환하는 메서드
+    public int getTotalLikes(){
+        return (int) reCommentLikes.stream()
+                .filter(commentLike -> commentLike.getLikeType() == LikeType.LIKE)
+                .count();
+
+    }
+    //싫어요 수를 반환하는 메서드
+    public int getTotalDisLikes(){
+        return (int) reCommentLikes.stream()
+                .filter(commentLike -> commentLike.getLikeType() == LikeType.DISLIKE)
+                .count();
+
+    }
+
 
 
 
