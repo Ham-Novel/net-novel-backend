@@ -5,7 +5,7 @@ import com.ham.netnovel.coinUseHistory.CoinUseHistoryRepository;
 import com.ham.netnovel.coinUseHistory.dto.CoinUseCreateDto;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.episode.Episode;
-import com.ham.netnovel.episode.EpisodeService;
+import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.service.MemberService;
@@ -42,7 +42,7 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
                 .orElseThrow(() -> new NoSuchElementException("Member 정보가 없습니다. providerId: " + coinUseCreateDto.getProviderId()));
 
         //에피소드 정보 확인
-        Episode episode = episodeService.getEpisode(coinUseCreateDto.getEpisodeId())
+        Episode episode = episodeService.getEpisodeEntity(coinUseCreateDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("Episode 정보가 없습니다. episodeId: " + coinUseCreateDto.getEpisodeId()));
 
         try {

@@ -41,10 +41,9 @@ public class Episode {
     @Column(nullable = false)
     private String content;
 
-    //ToDo 편당 결제 금액은 Novel 등급에 따라서 고정되어 있음. 굳이 Episode에 넣을 필요가 있을까?
+    //ToDo 편당 결제 금액 전역 관리
     //조회를 위한 코인의 갯수
-//    @Column(nullable = false)
-//    private Integer coinCost;
+    private Integer coinCost;
 
     //에피소드 조회수
     @Column(nullable = false)
