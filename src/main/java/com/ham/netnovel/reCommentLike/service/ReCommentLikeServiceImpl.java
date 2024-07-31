@@ -6,7 +6,7 @@ import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.reComment.ReComment;
 import com.ham.netnovel.reComment.ReCommentLike;
 import com.ham.netnovel.reComment.service.ReCommentService;
-import com.ham.netnovel.reCommentLike.ReCommentLikeKey;
+import com.ham.netnovel.reCommentLike.ReCommentLikeId;
 import com.ham.netnovel.reCommentLike.ReCommentLikeRepository;
 import com.ham.netnovel.reCommentLike.ReCommentLikeToggleDto;
 import org.springframework.stereotype.Service;
@@ -41,13 +41,13 @@ public class ReCommentLikeServiceImpl implements ReCommentLikeService {
 
         try {
             //ReCommentLike 엔티티 조회를 위한 composite key 생성
-            ReCommentLikeKey reCommentLikeKey = new ReCommentLikeKey(reComment.getId(), member.getId());
+            ReCommentLikeId reCommentLikeId = new ReCommentLikeId(reComment.getId(), member.getId());
             //DB에서 엔티티 찾아서 반환
-            Optional<ReCommentLike> reCommentLike = reCommentLikeRepository.findById(reCommentLikeKey);
+            Optional<ReCommentLike> reCommentLike = reCommentLikeRepository.findById(reCommentLikeId);
 
             //찾은 값이 없으면(좋아요 누른 기록이 없음), 새로운 엔티티 만들어 DB에 저장 후 true 반환
             if (reCommentLike.isEmpty()){
-                ReCommentLike newRecommentLike = new ReCommentLike(reCommentLikeKey, member, reComment, dto.getLikeType());
+                ReCommentLike newRecommentLike = new ReCommentLike(reCommentLikeId, member, reComment, dto.getLikeType());
 
                 reCommentLikeRepository.save(newRecommentLike);
 

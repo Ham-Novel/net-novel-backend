@@ -2,7 +2,7 @@ package com.ham.netnovel.reComment;
 
 import com.ham.netnovel.commentLike.LikeType;
 import com.ham.netnovel.member.Member;
-import com.ham.netnovel.reCommentLike.ReCommentLikeKey;
+import com.ham.netnovel.reCommentLike.ReCommentLikeId;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class ReCommentLike {
 
     @EmbeddedId
-    private ReCommentLikeKey id;
+    private ReCommentLikeId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("memberId") // 복합 키의 memberId 필드와 매핑
@@ -32,7 +32,7 @@ public class ReCommentLike {
     private LikeType likeType;
 
     @Builder
-    public ReCommentLike(ReCommentLikeKey id, Member member, ReComment reComment, LikeType likeType) {
+    public ReCommentLike(ReCommentLikeId id, Member member, ReComment reComment, LikeType likeType) {
         this.id = id;
         this.member = member;
         this.reComment = reComment;
