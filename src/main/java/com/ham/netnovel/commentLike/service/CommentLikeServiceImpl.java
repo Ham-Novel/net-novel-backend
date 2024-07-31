@@ -3,9 +3,8 @@ package com.ham.netnovel.commentLike.service;
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.commentLike.CommentLike;
-import com.ham.netnovel.commentLike.CommentLikeKey;
+import com.ham.netnovel.commentLike.CommentLikeId;
 import com.ham.netnovel.commentLike.CommentLikeRepository;
-import com.ham.netnovel.commentLike.LikeType;
 import com.ham.netnovel.commentLike.dto.CommentLikeToggleDto;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
@@ -45,15 +44,15 @@ public class CommentLikeServiceImpl implements CommentLikeService {
 
         try {
             //CommentLike 엔티티 조회를 위한 composite key 생성
-            CommentLikeKey commentLikeKey = new CommentLikeKey(comment.getId(), member.getId());
+            CommentLikeId commentLikeId = new CommentLikeId(comment.getId(), member.getId());
 
             //DB에서 엔티티 찾아서 반환
-            Optional<CommentLike> commentLike = commentLikeRepository.findById(commentLikeKey);
+            Optional<CommentLike> commentLike = commentLikeRepository.findById(commentLikeId);
 
             //찾은 값이 없으면(좋아요 누른 기록이 없음), 새로운 엔티티 만들어 DB에 저장 후 true 반환
             if (commentLike.isEmpty()) {
 
-                CommentLike newCommentLike = new CommentLike(commentLikeKey, member, comment, commentLikeToggleDto.getLikeType());
+                CommentLike newCommentLike = new CommentLike(commentLikeId, member, comment, commentLikeToggleDto.getLikeType());
 
                 commentLikeRepository.save(newCommentLike);
 
