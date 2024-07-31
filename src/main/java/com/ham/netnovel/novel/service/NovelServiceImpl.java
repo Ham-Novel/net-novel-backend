@@ -5,6 +5,7 @@ import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
+import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
@@ -69,7 +70,8 @@ public class NovelServiceImpl implements NovelService {
                     .title(novelCreateDto.getTitle())
                     .description(novelCreateDto.getDescription())
                     .author(author)
-                    .status(NovelType.ONGOING)
+                    .type(NovelType.ONGOING)
+                    .status(NovelStatus.ACTIVE)
                     .build();
             return novelRepository.save(targetNovel).parseResponseDto();
         } catch (Exception ex) {
@@ -132,6 +134,9 @@ public class NovelServiceImpl implements NovelService {
         } catch (Exception ex) {
             throw new ServiceMethodException("updateNovel Error" + ex.getMessage());
         }
+
+        //Novel 삭제 처리
+        targetNovel.changeStatus(NovelStatus.DELETED_BY_USER);
         novelRepository.delete(targetNovel);
         return targetNovel.parseResponseDto();
     }

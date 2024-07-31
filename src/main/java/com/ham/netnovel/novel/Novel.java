@@ -1,5 +1,6 @@
 package com.ham.netnovel.novel;
 
+import com.ham.netnovel.comment.CommentStatus;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.data.NovelStatus;
@@ -33,7 +34,7 @@ public class Novel {
     @Enumerated(EnumType.STRING)
     private NovelType type;
 
-    //연재 상태 Enum 사용
+    //삭제 처리 상태 Enum 사용
     @Enumerated(EnumType.STRING)
     private NovelStatus status;
 
@@ -46,11 +47,17 @@ public class Novel {
     private List<Episode> episodes = new ArrayList<>();
 
     @Builder
-    public Novel(String title, String description, NovelType status, Member author) {
+    public Novel(String title, String description, Member author, NovelType type, NovelStatus status) {
         this.title = title;
         this.description = description;
-        this.type = status;
         this.author = author;
+        this.type = type;
+        this.status = status;
+    }
+
+    //댓글 엔티티 상태 변경
+    public  void changeStatus(NovelStatus status) {
+        this.status = status;
     }
 
     //댓글 엔티티 내용 변경
