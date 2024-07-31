@@ -17,7 +17,6 @@ public class NovelUpdateDto {
     @NotNull
     private Long novelId;
 
-    @NotBlank
     @Size(max = 30)
     private String title;
 

@@ -1,6 +1,10 @@
 package com.ham.netnovel.novel;
 
+import com.ham.netnovel.OAuth.CustomOAuth2User;
+import com.ham.netnovel.common.utils.Authenticator;
+import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.episode.service.EpisodeService;
+import com.ham.netnovel.member.dto.MemberMyPageDto;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
@@ -10,6 +14,8 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,14 +26,20 @@ import java.util.List;
 @RequestMapping("api/novel")
 public class NovelController {
     private final NovelService novelService;
+    private final Authenticator authenticator;
 
-    public NovelController(NovelService novelService, EpisodeService episodeService) {
+    public NovelController(NovelService novelService, EpisodeService episodeService, Authenticator authenticator) {
         this.novelService = novelService;
+        this.authenticator = authenticator;
     }
 
-    //ToDo @Valid 유저 인증 코드 추가
     @GetMapping("/{novelId}")
-    public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId) {
+    public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId,
+                                                     Authentication authentication) {
+
+        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
         return ResponseEntity.ok(novelService.getNovel(novelId));
     }
 
@@ -38,33 +50,83 @@ public class NovelController {
     }
 
     @PostMapping
-    public ResponseEntity<NovelResponseDto> createNovel(@Valid  @RequestBody NovelCreateDto reqBody) {
-        return ResponseEntity.ok(novelService.createNovel(reqBody));
+    public ResponseEntity<String> createNovel(@Valid @RequestBody NovelCreateDto reqBody,
+                                                        BindingResult bindingResult,
+                                                        Authentication authentication) {
+        //NovelCreateDto Validation 예외 처리
+        if (bindingResult.hasErrors()) {
+            log.error("createNovel API Error = {}", bindingResult.getFieldError());
+            //badRequest 에러 메세지 body에 담아 전송
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
+        }
+
+        //유저 인증. 없으면 badRequest 응답. 있으면 CustomOAuth2User 타입캐스팅.
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+        //DTO에 유저 정보(providerId) 값 저장
+        reqBody.setAccessorProviderId(principal.getName());
+
+        //DTO를 서비스로 넘겨서 Novel DB에 저장. 에러 발생 시 내부에서 예외 처리.
+        NovelResponseDto result = novelService.createNovel(reqBody);
+        return ResponseEntity.ok("createNovel: " + result.toString());
     }
 
-    //ToDo updateNovel, deleteNovel MessageBody와 Url에 모두 novelId를 보내는 문제 해결해야 함
     @PutMapping("/{novelId}")
-    public ResponseEntity<NovelResponseDto> updateNovel(
-            @PathVariable("novelId") Long pathNovelId,
-            @Valid @RequestBody NovelUpdateDto reqBody) {
+    public ResponseEntity<String> updateNovel(@PathVariable("novelId") Long pathNovelId,
+                                                        @Valid @RequestBody NovelUpdateDto reqBody,
+                                                        BindingResult bindingResult,
+                                                        Authentication authentication) {
+        //NovelUpdateDto Validation 예외 처리
+        if (bindingResult.hasErrors()) {
+            log.error("updateNovel API Error = {}", bindingResult.getFieldError());
+            //badRequest 에러 메세지 body에 담아 전송
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
+        }
+
+        //유저 인증. 없으면 badRequest 응답. 있으면 CustomOAuth2User 타입캐스팅.
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+        //DTO에 유저 정보(providerId) 값 저장
+        reqBody.setAccessorProviderId(principal.getName());
 
         //url의 novelId와 reqBody의 novelId가 같은지 검증
         if (!pathNovelId.equals(reqBody.getNovelId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path Variable Id != Message Body Id");
+            String errorMessage = "updateNovel API Error = 'Path Variable Id != Message Body Id'";
+            log.error(errorMessage);
+            return ResponseEntity.badRequest().body(errorMessage);
         }
 
-        return ResponseEntity.ok(novelService.updateNovel(reqBody));
+        NovelResponseDto result = novelService.updateNovel(reqBody);
+        return ResponseEntity.ok("updateNovel: " + result.toString());
     }
 
     @DeleteMapping("/{novelId}")
-    public ResponseEntity<NovelResponseDto> deleteNovel(
-            @PathVariable("novelId") Long pathNovelId,
-            @Valid @RequestBody NovelDeleteDto reqBody) {
+    public ResponseEntity<String> deleteNovel(@PathVariable("novelId") Long pathNovelId,
+                                                        @Valid @RequestBody NovelDeleteDto reqBody,
+                                                        BindingResult bindingResult,
+                                                        Authentication authentication) {
+        //NovelDeleteDto Validation 예외 처리
+        if (bindingResult.hasErrors()) {
+            log.error("deleteNovel API Error = {}", bindingResult.getFieldError());
+            //badRequest 에러 메세지 body에 담아 전송
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
+        }
+
+        //유저 인증. 없으면 badRequest 응답. 있으면 CustomOAuth2User 타입캐스팅.
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+        //DTO에 유저 정보(providerId) 값 저장
+        reqBody.setAccessorProviderId(principal.getName());
 
         //url의 novelId와 reqBody의 novelId가 같은지 검증
         if (!pathNovelId.equals(reqBody.getNovelId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path Variable Id != Message Body Id");
+            String errorMessage = "deleteNovel API Error = 'Path Variable Id != Message Body Id'";
+            log.error(errorMessage);
+            return ResponseEntity.badRequest().body(errorMessage);
         }
-        return ResponseEntity.ok(novelService.deleteNovel(reqBody));
+
+        NovelResponseDto result = novelService.deleteNovel(reqBody);
+        return ResponseEntity.ok("deleteNovel: " + result.toString());
+
     }
 }
