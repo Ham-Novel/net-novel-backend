@@ -33,15 +33,10 @@ public class NovelController {
     /**
      * 소설 상세 페이지에서 Novel 데이터 응답하는 API
      * @param novelId novelId를 담은 url path variable
-     * @param authentication 유저의 인증 정보
      * @return ResponseEntity NovelResponseDto로 Novel 데이터 반환.
      */
     @GetMapping("/{novelId}")
-    public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId,
-                                                     Authentication authentication) {
-
-        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
-        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+    public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId) {
 
         return ResponseEntity.ok(novelService.getNovel(novelId));
     }
