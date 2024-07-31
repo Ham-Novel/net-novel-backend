@@ -75,7 +75,7 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
                 .map(novel -> NovelFavoriteDto.builder()
                         .novelId(novel.getId())
                         .title(novel.getTitle())
-                        .status(novel.getStatus())
+                        .status(novel.getType())
                         .build()
                 ).collect(Collectors.toList());
     }

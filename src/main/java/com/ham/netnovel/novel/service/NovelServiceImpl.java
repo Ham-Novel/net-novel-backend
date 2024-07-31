@@ -5,7 +5,7 @@ import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
-import com.ham.netnovel.novel.data.NovelStatus;
+import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
@@ -69,7 +69,7 @@ public class NovelServiceImpl implements NovelService {
                     .title(novelCreateDto.getTitle())
                     .description(novelCreateDto.getDescription())
                     .author(author)
-                    .status(NovelStatus.ONGOING)
+                    .status(NovelType.ONGOING)
                     .build();
             return novelRepository.save(targetNovel).parseResponseDto();
         } catch (Exception ex) {
@@ -99,7 +99,7 @@ public class NovelServiceImpl implements NovelService {
             if (isSameContent(targetNovel,
                     novelUpdateDto.getTitle(),
                     novelUpdateDto.getDescription(),
-                    novelUpdateDto.getStatus())) {
+                    novelUpdateDto.getType())) {
                 throw new RuntimeException("변경 사항이 없습니다.");
             }
 
@@ -136,10 +136,10 @@ public class NovelServiceImpl implements NovelService {
         return targetNovel.parseResponseDto();
     }
 
-    public boolean isSameContent(Novel novel, String title, String desc, NovelStatus status) {
+    public boolean isSameContent(Novel novel, String title, String desc, NovelType status) {
         return novel.getTitle().equals(title)
                 && novel.getDescription().equals(desc)
-                && novel.getStatus().equals(status);
+                && novel.getType().equals(status);
     }
 
 
