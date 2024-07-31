@@ -6,6 +6,7 @@ import com.ham.netnovel.novel.dto.NovelDeleteDto;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novel.service.NovelService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,7 @@ public class NovelController {
     }
 
     @PostMapping
-    public ResponseEntity<NovelResponseDto> createNovel(@RequestBody NovelCreateDto reqBody) {
+    public ResponseEntity<NovelResponseDto> createNovel(@Valid  @RequestBody NovelCreateDto reqBody) {
         return ResponseEntity.ok(novelService.createNovel(reqBody));
     }
 
@@ -45,14 +46,14 @@ public class NovelController {
     @PutMapping("/{novelId}")
     public ResponseEntity<NovelResponseDto> updateNovel(
             @PathVariable("novelId") Long novelId,
-            @RequestBody NovelUpdateDto reqBody) {
+            @Valid @RequestBody NovelUpdateDto reqBody) {
         return ResponseEntity.ok(novelService.updateNovel(reqBody));
     }
 
     @DeleteMapping("/{novelId}")
     public ResponseEntity<NovelResponseDto> deleteNovel(
             @PathVariable("novelId") Long novelId,
-            @RequestBody NovelDeleteDto reqBody) {
+            @Valid @RequestBody NovelDeleteDto reqBody) {
         return ResponseEntity.ok(novelService.deleteNovel(reqBody));
     }
 }
