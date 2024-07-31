@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class CommentLike {
 
     @EmbeddedId
-    private CommentLikeKey id;
+    private CommentLikeId id;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,7 +33,7 @@ public class CommentLike {
     private LikeType likeType;
 
     @Builder
-    public CommentLike(CommentLikeKey id, Member member, Comment comment, LikeType likeType) {
+    public CommentLike(CommentLikeId id, Member member, Comment comment, LikeType likeType) {
         this.id = id;
         this.member = member;
         this.comment = comment;

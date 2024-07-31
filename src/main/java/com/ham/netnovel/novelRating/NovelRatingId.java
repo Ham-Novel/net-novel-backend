@@ -1,4 +1,5 @@
-package com.ham.netnovel.reCommentLike;
+package com.ham.netnovel.novelRating;
+
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -14,11 +15,12 @@ import java.util.Objects;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ReCommentLikeKey implements Serializable {
+public class NovelRatingId implements Serializable {
 
-    private Long reCommentId;
+
     private Long memberId;
 
+    private Long novelId;
 
     @Override
     public boolean equals(Object o) {
@@ -27,13 +29,16 @@ public class ReCommentLikeKey implements Serializable {
         //파라미터로 받은 객체가 null 이거나, 현재 클래스와 다른 클래스일경우 false 반환
         if (o==null || getClass() !=o.getClass()) return false;
         //타입 캐스팅
-        ReCommentLikeKey that = (ReCommentLikeKey) o;
+        NovelRatingId that = (NovelRatingId) o;
         //파라미터로 받은 객체와 현재 객체의 필드값 비교, 두 필드값이 모두 동일해야 true 반환
-        return Objects.equals(reCommentId,that.reCommentId) && Objects.equals(memberId,that.memberId);
+        return Objects.equals(memberId,that.memberId) && Objects.equals(novelId,that.novelId);
+
     }
-    //equals()가 true를 반환할때, 객체들이 도일한 해시 코드 값을 반환하도록 보장하는 메서드
+
     @Override
     public int hashCode() {
-        return Objects.hash(reCommentId, memberId);
+
+        return Objects.hash(memberId, novelId);
     }
+
 }

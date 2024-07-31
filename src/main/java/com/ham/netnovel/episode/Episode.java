@@ -3,7 +3,6 @@ package com.ham.netnovel.episode;
 
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.episode.dto.EpisodeDataDto;
-import com.ham.netnovel.episodeRating.EpisodeRating;
 import com.ham.netnovel.coinUseHistory.CoinUseHistory;
 import com.ham.netnovel.novel.Novel;
 import jakarta.persistence.*;
@@ -67,10 +66,6 @@ public class Episode {
 
     @OneToMany(mappedBy = "episode")
     private List<Comment> comments = new ArrayList<>();
-
-    //junction table 연결, 에피소드 별점
-    @OneToMany(mappedBy = "episode")
-    private List<EpisodeRating> episodeRatings = new ArrayList<>();
 
 
     //junction table 연결, 코인 사용 기록
