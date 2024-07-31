@@ -43,16 +43,16 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     @Transactional(readOnly = true)
-    public NovelResponseDto getNovel(Long id) {
-        return novelRepository.findById(id)
+    public NovelResponseDto getNovel(Long novelId) {
+        return novelRepository.findById(novelId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Novel 입니다."))
                 .parseResponseDto();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Novel> getNovelEntity(Long id) {
-        return novelRepository.findById(id);
+    public Optional<Novel> getNovelEntity(Long novelId) {
+        return novelRepository.findById(novelId);
     }
 
     @Override
