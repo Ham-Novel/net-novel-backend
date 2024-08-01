@@ -4,10 +4,7 @@ package com.ham.netnovel.comment.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +12,8 @@ import org.springframework.stereotype.Service;
 @Setter
 @ToString
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CommentCreateDto {
 
 

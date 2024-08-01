@@ -6,6 +6,7 @@ import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.data.NovelStatus;
+import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
@@ -42,16 +43,16 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     @Transactional(readOnly = true)
-    public NovelResponseDto getNovel(Long id) {
-        return novelRepository.findById(id)
+    public NovelResponseDto getNovel(Long novelId) {
+        return novelRepository.findById(novelId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Novel 입니다."))
                 .parseResponseDto();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Novel> getNovelEntity(Long id) {
-        return novelRepository.findById(id);
+    public Optional<Novel> getNovelEntity(Long novelId) {
+        return novelRepository.findById(novelId);
     }
 
     @Override
@@ -69,7 +70,8 @@ public class NovelServiceImpl implements NovelService {
                     .title(novelCreateDto.getTitle())
                     .description(novelCreateDto.getDescription())
                     .author(author)
-                    .status(NovelStatus.ONGOING)
+                    .type(NovelType.ONGOING)
+                    .status(NovelStatus.ACTIVE)
                     .build();
             return novelRepository.save(targetNovel).parseResponseDto();
         } catch (Exception ex) {
@@ -99,7 +101,7 @@ public class NovelServiceImpl implements NovelService {
             if (isSameContent(targetNovel,
                     novelUpdateDto.getTitle(),
                     novelUpdateDto.getDescription(),
-                    novelUpdateDto.getStatus())) {
+                    novelUpdateDto.getType())) {
                 throw new RuntimeException("변경 사항이 없습니다.");
             }
 
@@ -132,14 +134,17 @@ public class NovelServiceImpl implements NovelService {
         } catch (Exception ex) {
             throw new ServiceMethodException("updateNovel Error" + ex.getMessage());
         }
+
+        //Novel 삭제 처리
+        targetNovel.changeStatus(NovelStatus.DELETED_BY_USER);
         novelRepository.delete(targetNovel);
         return targetNovel.parseResponseDto();
     }
 
-    public boolean isSameContent(Novel novel, String title, String desc, NovelStatus status) {
+    public boolean isSameContent(Novel novel, String title, String desc, NovelType status) {
         return novel.getTitle().equals(title)
                 && novel.getDescription().equals(desc)
-                && novel.getStatus().equals(status);
+                && novel.getType().equals(status);
     }
 
 

@@ -1,8 +1,9 @@
 package com.ham.netnovel.novel.dto;
 
-import com.ham.netnovel.novel.data.NovelStatus;
+import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.tag.Tag;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -16,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class NovelResponseDto {
 
+    @NotNull
     private Long novelId;
 
     @NotBlank
@@ -25,7 +27,7 @@ public class NovelResponseDto {
     @Size(max = 300)
     private String description;
 
-    private NovelStatus status;
+    private NovelType type;
 
     private String authorName;
 

@@ -1,7 +1,6 @@
 package com.ham.netnovel.novel.dto;
 
-import com.ham.netnovel.novel.data.NovelStatus;
-import jakarta.validation.constraints.NotBlank;
+import com.ham.netnovel.novel.data.NovelType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -17,16 +16,13 @@ public class NovelUpdateDto {
     @NotNull
     private Long novelId;
 
-    @NotBlank
     @Size(max = 30)
     private String title;
 
     @Size(max = 300)
     private String description;
 
-    private NovelStatus status;
-
-//    private String authorProviderId;
+    private NovelType type;
 
     private String accessorProviderId;
 }

@@ -1,8 +1,10 @@
 package com.ham.netnovel.novel;
 
+import com.ham.netnovel.comment.CommentStatus;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.data.NovelStatus;
+import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import jakarta.persistence.*;
@@ -30,6 +32,10 @@ public class Novel {
 
     //연재 상태 Enum 사용
     @Enumerated(EnumType.STRING)
+    private NovelType type;
+
+    //삭제 처리 상태 Enum 사용
+    @Enumerated(EnumType.STRING)
     private NovelStatus status;
 
     //작가
@@ -41,18 +47,24 @@ public class Novel {
     private List<Episode> episodes = new ArrayList<>();
 
     @Builder
-    public Novel(String title, String description, NovelStatus status, Member author) {
+    public Novel(String title, String description, Member author, NovelType type, NovelStatus status) {
         this.title = title;
         this.description = description;
-        this.status = status;
         this.author = author;
+        this.type = type;
+        this.status = status;
+    }
+
+    //댓글 엔티티 상태 변경
+    public  void changeStatus(NovelStatus status) {
+        this.status = status;
     }
 
     //댓글 엔티티 내용 변경
     public void updateNovel(NovelUpdateDto updateDto){
         this.title = updateDto.getTitle();
         this.description = updateDto.getDescription();
-        this.status = updateDto.getStatus();
+        this.type = updateDto.getType();
     }
 
     public NovelResponseDto parseResponseDto() {
@@ -61,7 +73,7 @@ public class Novel {
                 .title(this.title)
                 .description(this.description)
                 .authorName(this.author.getNickName())
-                .status(this.status)
+                .type(this.type)
                 .view(episodes.stream().mapToInt(epi->epi.getView()).sum())
                 .episodeAmount(episodes.size())
                 .build();
