@@ -6,6 +6,7 @@ import com.ham.netnovel.reComment.dto.ReCommentCreateDto;
 import com.ham.netnovel.reComment.dto.ReCommentDeleteDto;
 import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import com.ham.netnovel.reComment.dto.ReCommentUpdateDto;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +54,7 @@ public interface ReCommentService {
      * @param providerId
      * @return
      */
-    List<MemberCommentDto> getMemberReCommentList(String providerId);
+    List<MemberCommentDto> getMemberReCommentList(String providerId, Pageable pageable);
 
 
 

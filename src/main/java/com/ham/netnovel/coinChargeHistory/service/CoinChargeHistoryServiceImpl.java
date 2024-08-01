@@ -7,6 +7,7 @@ import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.service.MemberService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,10 +68,10 @@ public class CoinChargeHistoryServiceImpl implements CoinChargeHistoryService {
     }
 
     @Override
-    public List<MemberCoinChargeDto> getCoinChargeHistoryByMember(String providerId) {
+    public List<MemberCoinChargeDto> getCoinChargeHistoryByMember(String providerId, Pageable pageable) {
         try {
             //유저 정보로 DB에서 CoinChargeHistory 레코드를 찾아 DTO로 변환
-            return coinChargeHistoryRepository.findByMemberProviderId(providerId)
+            return coinChargeHistoryRepository.findByMemberProviderId(providerId,pageable)
                     .stream()
                     .map(coinChargeHistory -> MemberCoinChargeDto.builder()
                             .payment(coinChargeHistory.getPayment())

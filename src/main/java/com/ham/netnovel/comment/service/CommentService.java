@@ -6,6 +6,7 @@ import com.ham.netnovel.comment.dto.CommentDeleteDto;
 import com.ham.netnovel.comment.dto.CommentEpisodeListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.member.dto.MemberCommentDto;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,8 +16,8 @@ public interface CommentService {
 
     /**
      * commentId 값으로 DB에서 정보를 가져오는 메서드, 사용시 Null체크 필수
-     * @param commentId
-     * @return
+     * @param commentId 댓글의 ID 값
+     * @return Optional Comment 엔티티 Optional로 감싸 반환
      */
     Optional<Comment> getComment(Long commentId);
 
@@ -44,10 +45,10 @@ public interface CommentService {
 
     /**
      * 유저가 작성한 댓글을 DB에서 찾아 반환하는 메서드
-     * @param providerId
+     * @param providerId 유저 정보
      * @return
      */
-    List<MemberCommentDto> getMemberCommentList(String providerId);
+    List<MemberCommentDto> getMemberCommentList(String providerId,Pageable pageable);
 
 
 
@@ -56,7 +57,7 @@ public interface CommentService {
      * @param episodeId episode의 PK값
      * @return CommentEpisodeListDto List 형태로 반환
      */
-    List<CommentEpisodeListDto> getEpisodeCommentListByRecent(Long episodeId);
+    List<CommentEpisodeListDto> getEpisodeCommentListByRecent(Long episodeId, Pageable pageable);
 
 
     /**
@@ -64,7 +65,7 @@ public interface CommentService {
      * @param episodeId episode의 PK값
      * @return CommentEpisodeListDto List 형태로 반환
      */
-    List<CommentEpisodeListDto> getEpisodeCommentListByLikes(Long episodeId);
+    List<CommentEpisodeListDto> getEpisodeCommentListByLikes(Long episodeId, Pageable pageable);
 
 
 
@@ -73,14 +74,14 @@ public interface CommentService {
      * @param novelId Novel 의 PK 값
      * @return List 댓글과 대댓글 정보를 담은 DTO List
      */
-    List<CommentEpisodeListDto> getNovelCommentListByRecent(Long novelId);
+    List<CommentEpisodeListDto> getNovelCommentListByRecent(Long novelId,Pageable pageable);
 
     /**
      * Novel에 달린 댓글과 대댓글을 좋아요 순으로 반환하는 메서드
      * @param novelId Novel 의 PK 값
      * @return List 댓글과 대댓글 정보를 담은 DTO List
      */
-    List<CommentEpisodeListDto> getNovelCommentListByLikes(Long novelId);
+    List<CommentEpisodeListDto> getNovelCommentListByLikes(Long novelId, Pageable pageable);
 
 
 

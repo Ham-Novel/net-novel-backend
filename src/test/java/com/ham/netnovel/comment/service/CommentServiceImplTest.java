@@ -9,6 +9,8 @@ import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -80,8 +82,9 @@ class CommentServiceImplTest {
     @Test
     public void getEpisodeCommentListByRecent() {
         System.out.println("댓글 불러오기 테스트");
+        Pageable pageable = PageRequest.of(1, 10);
 
-        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByRecent(2310L);
+        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByRecent(2310L,pageable);
 //        List<CommentEpisodeListDto> commentList = commentService.getCommentList(909090909L);//존재하지 않는 에피소드 테스트, 빈리스트 반환됨
 
         printCommentAndReCommentInfo(commentList);
@@ -93,7 +96,8 @@ class CommentServiceImplTest {
     @Test
     void getEpisodeCommentListByLikes() {
         Long episodeId = 2310L;
-        List<CommentEpisodeListDto> episodeCommentListByLikes = commentService.getEpisodeCommentListByLikes(episodeId);
+        Pageable pageable = PageRequest.of(0, 10);
+        List<CommentEpisodeListDto> episodeCommentListByLikes = commentService.getEpisodeCommentListByLikes(episodeId,pageable);
 
         //출력 테스트
         printCommentAndReCommentInfo(episodeCommentListByLikes);
@@ -106,12 +110,13 @@ class CommentServiceImplTest {
     @Test
     public void getMemberCommentList() {
 
-
         String providerId = "";
         //댓글을 작성한적이 없는 유저 테스트
 //        String providerId= "ttt";
 
-        List<MemberCommentDto> memberCommentList = commentService.getMemberCommentList(providerId);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<MemberCommentDto> memberCommentList = commentService.getMemberCommentList(providerId,pageable);
 
         if (memberCommentList.isEmpty()) {
             System.out.println("비었음");
@@ -132,7 +137,9 @@ class CommentServiceImplTest {
     public void getNovelCommentListRecent() {
         Long novelId = 1L;
 //        Long novelId =7L;
-        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByRecent(novelId);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByRecent(novelId,pageable);
         //출력 테스트
         printCommentAndReCommentInfo(novelCommentList);
     }
@@ -143,7 +150,10 @@ class CommentServiceImplTest {
     void getNovelCommentListByLikes() {
         Long novelId = 1L;
 //        Long novelId =7L;
-        List<CommentEpisodeListDto> novelCommentListByLikes = commentService.getNovelCommentListByLikes(novelId);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<CommentEpisodeListDto> novelCommentListByLikes = commentService.getNovelCommentListByLikes(novelId,pageable);
 
         printCommentAndReCommentInfo(novelCommentListByLikes);
 
@@ -152,6 +162,7 @@ class CommentServiceImplTest {
     //댓글,대댓글 정보 출력 테스트용 메서드
     private void printCommentAndReCommentInfo(List<CommentEpisodeListDto> list) {
 
+        System.out.println("조회된 댓글의 수 = "+list.size());
         for (CommentEpisodeListDto dto : list) {
             System.out.println("*******댓글 정보********");
             System.out.println("에피소드 제목= " + dto.getEpisodeTitle());

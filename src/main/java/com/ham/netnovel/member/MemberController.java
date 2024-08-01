@@ -2,6 +2,7 @@ package com.ham.netnovel.member;
 
 
 import com.ham.netnovel.OAuth.CustomOAuth2User;
+import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.member.dto.*;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.service.MemberService;
@@ -9,6 +10,7 @@ import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,14 +43,15 @@ public class MemberController {
 
     /**
      * 마이페이지 GET 요청시 유저 정보를 전달하는 API
+     *
      * @param authentication 유저의 인증 정보
-     * @return  ResponseEntity 유저 정보 담은 응답 객체
+     * @return ResponseEntity 유저 정보 담은 응답 객체
      */
     @GetMapping("/mypage")
     @ResponseBody
     public ResponseEntity<?> showMyPage(
             Authentication authentication
-    ){
+    ) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
@@ -62,6 +65,7 @@ public class MemberController {
 
     /**
      * 유저의 닉네임을 수정하는 API
+     *
      * @param changeNickNameDto 닉네임 변경을 위한 DTO, 유저의 providerId 값과 새로운 닉네임 값을 멤버변수로 가짐
      * @param bindingResult     ChangeNickNameDto 검증 에러를 담는 객체
      * @param authentication    유저의 인증 정보
@@ -121,19 +125,18 @@ public class MemberController {
      * @return ResponseEntity 댓글과 대댓글의 정보 리스트를 담은 응답 객체
      */
     @PostMapping("/comment")
-    public ResponseEntity<?> postMemberCommentList(Authentication authentication) {
+    public ResponseEntity<?> postMemberCommentList(Authentication authentication,
+                                                   @RequestParam(defaultValue = "0") int pageNumber,
+                                                   @RequestParam(defaultValue = "10") int pageSize) {
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
+        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //유저가 작성한 댓글,대댓글 정보를 DB에서 받아와 DTO 형태로 변환(최근에 작성한 댓글이 index 앞에 위치)
-        List<MemberCommentDto> commentList = memberMyPageService.getMemberCommentAndReCommentList(principal.getName());
-
-        for (MemberCommentDto memberCommentDto : commentList) {
-            log.info("정보{}", memberCommentDto.toString());
-
-        }
-
+        List<MemberCommentDto> commentList = memberMyPageService.getMemberCommentAndReCommentList(principal.getName(),pageable);
+        
         //클라이언트로 정보 전송
         return ResponseEntity.ok(commentList);
 
@@ -143,6 +146,7 @@ public class MemberController {
 
     /**
      * 유저가 좋아요 누른 소설 리스트를 전송하는 API
+     *
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 유저가 좋아요를 누른 소설 리스트를 담은 응답 객체
      */
@@ -163,16 +167,22 @@ public class MemberController {
 
     /**
      * 유저가 코인 사용 기록 열람을 요청하면, body에 담아 전송하는 API
+     *
      * @param authentication 유저의 인정 정보
      * @return ResponseEntity 데이터를 List에 담아 반환
      */
     @PostMapping("/coin-use-history")
-    public ResponseEntity<?> postMemberCoinUseHistory(Authentication authentication) {
+    public ResponseEntity<?> postMemberCoinUseHistory(Authentication authentication,
+                                                      @RequestParam(defaultValue = "0") int pageNumber,
+                                                      @RequestParam(defaultValue = "10") int pageSize) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
+        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+
         //유저 코인 사용 기록 조회
-        List<MemberCoinUseHistoryDto> coinUseHistory = memberMyPageService.getMemberCoinUseHistory(principal.getName());
+        List<MemberCoinUseHistoryDto> coinUseHistory = memberMyPageService.getMemberCoinUseHistory(principal.getName(), pageable);
 
         //정보 전송
         return ResponseEntity.ok(coinUseHistory);
@@ -181,15 +191,19 @@ public class MemberController {
 
     /**
      * 유저가 코인 충전 기록 열람을 요청하면, body에 담아 전송하는 API
+     *
      * @param authentication 유저의 인정 정보
      * @return ResponseEntity 데이터를 List에 담아 반환
      */
     @PostMapping("/coin-charge-history")
-    public ResponseEntity<List<MemberCoinChargeDto>> postMemberCoinChargeHistory(Authentication authentication){
+    public ResponseEntity<List<MemberCoinChargeDto>> postMemberCoinChargeHistory(Authentication authentication, @RequestParam(defaultValue = "0") int pageNumber,
+                                                                                 @RequestParam(defaultValue = "10") int pageSize) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //유저 코인 충전 기록 조회
-        List<MemberCoinChargeDto> memberCoinChargeHistory = memberMyPageService.getMemberCoinChargeHistory(principal.getName());
+        List<MemberCoinChargeDto> memberCoinChargeHistory = memberMyPageService.getMemberCoinChargeHistory(principal.getName(),pageable);
         //정보 전송
         return ResponseEntity.ok(memberCoinChargeHistory);
 
@@ -232,7 +246,6 @@ public class MemberController {
         return "ok";
 
     }
-
 
 
 }
