@@ -4,7 +4,7 @@ package com.ham.netnovel.episode;
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.episode.dto.EpisodeDataDto;
 import com.ham.netnovel.coinUseHistory.CoinUseHistory;
-import com.ham.netnovel.episodeCostPolicy.EpisodeCostPolicy;
+import com.ham.netnovel.coinCostPolicy.CoinCostPolicy;
 import com.ham.netnovel.novel.Novel;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -64,7 +64,7 @@ public class Episode {
     //EpisodeCostPolicy 테이블 연결
     @ManyToOne(fetch = FetchType.LAZY ,cascade = CascadeType.ALL)
     @JoinColumn(name = "coin_cost_policy_id")
-    private EpisodeCostPolicy costPolicy;
+    private CoinCostPolicy coinCostPolicy;
 
     @OneToMany(mappedBy = "episode")
     private List<Comment> comments = new ArrayList<>();

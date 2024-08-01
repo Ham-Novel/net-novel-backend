@@ -1,7 +1,7 @@
-package com.ham.netnovel.episodeCostPolicy;
+package com.ham.netnovel.coinCostPolicy;
 
 import com.ham.netnovel.episode.Episode;
-import com.ham.netnovel.episodeCostPolicy.data.RangeFrom;
+import com.ham.netnovel.coinCostPolicy.data.RangeFrom;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-public class EpisodeCostPolicy {
+public class CoinCostPolicy {
 
     //인조키
     @Id
