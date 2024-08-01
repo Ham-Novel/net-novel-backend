@@ -12,6 +12,7 @@ import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 import com.ham.netnovel.novel.service.NovelService;
 import com.ham.netnovel.reComment.service.ReCommentService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -49,13 +50,13 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
 
 
     @Override
-    public List<MemberCommentDto> getMemberCommentAndReCommentList(String providerId) {
+    public List<MemberCommentDto> getMemberCommentAndReCommentList(String providerId,Pageable pageable) {
         // 두 개의 스트림을 합치고 정렬한 후 리스트로 변환하여 반환
         return Stream.concat(
                         //댓글(comment) List를 가져와 stream 생성
-                        commentService.getMemberCommentList(providerId).stream(),
+                        commentService.getMemberCommentList(providerId,pageable).stream(),
                         //대댓글(reComment) List를 가져와 stream 생성
-                        reCommentService.getMemberReCommentList(providerId).stream()
+                        reCommentService.getMemberReCommentList(providerId,pageable).stream()
                 )
                 //멤버변수인 생성 시간을 기준으로 재정렬
                 .sorted(Comparator.comparing(MemberCommentDto::getCreateAt).reversed())
@@ -81,27 +82,24 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
     }
 
     @Override
-    public List<MemberCoinUseHistoryDto> getMemberCoinUseHistory(String providerId) {
+    public List<MemberCoinUseHistoryDto> getMemberCoinUseHistory(String providerId, Pageable pageable) {
         //유저 providerId 유효성 검사
         validateProviderId(providerId, "getMemberCoinUseHistory");
-        return coinUseHistoryService.getMemberCoinUseHistory(providerId);
+
+        return coinUseHistoryService.getMemberCoinUseHistory(providerId,pageable);
 
     }
 
     @Override
-    public List<MemberCoinChargeDto> getMemberCoinChargeHistory(String providerId) {
+    public List<MemberCoinChargeDto> getMemberCoinChargeHistory(String providerId, Pageable pageable) {
 
-        log.info("진입");
         //유저 providerId 유효성 검사
         validateProviderId(providerId, "getMemberCoinChargeHistory");
-
         //유저 정보로 코인 충전 기록을 List로 가져와 반환
-
-        return coinChargeHistoryService.getCoinChargeHistoryByMember(providerId)
+        return coinChargeHistoryService.getCoinChargeHistoryByMember(providerId,pageable)
                 .stream()
                 .sorted(Comparator.comparing(MemberCoinChargeDto::getCreatedAt).reversed())//날짜순으로 정렬(최신 기록이 index 앞에위치)
                 .collect(Collectors.toList());
-
     }
 
     /**

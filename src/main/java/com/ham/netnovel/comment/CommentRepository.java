@@ -1,5 +1,6 @@
 package com.ham.netnovel.comment;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,7 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
     @Query("select c from Comment c " +
             "join fetch c.member m " +
             "where c.episode.id =:episodeId")
-    List<Comment> findByEpisodeId(@Param("episodeId")Long episodeId);
+    List<Comment> findByEpisodeId(@Param("episodeId")Long episodeId,Pageable pageable);
 
 
     /**
@@ -24,7 +25,7 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
             "join fetch c.member m " +
             "where m.providerId =:providerId " +
             "order by c.createdAt DESC ")//생성 날짜 내림차순 정렬(최신글이 위로오게설정)
-    List<Comment> findByMember(@Param("providerId")String providerId);
+    List<Comment> findByMember(@Param("providerId")String providerId,Pageable pageable);
 
 
     /**
@@ -36,7 +37,7 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
             "join fetch c.episode e " +
             "join fetch c.member m " +
             "where e.novel.id = :novelId")
-    List<Comment> findByNovel(@Param("novelId")Long novelId);
+    List<Comment> findByNovel(@Param("novelId")Long novelId, Pageable pageable);
 
 
 

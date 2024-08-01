@@ -17,6 +17,7 @@ import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,11 +139,11 @@ public class CommentServiceImpl implements CommentService {
     //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
-    public List<MemberCommentDto> getMemberCommentList(String providerId) {
+    public List<MemberCommentDto> getMemberCommentList(String providerId,Pageable pageable) {
 
         try {
             //유저가 작성한 댓글이 있으면, DTO로 변환해서 반환
-            return commentRepository.findByMember(providerId)
+            return commentRepository.findByMember(providerId,pageable)
                     .stream()
                     .map(comment -> MemberCommentDto.builder()
                             .type(CommentType.COMMENT)//타입지정
@@ -166,10 +167,10 @@ public class CommentServiceImpl implements CommentService {
     //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
-    public List<CommentEpisodeListDto> getEpisodeCommentListByRecent(Long episodeId) {
+    public List<CommentEpisodeListDto> getEpisodeCommentListByRecent(Long episodeId,Pageable pageable) {
 
         try {
-            return commentRepository.findByEpisodeId(episodeId)
+            return commentRepository.findByEpisodeId(episodeId,pageable)
                     .stream()
                     //엔티티 DTO로 convert
                     .map(this::convertToCommentEpisodeListDto)
@@ -186,9 +187,9 @@ public class CommentServiceImpl implements CommentService {
     //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
-    public List<CommentEpisodeListDto> getEpisodeCommentListByLikes(Long episodeId) {
+    public List<CommentEpisodeListDto> getEpisodeCommentListByLikes(Long episodeId,Pageable pageable) {
         try {
-            return commentRepository.findByEpisodeId(episodeId)
+            return commentRepository.findByEpisodeId(episodeId,pageable)
                     .stream()
                     //엔티티 DTO로 convert
                     .map(this::convertToCommentEpisodeListDto)
@@ -206,9 +207,9 @@ public class CommentServiceImpl implements CommentService {
     //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
-    public List<CommentEpisodeListDto> getNovelCommentListByRecent(Long novelId) {
+    public List<CommentEpisodeListDto> getNovelCommentListByRecent(Long novelId,Pageable pageable) {
         try {
-            return commentRepository.findByNovel(novelId).stream()
+            return commentRepository.findByNovel(novelId,pageable).stream()
                 //엔티티 DTO로 convert
                 .map(this::convertToCommentEpisodeListDto)
                 //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
@@ -224,9 +225,9 @@ public class CommentServiceImpl implements CommentService {
     //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
-    public List<CommentEpisodeListDto> getNovelCommentListByLikes(Long novelId) {
+    public List<CommentEpisodeListDto> getNovelCommentListByLikes(Long novelId, Pageable pageable) {
         try {
-            return commentRepository.findByNovel(novelId).stream()
+            return commentRepository.findByNovel(novelId,pageable).stream()
                     //엔티티 DTO로 convert
                     .map(this::convertToCommentEpisodeListDto)
                     //좋아요 순으로 정렬, 기본값은 오름차순 정렬이므로 reversed 추가

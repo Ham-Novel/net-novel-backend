@@ -16,6 +16,7 @@ import com.ham.netnovel.reComment.dto.ReCommentDeleteDto;
 import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import com.ham.netnovel.reComment.dto.ReCommentUpdateDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -162,11 +163,11 @@ public class ReCommentServiceImpl implements ReCommentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MemberCommentDto> getMemberReCommentList(String providerId) {
+    public List<MemberCommentDto> getMemberReCommentList(String providerId, Pageable pageable) {
 
         try {
             //유저가 작성한 대댓글이 있으면, DTO로 변환해서 반환
-            return reCommentRepository.findByMember(providerId)
+            return reCommentRepository.findByMember(providerId,pageable)
                     .stream()
                     .map(reComment -> MemberCommentDto.builder()
                             .type(CommentType.RECOMMENT)//타입지정

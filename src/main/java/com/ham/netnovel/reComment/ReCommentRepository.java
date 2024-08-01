@@ -1,5 +1,6 @@
 package com.ham.netnovel.reComment;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,7 +18,7 @@ public interface ReCommentRepository extends JpaRepository<ReComment, Long> {
     @Query("select r from ReComment  r " +
             "where r.member.providerId =:providerId " +
             "order by r.createdAt desc ")
-    List<ReComment> findByMember(@Param("providerId")String providerId);
+    List<ReComment> findByMember(@Param("providerId")String providerId, Pageable pageable);
 
 
 

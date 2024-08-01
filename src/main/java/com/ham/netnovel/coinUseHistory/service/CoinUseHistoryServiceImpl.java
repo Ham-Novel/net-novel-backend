@@ -10,6 +10,8 @@ import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,9 +64,9 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MemberCoinUseHistoryDto> getMemberCoinUseHistory(String providerId) {
+    public List<MemberCoinUseHistoryDto> getMemberCoinUseHistory(String providerId, Pageable pageable) {
         try {
-            return coinUseHistoryRepository.findByMemberProviderId(providerId)
+            return coinUseHistoryRepository.findByMemberProviderId(providerId,pageable)
                     .stream()//유저의 코인 사용 기록을 받아와 stream 생성
                     .map(coinUseHistory -> {//엔티티 정보 DTO에 바인딩
                                 Episode episode = coinUseHistory.getEpisode();

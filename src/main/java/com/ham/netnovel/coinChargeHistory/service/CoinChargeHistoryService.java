@@ -2,6 +2,7 @@ package com.ham.netnovel.coinChargeHistory.service;
 
 import com.ham.netnovel.coinChargeHistory.dto.CoinChargeCreateDto;
 import com.ham.netnovel.member.dto.MemberCoinChargeDto;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public interface CoinChargeHistoryService {
     * @param providerId 유저 정보
     * @return List MemberCoinChargeDto 로 변환해서 반환
     */
-   List<MemberCoinChargeDto> getCoinChargeHistoryByMember(String providerId);
+   List<MemberCoinChargeDto> getCoinChargeHistoryByMember(String providerId, Pageable pageable);
 
 
 }

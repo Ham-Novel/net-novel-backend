@@ -8,11 +8,13 @@ import com.ham.netnovel.comment.dto.CommentEpisodeListDto;
 import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.common.utils.Authenticator;
+import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -158,15 +160,20 @@ public class CommentController {
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
     @PostMapping("/episode/recent")
-    public ResponseEntity<?> postEpisodeCommentsByRecent(@RequestBody Map<String, String> requestBody) {
+    public ResponseEntity<?> postEpisodeCommentsByRecent(@RequestBody Map<String, String> requestBody,
+                                                         @RequestParam(defaultValue = "0") int pageNumber,
+                                                         @RequestParam(defaultValue = "10") int pageSize) {
         //클라이언트에서 보낸 episodeId값 객체에 저장
         String episodeIdStr = requestBody.get("episodeId");
 
         //episodeId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
         Long episodeId = TypeValidationUtil.validateLong(episodeIdStr);
 
+        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+
         //episode 에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 최신순으로 정렬
-        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByRecent(episodeId);
+        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByRecent(episodeId,pageable);
 
         //클라이언트에 댓글,대댓글 정보 전송
         return ResponseEntity.ok(commentList);
@@ -181,14 +188,19 @@ public class CommentController {
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
     @PostMapping("/episode/likes")
-    public ResponseEntity<?> postEpisodeCommentsByLikes(@RequestBody Map<String, String> requestBody){
+    public ResponseEntity<?> postEpisodeCommentsByLikes(@RequestBody Map<String, String> requestBody,
+                                                        @RequestParam(defaultValue = "0") int pageNumber,
+                                                        @RequestParam(defaultValue = "10") int pageSize){
         //클라이언트에서 보낸 episodeId값 객체에 저장
         String episodeIdStr = requestBody.get("episodeId");
         //episodeId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
         Long episodeId = TypeValidationUtil.validateLong(episodeIdStr);
 
+        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+
         //episode 에 달린 댓글,대댓글 정보를 List에 담음 댓글은 좋아요 순으로 정렬
-        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByLikes(episodeId);
+        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByLikes(episodeId,pageable);
 
         //클라이언트에 댓글,대댓글 정보 전송
         return ResponseEntity.ok(commentList);
@@ -202,7 +214,9 @@ public class CommentController {
      * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
      */
     @PostMapping("/novel/recent")
-    public ResponseEntity<List<CommentEpisodeListDto>> postNovelCommentsRecent(@RequestBody Map<String, String> requestBody) {
+    public ResponseEntity<List<CommentEpisodeListDto>> postNovelCommentsRecent(@RequestBody Map<String, String> requestBody,
+                                                                               @RequestParam(defaultValue = "0") int pageNumber,
+                                                                               @RequestParam(defaultValue = "10") int pageSize) {
 
         //클라이언트에서 보낸 novelId값 객체에 저장
         String novelIdStr = requestBody.get("novelId");
@@ -210,8 +224,11 @@ public class CommentController {
         //novelId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
         Long novelId = TypeValidationUtil.validateLong(novelIdStr);
 
+        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+
         //Novel의 Episode 에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 최신순으로 정렬
-        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByRecent(novelId);
+        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByRecent(novelId,pageable);
 
         //클라이언트에 댓글,대댓글 정보 전송
         return ResponseEntity.ok(novelCommentList);
@@ -225,16 +242,20 @@ public class CommentController {
      * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
      */
     @PostMapping("/novel/likes")
-    public ResponseEntity<List<CommentEpisodeListDto>> postNovelCommentsLikes(@RequestBody Map<String, String> requestBody) {
-
+    public ResponseEntity<List<CommentEpisodeListDto>> postNovelCommentsLikes(@RequestBody Map<String, String> requestBody,
+                                                                              @RequestParam(defaultValue = "0") int pageNumber,
+                                                                              @RequestParam(defaultValue = "10") int pageSize) {
         //클라이언트에서 보낸 novelId값 객체에 저장
         String novelIdStr = requestBody.get("novelId");
 
         //novelId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
         Long novelId = TypeValidationUtil.validateLong(novelIdStr);
 
+        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+
         //Novel의 Episode 에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 좋아요 순으로 정렬
-        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByLikes(novelId);
+        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByLikes(novelId,pageable);
 
         //클라이언트에 댓글,대댓글 정보 전송
         return ResponseEntity.ok(novelCommentList);
