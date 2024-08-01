@@ -1,6 +1,10 @@
 package com.ham.netnovel.member.service;
 
+import com.ham.netnovel.member.OAuthProvider;
+import com.ham.netnovel.member.data.Gender;
+import com.ham.netnovel.member.data.MemberRole;
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
+import com.ham.netnovel.member.dto.MemberCreateDto;
 import com.ham.netnovel.member.dto.MemberMyPageDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +38,7 @@ class MemberServiceImplTest {
         changeNickNameDto.setNewNickName("변경@테스트");
 
 
-        changeNickNameDto.setProviderId("UEqG1Al3FwPQTqDy6tfFb2MGZyEUd-weiJUzyxnkJhM");
+        changeNickNameDto.setProviderId("test1");
         memberService.updateMemberNickName(changeNickNameDto);
 
 
@@ -75,4 +79,38 @@ class MemberServiceImplTest {
         System.out.println(memberMyPageInfo.toString());
 
     }
+
+
+    //유저 생성 테스트
+    //테스트 성공
+    @Test
+    public void createNewMember(){
+
+        String email = "test";
+        String nickName = "testName";
+        String providerId = "test";
+
+
+        //100명 유저 생성 테스트
+        for (int i = 100; i<=200; i++){
+
+            MemberCreateDto build = MemberCreateDto.builder()
+                    .email(email + i + "@naver.com")
+                    .role(MemberRole.READER)
+                    .gender(Gender.MALE)
+                    .nickName(nickName + i)
+                    .providerId(providerId + i)
+                    .provider(OAuthProvider.NAVER)
+                    .build();
+
+            memberService.createNewMember(build);
+
+        }
+
+
+
+
+
+    }
+
 }

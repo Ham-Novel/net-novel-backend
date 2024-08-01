@@ -7,6 +7,7 @@ import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
+import com.ham.netnovel.novelAverageRating.NovelAverageRating;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -45,6 +46,9 @@ public class Novel {
 
     @OneToMany(mappedBy = "novel")
     private List<Episode> episodes = new ArrayList<>();
+
+    @OneToOne(mappedBy = "novel")
+    private NovelAverageRating novelAverageRating;
 
     @Builder
     public Novel(String title, String description, Member author, NovelType type, NovelStatus status) {

@@ -59,4 +59,12 @@ public interface NovelService {
      * @return List<Novel>
      */
     List<Novel> getFavoriteNovels(String providerId);
+
+    /**
+     * 별점 점수가 있는 Novel의 id값들을 List로 반환하는 메서드
+     * @return List Long 타입으로 반환
+     */
+    List<Long> getRatedNovelIds();
+
+
 }
