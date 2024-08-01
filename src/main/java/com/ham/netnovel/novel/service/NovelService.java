@@ -26,6 +26,7 @@ public interface NovelService {
 
     /**
      * novelId 값으로 DB에서 Novel 엔티티 반환. 외부에서 Null 체크 필요.
+     * Service 계층에서 Novel 엔티티를 받아야하는 용도. 절대로 다른 계층에서 사용 금지.
      * @param novelId Novel의 PK값
      * @return Optional<Novel>
      */

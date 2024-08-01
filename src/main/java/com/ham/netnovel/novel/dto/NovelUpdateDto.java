@@ -24,7 +24,5 @@ public class NovelUpdateDto {
 
     private NovelType type;
 
-//    private String authorProviderId;
-
     private String accessorProviderId;
 }

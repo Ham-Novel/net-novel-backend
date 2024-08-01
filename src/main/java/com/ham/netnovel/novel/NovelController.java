@@ -4,7 +4,6 @@ import com.ham.netnovel.OAuth.CustomOAuth2User;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.episode.service.EpisodeService;
-import com.ham.netnovel.member.dto.MemberMyPageDto;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
@@ -12,12 +11,10 @@ import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novel.service.NovelService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -33,6 +30,12 @@ public class NovelController {
         this.authenticator = authenticator;
     }
 
+    /**
+     * 소설 상세 페이지에서 Novel 데이터 응답하는 API
+     * @param novelId novelId를 담은 url path variable
+     * @param authentication 유저의 인증 정보
+     * @return ResponseEntity NovelResponseDto로 Novel 데이터 반환.
+     */
     @GetMapping("/{novelId}")
     public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId,
                                                      Authentication authentication) {
@@ -49,6 +52,14 @@ public class NovelController {
         return null;
     }
 
+
+    /**
+     * 유저가 생성한 소설(Novel) 서버에 저장하는 API
+     * @param reqBody Novel 엔티티의 title, desc, providerId(유저 정보)를 담은 객체
+     * @param bindingResult DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
+     * @param authentication 유저의 인증 정보
+     * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
+     */
     @PostMapping
     public ResponseEntity<String> createNovel(@Valid @RequestBody NovelCreateDto reqBody,
                                                         BindingResult bindingResult,
@@ -71,6 +82,13 @@ public class NovelController {
         return ResponseEntity.ok("createNovel: " + result.toString());
     }
 
+    /**
+     * 유저가 소설(Novel)의 변경된 내용을 업데이트하는 API
+     * @param reqBody novelId, title, desc, providerId를 담은 객체
+     * @param bindingResult DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
+     * @param authentication 유저의 인증 정보
+     * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
+     */
     @PutMapping("/{novelId}")
     public ResponseEntity<String> updateNovel(@PathVariable("novelId") Long pathNovelId,
                                                         @Valid @RequestBody NovelUpdateDto reqBody,
@@ -100,6 +118,13 @@ public class NovelController {
         return ResponseEntity.ok("updateNovel: " + result.toString());
     }
 
+    /**
+     * 유저가 생성한 소설을 DELETE_BY_USER로 삭제 처리하는 API
+     * @param reqBody novelId, providerId를 담은 객체
+     * @param bindingResult DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
+     * @param authentication 유저의 인증 정보
+     * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
+     */
     @DeleteMapping("/{novelId}")
     public ResponseEntity<String> deleteNovel(@PathVariable("novelId") Long pathNovelId,
                                                         @Valid @RequestBody NovelDeleteDto reqBody,
