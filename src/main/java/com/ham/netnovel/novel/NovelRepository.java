@@ -16,4 +16,15 @@ public interface NovelRepository extends JpaRepository<Novel, Long> {
             "where fn.member.providerId =:providerId)")
     List<Novel> findFavoriteNovelsByMember(@Param("providerId") String providerId);
 
+
+
+
+    @Query("select distinct n " +
+            "from Novel n " +
+            "where n in " +
+            "(select r.novel from NovelRating r " +
+            "where r.rating is not null)")
+    List<Novel> findByNovelRating();
+
+
 }

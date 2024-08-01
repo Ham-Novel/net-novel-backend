@@ -19,6 +19,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -154,7 +155,26 @@ public class NovelServiceImpl implements NovelService {
 
 
         } catch (Exception ex) {//예외 발생시 처리
-            throw new ServiceMethodException("getMemberFavoriteNovels Error");
+            throw new ServiceMethodException("getFavoriteNovels 메서드 에러 발생" + ex.getMessage());
+        }
+
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> getRatedNovelIds() {
+
+
+        try {
+            return novelRepository.findByNovelRating()
+                    .stream()
+                    .map(Novel::getId)
+                    .collect(Collectors.toList());
+
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getRatedNovelIds 메서드 에러 발생" + ex.getMessage());
+
         }
 
 

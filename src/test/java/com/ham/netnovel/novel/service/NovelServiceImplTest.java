@@ -90,4 +90,15 @@ class NovelServiceImplTest {
 
 
     }
+
+
+    @Test
+    public void getRatedNovelIds(){
+        List<Long> ratedNovelIds = novelService.getRatedNovelIds();
+        for (Long ratedNovelId : ratedNovelIds) {
+            System.out.println("novelId ="+ratedNovelId);
+
+        }
+
+    }
 }
