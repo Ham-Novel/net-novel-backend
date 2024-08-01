@@ -1,7 +1,7 @@
 package com.ham.netnovel.coinCostPolicy;
 
 import com.ham.netnovel.episode.Episode;
-import com.ham.netnovel.coinCostPolicy.data.RangeFrom;
+import com.ham.netnovel.coinCostPolicy.data.PolicyRange;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CoinCostPolicy {
 
-    //인조키
-    @Id
+    @Id //인조키
     @GeneratedValue(strategy = GenerationType.IDENTITY) //auto_increment 자동 생성
     private Long id;
 
@@ -26,7 +25,7 @@ public class CoinCostPolicy {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RangeFrom rangeFrom;
+    private PolicyRange policyRange;
 
     @Column(nullable = false)
     private Integer rangeValue;
