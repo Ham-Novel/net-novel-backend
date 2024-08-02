@@ -26,7 +26,7 @@ public class CoinCostPolicy {
     private Integer coinCost;
 
     //해당 정책을 쓰는 에피소드 리스트
-    @OneToMany(mappedBy = "coinCostPolicy")
+    @OneToMany(mappedBy = "costPolicy")
     private List<Episode> episodes;
 
     //생성 메서드

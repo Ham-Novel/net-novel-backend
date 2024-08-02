@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
@@ -28,6 +29,18 @@ class NovelServiceImplTest {
 
     @Autowired
     NovelServiceImpl novelService;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    void setup() {
+        //DB records 전부 삭제
+        novelRepository.deleteAll();
+
+        //auto_increment id를 1부터 초기화.
+        String sql = "ALTER TABLE novel ALTER COLUMN id RESTART WITH 1";
+        jdbcTemplate.execute(sql);
+    }
 
     @Test
     void readTest() {
@@ -54,6 +67,7 @@ class NovelServiceImplTest {
     @Test
     void createTest() {
         //given
+        setup();
         NovelCreateDto createDto = NovelCreateDto.builder()
                 .title("소설1")
                 .description("Duis ea aliquip dolor sit dolore ut adipisicing eu tempor.")

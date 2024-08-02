@@ -74,14 +74,16 @@ public class EpisodeServiceImpl implements EpisodeService {
         Episode targetRecord = episodeRepository.findById(episodeUpdateDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("Episode 정보 없음"));
 
-        CoinCostPolicy dtoCostPolicy = costPolicyService.getPolicyEntity(episodeUpdateDto.getCostPolicyId())
-                .orElseThrow(() -> new NoSuchElementException("CoinCostPolicy 정보 없음"));
-
         try {
             //episodeUpdateDto에서 null값은 기존값 할당. 변경할 값만 입력하면 됨.
-            String updateTitle = (episodeUpdateDto.getTitle() != null) ? episodeUpdateDto.getTitle() : targetRecord.getTitle();
-            String updateContent = (episodeUpdateDto.getContent() != null) ? episodeUpdateDto.getContent() : targetRecord.getContent();
-            CoinCostPolicy updateCostPolicy = (episodeUpdateDto.getCostPolicyId() != null) ? dtoCostPolicy : targetRecord.getCostPolicy();
+            String updateTitle = (episodeUpdateDto.getTitle() != null)
+                    ? episodeUpdateDto.getTitle() : targetRecord.getTitle();
+            String updateContent = (episodeUpdateDto.getContent() != null)
+                    ? episodeUpdateDto.getContent() : targetRecord.getContent();
+            CoinCostPolicy updateCostPolicy = (episodeUpdateDto.getCostPolicyId() != null)
+                    ? costPolicyService.getPolicyEntity(episodeUpdateDto.getCostPolicyId())
+                    .orElseThrow(() -> new NoSuchElementException("CoinCostPolicy 정보 없음"))
+                    : targetRecord.getCostPolicy();
 
             targetRecord.updateEpisode(updateTitle, updateContent, updateCostPolicy);
             episodeRepository.save(targetRecord);
