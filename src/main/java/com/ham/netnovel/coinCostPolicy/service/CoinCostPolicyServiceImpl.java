@@ -18,7 +18,7 @@ public class CoinCostPolicyServiceImpl implements CoinCostPolicyService {
 
     private final CoinCostPolicyRepository coinCostPolicyRepository;
 
-    public CoinCostPolicyServiceImpl(CoinCostPolicyRepository coinCostPolicyRepository, EpisodeService episodeService) {
+    public CoinCostPolicyServiceImpl(CoinCostPolicyRepository coinCostPolicyRepository) {
         this.coinCostPolicyRepository = coinCostPolicyRepository;
     }
 
