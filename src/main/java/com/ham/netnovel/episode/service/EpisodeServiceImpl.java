@@ -36,7 +36,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional(readOnly = true)//읽기전용
-    public Optional<Episode> getEpisodeEntity(Long episodeId) {
+    public Optional<Episode> getEpisode(Long episodeId) {
         return episodeRepository.findById(episodeId);
     }
 

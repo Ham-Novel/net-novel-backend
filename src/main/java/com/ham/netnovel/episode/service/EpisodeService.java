@@ -15,7 +15,7 @@ public interface EpisodeService {
      * episodeId 값으로 DB에서 Entity 가져오는 메서드. 사용 시 Null 체크 필수.
      * @return Optional<Episode>
      */
-    Optional<Episode> getEpisodeEntity(Long episodeId);
+    Optional<Episode> getEpisode(Long episodeId);
 
     /**
      * Episode를 DB에 생성하는 메서드

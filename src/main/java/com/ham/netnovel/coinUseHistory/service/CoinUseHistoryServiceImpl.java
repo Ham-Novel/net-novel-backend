@@ -42,7 +42,7 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
                 .orElseThrow(() -> new NoSuchElementException("Member 정보가 없습니다. providerId: " + coinUseCreateDto.getProviderId()));
 
         //에피소드 정보 확인
-        Episode episode = episodeService.getEpisodeEntity(coinUseCreateDto.getEpisodeId())
+        Episode episode = episodeService.getEpisode(coinUseCreateDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("Episode 정보가 없습니다. episodeId: " + coinUseCreateDto.getEpisodeId()));
 
         try {
