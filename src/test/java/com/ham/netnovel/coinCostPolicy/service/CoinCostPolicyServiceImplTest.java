@@ -10,19 +10,36 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @SpringBootTest
 @Slf4j
 class CoinCostPolicyServiceImplTest {
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    CoinCostPolicyRepository repository;
 
     @Autowired
     CoinCostPolicyService service;
 
+    void setup() {
+        //DB records 전부 삭제
+        repository.deleteAll();
+
+        //auto_increment id를 1부터 초기화.
+        String sql = "ALTER TABLE coin_cost_policy ALTER COLUMN id RESTART WITH 1";
+        jdbcTemplate.execute(sql);
+    }
+
     @Test
     public void create() {
         //given
+        setup();
         CostPolicyCreateDto createDto = CostPolicyCreateDto.builder()
                 .name("무료")
                 .coinCost(1)
@@ -70,7 +87,8 @@ class CoinCostPolicyServiceImplTest {
         service.deletePolicy(deleteDto);
 
         //then
-        CoinCostPolicy policyEntity = service.getPolicyEntity(1L)
-                .orElseThrow(() -> new NoSuchElementException("없음"));
+        Optional<CoinCostPolicy> entity = service.getPolicyEntity(1L);
+        Assertions.assertThat(entity.isPresent()).isFalse();
+
     }
 }
