@@ -33,9 +33,4 @@ public interface CoinCostPolicyService {
      */
     void deletePolicy(CostPolicyDeleteDto costPolicyDeleteDto);
 
-    /**
-     * CoinCostPolicy의 제약 조건 Validate
-     */
-    void validatePolicy(Long costPolicyId, Integer episodeNumber);
-
 }
