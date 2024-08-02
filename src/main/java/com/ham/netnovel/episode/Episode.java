@@ -58,12 +58,12 @@ public class Episode {
     private EpisodeStatus status = EpisodeStatus.ACTIVE;
 
     //Novel 테이블 연결
-    @ManyToOne(fetch = FetchType.LAZY ,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "novel_id")
     private Novel novel;
 
     //EpisodeCostPolicy 테이블 연결
-    @ManyToOne(fetch = FetchType.LAZY ,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coin_cost_policy_id")
     private CoinCostPolicy costPolicy;
 
