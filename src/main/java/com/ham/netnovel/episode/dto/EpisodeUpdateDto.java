@@ -12,11 +12,10 @@ import lombok.ToString;
 @Builder
 public class EpisodeUpdateDto {
 
+    @NotNull
     private Long episodeId;
 
-    @NotNull
     private String title;
 
-    @NotNull
     private String content;
 }

@@ -6,7 +6,6 @@ import com.ham.netnovel.coinCostPolicy.dto.CostPolicyCreateDto;
 import com.ham.netnovel.coinCostPolicy.dto.CostPolicyDeleteDto;
 import com.ham.netnovel.coinCostPolicy.dto.CostPolicyUpdateDto;
 import com.ham.netnovel.common.exception.ServiceMethodException;
-import com.ham.netnovel.episode.service.EpisodeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +38,7 @@ public class CoinCostPolicyServiceImpl implements CoinCostPolicyService {
 
             coinCostPolicyRepository.save(newRecord);
         } catch(Exception ex) {
-            throw new ServiceMethodException("createPolicy 메서드 에러", ex.getCause());
+            throw new ServiceMethodException("createPolicy 메서드 에러 발생", ex.getCause());
         }
 
     }
@@ -48,7 +47,7 @@ public class CoinCostPolicyServiceImpl implements CoinCostPolicyService {
     @Transactional
     public void updatePolicy(CostPolicyUpdateDto costPolicyUpdateDto) {
         CoinCostPolicy targetRecord = coinCostPolicyRepository.findById(costPolicyUpdateDto.getId())
-                .orElseThrow(() -> new NoSuchElementException("CoinCostPolicy Record 없음"));
+                .orElseThrow(() -> new NoSuchElementException("CoinCostPolicy 정보 없음"));
 
         try {
             //Todo 변경할 property만 변경하도록 최적화
@@ -58,7 +57,7 @@ public class CoinCostPolicyServiceImpl implements CoinCostPolicyService {
 
             coinCostPolicyRepository.save(targetRecord);
         } catch(Exception ex) {
-            throw new ServiceMethodException("updatePolicy 메서드 에러", ex.getCause());
+            throw new ServiceMethodException("updatePolicy 메서드 에러 발생", ex.getCause());
         }
     }
 
@@ -66,12 +65,12 @@ public class CoinCostPolicyServiceImpl implements CoinCostPolicyService {
     @Transactional
     public void deletePolicy(CostPolicyDeleteDto costPolicyDeleteDto) {
         CoinCostPolicy targetRecord = coinCostPolicyRepository.findById(costPolicyDeleteDto.getId())
-                .orElseThrow(() -> new NoSuchElementException("CoinCostPolicy Record 없음"));
+                .orElseThrow(() -> new NoSuchElementException("CoinCostPolicy 정보 없음"));
 
         try {
             coinCostPolicyRepository.delete(targetRecord);
         } catch(Exception ex) {
-        throw new ServiceMethodException("deletePolicy 메서드 에러", ex.getCause());
+        throw new ServiceMethodException("deletePolicy 메서드 에러 발생", ex.getCause());
         }
     }
 }

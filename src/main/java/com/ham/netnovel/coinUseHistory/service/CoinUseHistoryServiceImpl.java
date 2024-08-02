@@ -10,14 +10,12 @@ import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -74,7 +72,7 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
                                         .episodeTitle(episode.getTitle())//에피소드 제목
                                         .createdAt(coinUseHistory.getCreatedAt())//결제 시간
                                         .usedCoin(coinUseHistory.getAmount())//사용한 코인수
-                                        .episodeNumber(episode.getEpisodeNumber())//에피소드 번호
+                                        .episodeNumber(episode.getChapter())//에피소드 번호
                                         .novelTitle(episode.getNovel().getTitle())//소설 제목
                                         .build();
                             }
