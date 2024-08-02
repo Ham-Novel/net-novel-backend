@@ -47,7 +47,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional
-    public EpisodeDataDto createEpisode(EpisodeCreateDto episodeCreateDto) {
+    public void createEpisode(EpisodeCreateDto episodeCreateDto) {
         Novel novelFrom = novelService.getNovelEntity(episodeCreateDto.getNovelId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Novel 입니다."));
 
@@ -57,28 +57,26 @@ public class EpisodeServiceImpl implements EpisodeService {
                 .novel(novelFrom)
                 .episodeNumber(novelFrom.getEpisodes().size()+1) //자동으로 넘버링 증가
                 .build();
-        return episodeRepository.save(targetEpisode).parseDataDto();
+        episodeRepository.save(targetEpisode);
     }
 
     @Override
     @Transactional
-    public EpisodeDataDto updateEpisode(EpisodeUpdateDto episodeUpdateDto) {
+    public void updateEpisode(EpisodeUpdateDto episodeUpdateDto) {
         Episode targetEpisode = episodeRepository.findById(episodeUpdateDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Episode입니다."));
 
         targetEpisode.updateEpisode(episodeUpdateDto.getTitle(), episodeUpdateDto.getContent());
-        return episodeRepository.save(targetEpisode).parseDataDto();
+        episodeRepository.save(targetEpisode);
     }
 
     @Override
     @Transactional
-    public EpisodeDataDto deleteEpisode(EpisodeDeleteDto episodeDeleteDto) {
+    public void deleteEpisode(EpisodeDeleteDto episodeDeleteDto) {
         Episode targetEpisode = episodeRepository.findById(episodeDeleteDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Episode입니다."));
 
         episodeRepository.deleteById(episodeDeleteDto.getEpisodeId());
-
-        return targetEpisode.parseDataDto();
     }
 
     @Override
@@ -86,7 +84,7 @@ public class EpisodeServiceImpl implements EpisodeService {
     public List<EpisodeDataDto> getEpisodesByNovel(Long novelId) {
         return episodeRepository.findByNovel(novelId)
                 .stream()
-                .map(episode -> episode.parseDataDto())
+                .map(Episode::parseDataDto)
                 .collect(Collectors.toList());
     }
 }

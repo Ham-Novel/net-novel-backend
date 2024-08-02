@@ -14,9 +14,9 @@ public interface EpisodeService {
 
     EpisodeDataDto getEpisode(Long episodeId);
     Optional<Episode> getEpisodeEntity(Long episodeId);
-    EpisodeDataDto createEpisode(EpisodeCreateDto episodeCreateDto);
-    EpisodeDataDto updateEpisode(EpisodeUpdateDto episodeUpdateDto);
-    EpisodeDataDto deleteEpisode(EpisodeDeleteDto episodeDeleteDto);
+    void createEpisode(EpisodeCreateDto episodeCreateDto);
+    void updateEpisode(EpisodeUpdateDto episodeUpdateDto);
+    void deleteEpisode(EpisodeDeleteDto episodeDeleteDto);
 
     List<EpisodeDataDto> getEpisodesByNovel(Long novelId);
 }

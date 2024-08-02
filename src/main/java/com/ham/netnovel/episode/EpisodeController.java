@@ -29,8 +29,9 @@ public class EpisodeController {
     }
 
     @PostMapping
-    public ResponseEntity<EpisodeDataDto> createEpisode(@Valid @RequestBody EpisodeCreateDto reqBody) {
-        return ResponseEntity.ok(episodeService.createEpisode(reqBody));
+    public ResponseEntity<String> createEpisode(@Valid @RequestBody EpisodeCreateDto reqBody) {
+        episodeService.createEpisode(reqBody);
+        return ResponseEntity.ok("Episode Create Execution");
     }
 
 }
