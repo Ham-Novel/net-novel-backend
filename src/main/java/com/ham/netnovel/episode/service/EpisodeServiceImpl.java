@@ -1,6 +1,8 @@
 package com.ham.netnovel.episode.service;
 
 
+import com.ham.netnovel.coinCostPolicy.CoinCostPolicy;
+import com.ham.netnovel.coinCostPolicy.service.CoinCostPolicyService;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
@@ -28,10 +30,12 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     private final EpisodeRepository episodeRepository;
     private final NovelService novelService;
+    private final CoinCostPolicyService costPolicyService;
 
-    public EpisodeServiceImpl(EpisodeRepository episodeRepository, NovelService novelService) {
+    public EpisodeServiceImpl(EpisodeRepository episodeRepository, NovelService novelService, CoinCostPolicyService costPolicyService) {
         this.episodeRepository = episodeRepository;
         this.novelService = novelService;
+        this.costPolicyService = costPolicyService;
     }
 
     @Override
@@ -43,15 +47,19 @@ public class EpisodeServiceImpl implements EpisodeService {
     @Override
     @Transactional
     public void createEpisode(EpisodeCreateDto episodeCreateDto) {
-        Novel novelData = novelService.getNovelEntity(episodeCreateDto.getNovelId())
+        Novel novelProperty = novelService.getNovelEntity(episodeCreateDto.getNovelId())
                 .orElseThrow(() -> new NoSuchElementException("Novel 정보 없음"));
+
+        CoinCostPolicy costPolicyProperty = costPolicyService.getPolicyEntity(episodeCreateDto.getCostPolicyId())
+                .orElseThrow(() -> new NoSuchElementException("CoinCostPolicy 정보 없음"));
 
         try {
             Episode targetRecord = Episode.builder()
                     .title(episodeCreateDto.getTitle())
                     .content(episodeCreateDto.getContent())
-                    .novel(novelData)
-                    .chapter(novelData.getEpisodes().size()+1) //자동으로 넘버링 증가
+                    .costPolicy(costPolicyProperty)
+                    .novel(novelProperty)
+                    .chapter(novelProperty.getEpisodes().size()+1) //자동으로 넘버링 증가
                     .build();
             episodeRepository.save(targetRecord);
         } catch (Exception ex) {
@@ -66,12 +74,16 @@ public class EpisodeServiceImpl implements EpisodeService {
         Episode targetRecord = episodeRepository.findById(episodeUpdateDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("Episode 정보 없음"));
 
+        CoinCostPolicy dtoCostPolicy = costPolicyService.getPolicyEntity(episodeUpdateDto.getCostPolicyId())
+                .orElseThrow(() -> new NoSuchElementException("CoinCostPolicy 정보 없음"));
+
         try {
             //episodeUpdateDto에서 null값은 기존값 할당. 변경할 값만 입력하면 됨.
             String updateTitle = (episodeUpdateDto.getTitle() != null) ? episodeUpdateDto.getTitle() : targetRecord.getTitle();
             String updateContent = (episodeUpdateDto.getContent() != null) ? episodeUpdateDto.getContent() : targetRecord.getContent();
+            CoinCostPolicy updateCostPolicy = (episodeUpdateDto.getCostPolicyId() != null) ? dtoCostPolicy : targetRecord.getCostPolicy();
 
-            targetRecord.updateEpisode(updateTitle, updateContent);
+            targetRecord.updateEpisode(updateTitle, updateContent, updateCostPolicy);
             episodeRepository.save(targetRecord);
         } catch (Exception ex) {
             //나머지 Repository 작업 예외 처리

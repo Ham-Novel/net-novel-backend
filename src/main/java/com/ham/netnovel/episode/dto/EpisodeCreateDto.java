@@ -19,4 +19,7 @@ public class EpisodeCreateDto {
 
     @NotNull
     private String content;
+
+    @NotNull
+    private Long costPolicyId;
 }

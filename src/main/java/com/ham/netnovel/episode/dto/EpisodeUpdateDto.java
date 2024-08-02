@@ -18,4 +18,6 @@ public class EpisodeUpdateDto {
     private String title;
 
     private String content;
+
+    private Long costPolicyId;
 }

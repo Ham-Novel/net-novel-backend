@@ -65,7 +65,7 @@ public class Episode {
     //EpisodeCostPolicy 테이블 연결
     @ManyToOne(fetch = FetchType.LAZY ,cascade = CascadeType.ALL)
     @JoinColumn(name = "coin_cost_policy_id")
-    private CoinCostPolicy coinCostPolicy;
+    private CoinCostPolicy costPolicy;
 
     //junction table 연결, 댓글
     @OneToMany(mappedBy = "episode")
@@ -76,17 +76,19 @@ public class Episode {
     private List<CoinUseHistory> coinUseHistories = new ArrayList<>();
 
     @Builder
-    public Episode(Integer chapter, String title, String content, Novel novel) {
+    public Episode(Integer chapter, String title, String content, Novel novel, CoinCostPolicy costPolicy) {
         this.chapter = chapter;
         this.title = title;
         this.content = content;
         this.novel = novel;
         this.view = 0;
+        this.costPolicy = costPolicy;
     }
 
-    public void updateEpisode(String title, String content) {
+    public void updateEpisode(String title, String content, CoinCostPolicy costPolicy) {
         this.title = title;
         this.content = content;
+        this.costPolicy = costPolicy;
     }
 
     public void changeStatus(EpisodeStatus status) {
