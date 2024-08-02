@@ -31,7 +31,7 @@ public class CoinCostPolicyServiceImpl implements CoinCostPolicyService {
     }
 
     @Override
-    public void createPolicy(CostPolicyCreateDto costPolicyCreateDto) {
+    public Long createPolicy(CostPolicyCreateDto costPolicyCreateDto) {
         try {
             CoinCostPolicy newRecord = CoinCostPolicy.builder()
                     .name(costPolicyCreateDto.getName())
@@ -40,7 +40,8 @@ public class CoinCostPolicyServiceImpl implements CoinCostPolicyService {
                     .rangeValue(costPolicyCreateDto.getRangeValue())
                     .build();
 
-            coinCostPolicyRepository.save(newRecord);
+            CoinCostPolicy save = coinCostPolicyRepository.save(newRecord);
+            return save.getId();
         } catch(Exception ex) {
             throw new ServiceMethodException("createPolicy 메서드 에러", ex.getCause());
         }

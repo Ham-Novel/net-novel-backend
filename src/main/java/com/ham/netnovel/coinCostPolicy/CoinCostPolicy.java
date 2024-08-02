@@ -36,7 +36,7 @@ public class CoinCostPolicy {
     @Column(nullable = false)
     private PolicyDBStatus status = PolicyDBStatus.ACTIVE;
 
-    @OneToMany(mappedBy = "episode")
+    @OneToMany(mappedBy = "coinCostPolicy")
     private List<Episode> episodes;
 
     //생성 메서드

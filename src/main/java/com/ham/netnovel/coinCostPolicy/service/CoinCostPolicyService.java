@@ -18,8 +18,9 @@ public interface CoinCostPolicyService {
 
     /**
      * 가격 정책을 DB에 새로 생성하는 메서드
+     * @return Long id
      */
-    void createPolicy(CostPolicyCreateDto costPolicyCreateDto);
+    Long createPolicy(CostPolicyCreateDto costPolicyCreateDto);
 
 
     /**
