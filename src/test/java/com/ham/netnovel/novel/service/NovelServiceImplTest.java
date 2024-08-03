@@ -2,17 +2,21 @@ package com.ham.netnovel.novel.service;
 
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.MemberRepository;
+import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelResponseDto;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
 @SpringBootTest
+@Slf4j
 class NovelServiceImplTest {
     @Autowired
     NovelRepository novelRepository;
@@ -21,7 +25,22 @@ class NovelServiceImplTest {
     MemberRepository memberRepository;
 
     @Autowired
+    MemberService memberService;
+
+    @Autowired
     NovelServiceImpl novelService;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    void setup() {
+        //DB records 전부 삭제
+        novelRepository.deleteAll();
+
+        //auto_increment id를 1부터 초기화.
+        String sql = "ALTER TABLE novel ALTER COLUMN id RESTART WITH 1";
+        jdbcTemplate.execute(sql);
+    }
 
     @Test
     void readTest() {
@@ -48,18 +67,19 @@ class NovelServiceImplTest {
     @Test
     void createTest() {
         //given
-        NovelCreateDto novelCreateDto = NovelCreateDto.builder()
-                .title("전형적인 빙의물")
-                .description("그냥 평범한 판타지 빙의물입니다.")
-                .accessorProviderId("test")
+        setup();
+        NovelCreateDto createDto = NovelCreateDto.builder()
+                .title("소설1")
+                .description("Duis ea aliquip dolor sit dolore ut adipisicing eu tempor.")
+                .accessorProviderId("test100")
                 .build();
-        System.out.println(">> Novel Create " + novelCreateDto.toString());
+        log.info(createDto.toString());
 
         // when
-        NovelResponseDto responseDto = novelService.createNovel(novelCreateDto);
+        NovelResponseDto responseDto = novelService.createNovel(createDto);
 
         // then
-        System.out.println(">> Novel Model: " + responseDto.toString());
+        log.info(responseDto.toString());
     }
 
 

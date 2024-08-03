@@ -29,7 +29,7 @@ public interface CoinCostPolicyService {
 
 
     /**
-     * DB 내 가격 정책을 삭제 상태로 바꾸는 메서드
+     * DB 내 가격 정책을 삭제하는 메서드
      */
     void deletePolicy(CostPolicyDeleteDto costPolicyDeleteDto);
 

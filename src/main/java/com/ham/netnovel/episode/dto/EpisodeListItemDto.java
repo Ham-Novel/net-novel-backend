@@ -12,24 +12,26 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Builder
-public class EpisodeDataDto {
+public class EpisodeListItemDto {
 
+    @NotNull
     private Long episodeId;
 
     @NotNull
-    private Integer episodeNumber;
+    private Integer chapter;
 
     @NotNull
     private String title;
 
     @NotNull
-    private String content;
+    private Integer views;
 
-    private Integer view;
+    @NotNull
+    private Integer letterCount;
 
-    private Integer commentAmount;
+    @NotNull
+    private Integer commentCount;
 
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
+    @NotNull
+    private LocalDateTime uploadDate;
 }
