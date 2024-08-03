@@ -8,6 +8,7 @@ import com.ham.netnovel.favoriteNovel.FavoriteNovel;
 import com.ham.netnovel.member.data.Gender;
 import com.ham.netnovel.member.data.MemberRole;
 import com.ham.netnovel.novelRating.NovelRating;
+import com.ham.netnovel.recentRead.RecentRead;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -76,6 +77,10 @@ public class Member {
     //1:N 연결, 에피소드 댓글
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
+
+    //junction table 연결, 최근읽은 소설
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<RecentRead> recentReads = new ArrayList<>();
 
     @Builder
     public Member(String email, OAuthProvider provider, String providerId, MemberRole role, String nickName, Gender gender, Integer coinCount) {
