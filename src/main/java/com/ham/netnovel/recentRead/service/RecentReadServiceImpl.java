@@ -60,7 +60,7 @@ public class RecentReadServiceImpl implements RecentReadService {
         Member member = memberService.getMember(providerId)
                 .orElseThrow(() -> new NoSuchElementException("Member 가  엔티티가 null 입니다."));
         //에피소드 엔티티 객체에 저장
-        Episode episode = episodeService.getEpisodeEntity(episodeId)
+        Episode episode = episodeService.getEpisode(episodeId)
                 .orElseThrow(() -> new NoSuchElementException("Episode 가 엔티티가 null 입니다."));
         //에피소드의 소설 엔티티 정보 객체에 저장
         Novel novel = episode.getNovel();
