@@ -4,6 +4,7 @@ import com.ham.netnovel.coinUseHistory.CoinUseHistory;
 import com.ham.netnovel.coinUseHistory.CoinUseHistoryRepository;
 import com.ham.netnovel.coinUseHistory.dto.CoinUseCreateDto;
 import com.ham.netnovel.common.exception.ServiceMethodException;
+import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.member.Member;
@@ -64,7 +65,7 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
     @Transactional(readOnly = true)
     public List<MemberCoinUseHistoryDto> getMemberCoinUseHistory(String providerId, Pageable pageable) {
         try {
-            return coinUseHistoryRepository.findByMemberProviderId(providerId,pageable)
+            return coinUseHistoryRepository.findByMemberProviderId(providerId, pageable)
                     .stream()//유저의 코인 사용 기록을 받아와 stream 생성
                     .map(coinUseHistory -> {//엔티티 정보 DTO에 바인딩
                                 Episode episode = coinUseHistory.getEpisode();
@@ -84,4 +85,28 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
 
 
     }
+
+    @Override
+    public boolean hasMemberUsedCoinsForEpisode(String providerId, Long episodeId) {
+
+        try {
+
+            return coinUseHistoryRepository.findByMemberAndEpisode(providerId, episodeId)
+                    .map(coinUseHistory -> {
+                        Integer coinAmount = coinUseHistory.getAmount();
+                        TypeValidationUtil.validateCoinAmount(coinAmount);//코인 수 유효성 검사,null이거나 음수면 예외로 던짐
+                        return true;//유효성 검사 통과시 true 반환(코인 사용 기록 있음)
+                    }).orElse(false);//DB에서 엔티티 검색에 실패한경우 false 반환(코인 사용 기록이 없음)
+
+
+        } catch (Exception ex) {
+            throw new ServiceMethodException("hasMemberUsedCoinsForEpisode 메서드 에러 발생" + ex.getMessage());
+
+
+        }
+
+
+    }
+
+
 }
