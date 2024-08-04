@@ -16,6 +16,15 @@ public interface CoinUseHistoryService {
    List<MemberCoinUseHistoryDto> getMemberCoinUseHistory(String providerId, Pageable pageable);
 
 
+   /**
+    * 유저가 에피소드에 결제한 내역이 있는지 확인하는 메서드
+    * @param providerId 유저 정보
+    * @param episodeId 에피소드의 id
+    * @return 결제 내역이 있을 경우 true, 결제 내역이 없을경우 false 반환
+    */
+   boolean hasMemberUsedCoinsForEpisode(String providerId, Long episodeId);
+
+
 
 
 }

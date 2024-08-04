@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CoinUseHistoryRepository extends JpaRepository<CoinUseHistory,Long> {
 
@@ -16,5 +17,14 @@ public interface CoinUseHistoryRepository extends JpaRepository<CoinUseHistory,L
             "where c.member.providerId = :providerId " +
             "order by c.createdAt desc ")
     List<CoinUseHistory> findByMemberProviderId(@Param("providerId")String providerId, Pageable pageable);
+
+
+    @Query("select c from CoinUseHistory  c " +
+            "where c.episode.id = :episodeId " +
+            "and c.member.providerId = :providerId")
+    Optional<CoinUseHistory> findByMemberAndEpisode(@Param("providerId") String providerId,
+                                                    @Param("episodeId") Long episodeId);
+
+
 
 }

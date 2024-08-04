@@ -25,6 +25,7 @@ public class TypeValidationUtil {
 
     }
 
+    //Novel 별점 유효성 검사, null 이거나 음수 또는 10초과여서는 안됨
     public static void validateNovelRating(Integer rating) {
         //null 체크
         if (rating == null) {
@@ -33,6 +34,16 @@ public class TypeValidationUtil {
         // 범위 체크 (0~10)
         if (rating < 1 || rating > 10) {
             throw new IllegalArgumentException("validateNovelRating 에러: 파라미터가 1~10 범위를 벗어났습니다.");
+        }
+    }
+
+    //코인수 유효성 검사, null 이거나 음수일수 없음
+    public static void validateCoinAmount(Integer coinAmount){
+        if (coinAmount == null){
+
+            throw new IllegalArgumentException("validateCoinUseAmount 에러: 사용한 코인 갯수가 null 입니다");
+        } else if (coinAmount <0 ) {
+            throw new IllegalArgumentException("validateCoinUseAmount 에러: 사용한 코인 갯수가 음수입니다.");
         }
     }
 

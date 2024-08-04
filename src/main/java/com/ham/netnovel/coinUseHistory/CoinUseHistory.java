@@ -4,6 +4,7 @@ package com.ham.netnovel.coinUseHistory;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,6 +31,7 @@ public class CoinUseHistory {
     private Member member;
 
     @NotNull
+    @Min(0)
     //코인 사용갯수
     private Integer amount;
 
