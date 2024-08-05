@@ -123,6 +123,7 @@ public class EpisodeServiceImpl implements EpisodeService {
                             .letterCount(episode.getContent().length())
                             .commentCount(episode.getComments().size())
                             .uploadDate(episode.getCreatedAt())
+                            .coinCost(episode.getCostPolicy().getCoinCost())
                             .build()))
                     .collect(Collectors.toList());
         } catch (Exception ex) {

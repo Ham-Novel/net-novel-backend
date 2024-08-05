@@ -1,5 +1,6 @@
 package com.ham.netnovel.episode.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,4 +35,7 @@ public class EpisodeListItemDto {
 
     @NotNull
     private LocalDateTime uploadDate;
+
+    @Min(0)
+    private Integer coinCost;
 }
