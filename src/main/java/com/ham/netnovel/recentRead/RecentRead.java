@@ -5,6 +5,7 @@ import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.Novel;
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
+@Getter
 public class RecentRead {
 
     @EmbeddedId

@@ -21,7 +21,8 @@ public interface CoinUseHistoryRepository extends JpaRepository<CoinUseHistory,L
 
     @Query("select c from CoinUseHistory  c " +
             "where c.episode.id = :episodeId " +
-            "and c.member.providerId = :providerId")
+            "and c.member.providerId = :providerId " +
+            "order by c.updatedAt")
     Optional<CoinUseHistory> findByMemberAndEpisode(@Param("providerId") String providerId,
                                                     @Param("episodeId") Long episodeId);
 

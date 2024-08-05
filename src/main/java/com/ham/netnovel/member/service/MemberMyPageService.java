@@ -4,6 +4,7 @@ package com.ham.netnovel.member.service;
 import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.dto.MemberCommentDto;
+import com.ham.netnovel.member.dto.MemberRecentReadDto;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 import org.springframework.data.domain.Pageable;
 
@@ -38,6 +39,16 @@ public interface MemberMyPageService {
      * @return List MemberCoinChargeDto 형태로 변환해서 반환
      */
     List<MemberCoinChargeDto> getMemberCoinChargeHistory(String providerId,Pageable pageable);
+
+
+    /**
+     * 유저의 최근 열람 기록을 반환하는 메서드
+     * 소설 정보와, 해당 소설의 최근 열람 에피소드 정보를 반환
+     * @param providerId 유저 정보
+     * @param pageable
+     * @return List MemberRecentReadDto 형태로 반환, 소설, 에피소드 정보를 포함
+     */
+    List<MemberRecentReadDto> getMemberRecentReadInfo(String providerId, Pageable pageable);
 
 
 

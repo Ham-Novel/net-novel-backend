@@ -6,11 +6,13 @@ import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
+import com.ham.netnovel.member.dto.MemberRecentReadDto;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 import com.ham.netnovel.novel.service.NovelService;
 import com.ham.netnovel.reComment.service.ReCommentService;
+import com.ham.netnovel.recentRead.service.RecentReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,25 +40,34 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
 
     private final NovelService novelService;
 
+    private final RecentReadService recentReadService;
 
-    public MemberMyPageServiceImpl(CommentService commentService, ReCommentService reCommentService, MemberRepository memberRepository, CoinUseHistoryService coinUseHistoryService, CoinChargeHistoryService coinChargeHistoryService, NovelService novelService) {
+
+    public MemberMyPageServiceImpl(CommentService commentService,
+                                   ReCommentService reCommentService,
+                                   MemberRepository memberRepository,
+                                   CoinUseHistoryService coinUseHistoryService,
+                                   CoinChargeHistoryService coinChargeHistoryService,
+                                   NovelService novelService,
+                                   RecentReadService recentReadService) {
         this.commentService = commentService;
         this.reCommentService = reCommentService;
         this.memberRepository = memberRepository;
         this.coinUseHistoryService = coinUseHistoryService;
         this.coinChargeHistoryService = coinChargeHistoryService;
         this.novelService = novelService;
+        this.recentReadService = recentReadService;
     }
 
 
     @Override
-    public List<MemberCommentDto> getMemberCommentAndReCommentList(String providerId,Pageable pageable) {
+    public List<MemberCommentDto> getMemberCommentAndReCommentList(String providerId, Pageable pageable) {
         // 두 개의 스트림을 합치고 정렬한 후 리스트로 변환하여 반환
         return Stream.concat(
                         //댓글(comment) List를 가져와 stream 생성
-                        commentService.getMemberCommentList(providerId,pageable).stream(),
+                        commentService.getMemberCommentList(providerId, pageable).stream(),
                         //대댓글(reComment) List를 가져와 stream 생성
-                        reCommentService.getMemberReCommentList(providerId,pageable).stream()
+                        reCommentService.getMemberReCommentList(providerId, pageable).stream()
                 )
                 //멤버변수인 생성 시간을 기준으로 재정렬
                 .sorted(Comparator.comparing(MemberCommentDto::getCreateAt).reversed())
@@ -86,7 +97,7 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
         //유저 providerId 유효성 검사
         validateProviderId(providerId, "getMemberCoinUseHistory");
 
-        return coinUseHistoryService.getMemberCoinUseHistory(providerId,pageable);
+        return coinUseHistoryService.getMemberCoinUseHistory(providerId, pageable);
 
     }
 
@@ -96,9 +107,20 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
         //유저 providerId 유효성 검사
         validateProviderId(providerId, "getMemberCoinChargeHistory");
         //유저 정보로 코인 충전 기록을 List로 가져와 반환
-        return coinChargeHistoryService.getCoinChargeHistoryByMember(providerId,pageable)
+        return coinChargeHistoryService.getCoinChargeHistoryByMember(providerId, pageable)
                 .stream()
                 .sorted(Comparator.comparing(MemberCoinChargeDto::getCreatedAt).reversed())//날짜순으로 정렬(최신 기록이 index 앞에위치)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MemberRecentReadDto> getMemberRecentReadInfo(String providerId, Pageable pageable) {
+        //providerId 값 유효성 검사
+        validateProviderId(providerId, "getMemberRecentReadInfo");
+        //최근 본 소설 리스트 반환
+        return recentReadService.getMemberRecentReads(providerId, pageable)
+                .stream()
+                .sorted(Comparator.comparing(MemberRecentReadDto::getUpdatedAt).reversed())//업데이트 시간으로 최신순으로 정렬
                 .collect(Collectors.toList());
     }
 

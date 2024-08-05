@@ -2,6 +2,7 @@ package com.ham.netnovel.member.service.impl;
 
 import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
+import com.ham.netnovel.member.dto.MemberRecentReadDto;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
@@ -72,7 +73,7 @@ class MemberMyPageServiceImplTest {
         //테스트용 계정
 
         String providerId= "test";
-        Pageable pageable = PageRequest.of(10, 10);
+        Pageable pageable = PageRequest.of(0, 10);
 
         List<MemberCoinUseHistoryDto> memberCoinUseHistory = memberMyPageService.getMemberCoinUseHistory(providerId,pageable);
         System.out.println("List 사이즈 ="+memberCoinUseHistory.size());
@@ -106,4 +107,21 @@ class MemberMyPageServiceImplTest {
 
 
     }
+
+    @Test
+    void getMemberRecentReadInfo(){
+        //테스트용 계정
+        String providerId= "test";
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<MemberRecentReadDto> memberRecentReadInfo = memberMyPageService.getMemberRecentReadInfo(providerId, pageable);
+        for (MemberRecentReadDto memberRecentReadDto : memberRecentReadInfo) {
+            System.out.println("***** 최근 본 소설 정보 *****");
+            System.out.println(memberRecentReadDto.toString());
+        }
+
+
+    }
+
+
 }

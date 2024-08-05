@@ -4,16 +4,20 @@ import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.member.Member;
+import com.ham.netnovel.member.dto.MemberRecentReadDto;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.recentRead.RecentRead;
 import com.ham.netnovel.recentRead.RecentReadId;
 import com.ham.netnovel.recentRead.RecentReadRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -85,6 +89,33 @@ public class RecentReadServiceImpl implements RecentReadService {
             throw new ServiceMethodException("updateRecentRead 메서드 에러 발생" + ex.getMessage(), ex);
         }
 
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MemberRecentReadDto> getMemberRecentReads(String providerId, Pageable pageable) {
+        try {
+            return recentReadRepository.findByMemberProviderId(providerId, pageable)
+                    .stream()
+                    .map(recentRead -> {
+                        Episode episode = recentRead.getEpisode();//에피소드 엔티티 객체에 저장
+                        Novel novel = recentRead.getNovel();//노벨 엔티티 객체에 저장
+                        return MemberRecentReadDto.builder()//DTO로 변환하여 반환
+                                .novelId(novel.getId())
+                                .novelTitle(novel.getTitle())
+                                .novelType(novel.getType())
+                                .authorName(novel.getAuthor().getNickName())
+                                .episodeTitle(episode.getTitle())
+                                .episodeId(episode.getId())
+                                .updatedAt(recentRead.getUpdatedAt())
+                                .build();
+                    })
+                    .collect(Collectors.toList());//List로 collect
+
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getMemberRecentReads 메서드 에러 발생" + ex.getMessage(), ex);
+        }
 
     }
 
