@@ -82,9 +82,10 @@ class CommentServiceImplTest {
     @Test
     public void getEpisodeCommentListByRecent() {
         System.out.println("댓글 불러오기 테스트");
-        Pageable pageable = PageRequest.of(1, 10);
+        Long episodeId = 3008L;
+        Pageable pageable = PageRequest.of(1, 3);
 
-        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByRecent(2310L,pageable);
+        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByRecent(episodeId,pageable);
 //        List<CommentEpisodeListDto> commentList = commentService.getCommentList(909090909L);//존재하지 않는 에피소드 테스트, 빈리스트 반환됨
 
         printCommentAndReCommentInfo(commentList);
@@ -95,8 +96,9 @@ class CommentServiceImplTest {
     //테스트 성공 ,좋아요 순서로 정렬
     @Test
     void getEpisodeCommentListByLikes() {
-        Long episodeId = 2310L;
-        Pageable pageable = PageRequest.of(0, 10);
+        System.out.println("댓글 불러오기 테스트");
+        Long episodeId = 3008L;
+        Pageable pageable = PageRequest.of(1, 3);
         List<CommentEpisodeListDto> episodeCommentListByLikes = commentService.getEpisodeCommentListByLikes(episodeId,pageable);
 
         //출력 테스트
@@ -114,7 +116,7 @@ class CommentServiceImplTest {
         //댓글을 작성한적이 없는 유저 테스트
 //        String providerId= "ttt";
 
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 3);
 
         List<MemberCommentDto> memberCommentList = commentService.getMemberCommentList(providerId,pageable);
 
@@ -125,8 +127,6 @@ class CommentServiceImplTest {
         for (MemberCommentDto memberCommentDto : memberCommentList) {
             System.out.println("댓글");
             System.out.println(memberCommentDto.toString());
-
-
         }
 
 
@@ -135,7 +135,7 @@ class CommentServiceImplTest {
     //테스트 성공
     @Test
     public void getNovelCommentListRecent() {
-        Long novelId = 1L;
+        Long novelId = 10L;
 //        Long novelId =7L;
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -148,10 +148,10 @@ class CommentServiceImplTest {
     //에피소드 상관 없이, 좋아요 순서대로 댓글 정렬됨
     @Test
     void getNovelCommentListByLikes() {
-        Long novelId = 1L;
+        Long novelId = 10L;
 //        Long novelId =7L;
 
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(1, 6);
 
         List<CommentEpisodeListDto> novelCommentListByLikes = commentService.getNovelCommentListByLikes(novelId,pageable);
 
