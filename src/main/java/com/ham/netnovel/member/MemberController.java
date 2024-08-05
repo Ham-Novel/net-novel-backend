@@ -124,8 +124,8 @@ public class MemberController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 댓글과 대댓글의 정보 리스트를 담은 응답 객체
      */
-    @PostMapping("/comment")
-    public ResponseEntity<?> postMemberCommentList(Authentication authentication,
+    @GetMapping("/comment")
+    public ResponseEntity<?> getMemberCommentList(Authentication authentication,
                                                    @RequestParam(defaultValue = "0") int pageNumber,
                                                    @RequestParam(defaultValue = "10") int pageSize) {
 
@@ -150,8 +150,8 @@ public class MemberController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 유저가 좋아요를 누른 소설 리스트를 담은 응답 객체
      */
-    @PostMapping("/novel")
-    public ResponseEntity<?> postFavoriteNovels(Authentication authentication) {
+    @GetMapping("/novel")
+    public ResponseEntity<?> getFavoriteNovels(Authentication authentication) {
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
@@ -171,8 +171,8 @@ public class MemberController {
      * @param authentication 유저의 인정 정보
      * @return ResponseEntity 데이터를 List에 담아 반환
      */
-    @PostMapping("/coin-use-history")
-    public ResponseEntity<?> postMemberCoinUseHistory(Authentication authentication,
+    @GetMapping("/coin-use-history")
+    public ResponseEntity<?> getMemberCoinUseHistory(Authentication authentication,
                                                       @RequestParam(defaultValue = "0") int pageNumber,
                                                       @RequestParam(defaultValue = "10") int pageSize) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
@@ -195,8 +195,9 @@ public class MemberController {
      * @param authentication 유저의 인정 정보
      * @return ResponseEntity 데이터를 List에 담아 반환
      */
-    @PostMapping("/coin-charge-history")
-    public ResponseEntity<List<MemberCoinChargeDto>> postMemberCoinChargeHistory(Authentication authentication, @RequestParam(defaultValue = "0") int pageNumber,
+    @GetMapping("/coin-charge-history")
+    public ResponseEntity<List<MemberCoinChargeDto>> getMemberCoinChargeHistory(Authentication authentication,
+                                                                                 @RequestParam(defaultValue = "0") int pageNumber,
                                                                                  @RequestParam(defaultValue = "10") int pageSize) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
@@ -207,6 +208,33 @@ public class MemberController {
         //정보 전송
         return ResponseEntity.ok(memberCoinChargeHistory);
 
+    }
+
+    /**
+     *
+     * @param authentication
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("/recent-read")
+    public ResponseEntity<List<MemberRecentReadDto>> getMemberRecentRead(Authentication authentication,
+                                                  @RequestParam(defaultValue = "0") int pageNumber,
+                                                  @RequestParam(defaultValue = "10") int pageSize){
+
+        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+        //유저의 최근 읽은 작품 레코드 조회
+        List<MemberRecentReadDto> memberRecentReadInfo = memberMyPageService.getMemberRecentReadInfo(principal.getName(), pageable);
+
+        for (MemberRecentReadDto memberRecentReadDto : memberRecentReadInfo) {
+
+            log.info("정보={}",memberRecentReadDto.toString());
+        }
+        //정보 전송
+        return ResponseEntity.ok(memberRecentReadInfo);
     }
 
 
