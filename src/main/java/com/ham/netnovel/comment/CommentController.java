@@ -151,115 +151,64 @@ public class CommentController {
 
     }
 
-
-    /**
-     * 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API
-     * 댓글은 최신 순으로 정렬하여 전송
-     * 댓글과 대댓글 DTO는 엔티티PK, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
-     * @param requestBody episodeId값을 저장할 객체
-     * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
-     */
-    @PostMapping("/episode/recent")
-    public ResponseEntity<?> postEpisodeCommentsByRecent(@RequestBody Map<String, String> requestBody,
-                                                         @RequestParam(defaultValue = "0") int pageNumber,
-                                                         @RequestParam(defaultValue = "10") int pageSize) {
-        //클라이언트에서 보낸 episodeId값 객체에 저장
-        String episodeIdStr = requestBody.get("episodeId");
-
-        //episodeId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
-        Long episodeId = TypeValidationUtil.validateLong(episodeIdStr);
-
-        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
-        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
-
-        //episode 에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 최신순으로 정렬
-        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByRecent(episodeId,pageable);
-
-        //클라이언트에 댓글,대댓글 정보 전송
-        return ResponseEntity.ok(commentList);
-
-    }
-
     /**
      * 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API
      * 댓글은 좋아요 순으로 정렬하여 전송
      * 댓글과 대댓글 DTO는 엔티티PK, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
-     * @param requestBody episodeId값을 저장할 객체
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
-    @PostMapping("/episode/likes")
-    public ResponseEntity<?> postEpisodeCommentsByLikes(@RequestBody Map<String, String> requestBody,
-                                                        @RequestParam(defaultValue = "0") int pageNumber,
-                                                        @RequestParam(defaultValue = "10") int pageSize){
-        //클라이언트에서 보낸 episodeId값 객체에 저장
-        String episodeIdStr = requestBody.get("episodeId");
-        //episodeId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
-        Long episodeId = TypeValidationUtil.validateLong(episodeIdStr);
+    @GetMapping("/episode{episodeId}/{sortBy}")
+    public ResponseEntity<?> getEpisodeComments(
+            @PathVariable(name = "episodeId") Long episodeId,
+            @PathVariable(name = "sortBy") String sortBy,
+            @RequestParam(name = "pageNumber",defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize",defaultValue = "10") int pageSize){
 
         //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
 
-        //episode 에 달린 댓글,대댓글 정보를 List에 담음 댓글은 좋아요 순으로 정렬
-        List<CommentEpisodeListDto> commentList = commentService.getEpisodeCommentListByLikes(episodeId,pageable);
-
-        //클라이언트에 댓글,대댓글 정보 전송
-        return ResponseEntity.ok(commentList);
-
+        if (sortBy.equals("recent")) {
+            //특정 episode에 달린 댓글 정보를 List에 담음. 최신순으로 정렬
+            return ResponseEntity.ok(commentService.getEpisodeCommentListByRecent(episodeId,pageable));
+        }
+        else if (sortBy.equals("likes")) {
+            //특정 episode에 달린 댓글 정보를 List에 담음. 좋아요 순으로 정렬
+            return ResponseEntity.ok(commentService.getEpisodeCommentListByLikes(episodeId,pageable));
+        }
+        else {
+            //정렬 값이 없으면 예외 발생
+            throw new IllegalArgumentException("postNovelComments: invalid sortBy option");
+        }
     }
 
     /**
      * Novel(소설) Episode 에 달린 댓글과 대댓글 정보를 전송하는 API
      * 댓글은 최신 순으로 정렬
-     * @param requestBody episodeId를 담는 객체
      * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
      */
-    @PostMapping("/novel/recent")
-    public ResponseEntity<List<CommentEpisodeListDto>> postNovelCommentsRecent(@RequestBody Map<String, String> requestBody,
-                                                                               @RequestParam(defaultValue = "0") int pageNumber,
-                                                                               @RequestParam(defaultValue = "10") int pageSize) {
-
-        //클라이언트에서 보낸 novelId값 객체에 저장
-        String novelIdStr = requestBody.get("novelId");
-
-        //novelId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
-        Long novelId = TypeValidationUtil.validateLong(novelIdStr);
+    @GetMapping("/novel{novelId}/{sortBy}")
+    public ResponseEntity<List<CommentEpisodeListDto>> getNovelComments(
+            @PathVariable(name = "novelId") Long novelId,
+            @PathVariable(name = "sortBy") String sortBy,
+            @RequestParam(name = "pageNumber",defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize",defaultValue = "10") int pageSize
+    ) {
 
         //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
 
-        //Novel의 Episode 에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 최신순으로 정렬
-        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByRecent(novelId,pageable);
-
-        //클라이언트에 댓글,대댓글 정보 전송
-        return ResponseEntity.ok(novelCommentList);
-
-    }
-
-    /**
-     * Novel(소설) Episode 에 달린 댓글과 대댓글 정보를 전송하는 API
-     * 댓글은 좋아요 순으로 정렬
-     * @param requestBody episodeId를 담는 객체
-     * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
-     */
-    @PostMapping("/novel/likes")
-    public ResponseEntity<List<CommentEpisodeListDto>> postNovelCommentsLikes(@RequestBody Map<String, String> requestBody,
-                                                                              @RequestParam(defaultValue = "0") int pageNumber,
-                                                                              @RequestParam(defaultValue = "10") int pageSize) {
-        //클라이언트에서 보낸 novelId값 객체에 저장
-        String novelIdStr = requestBody.get("novelId");
-
-        //novelId 유효성 검사, null이거나 Long타입이 아니면 예외로 던져짐
-        Long novelId = TypeValidationUtil.validateLong(novelIdStr);
-
-        //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
-        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
-
-        //Novel의 Episode 에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 좋아요 순으로 정렬
-        List<CommentEpisodeListDto> novelCommentList = commentService.getNovelCommentListByLikes(novelId,pageable);
-
-        //클라이언트에 댓글,대댓글 정보 전송
-        return ResponseEntity.ok(novelCommentList);
-
+        if (sortBy.equals("recent")) {
+            //특정 Novel의 모든 Episode에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 최신순으로 정렬
+            return ResponseEntity.ok(commentService.getNovelCommentListByRecent(novelId,pageable));
+        }
+        else if (sortBy.equals("likes")) {
+            //특정 Novel의 모든 Episode에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 좋아요순으로 정렬
+            return ResponseEntity.ok(commentService.getNovelCommentListByLikes(novelId,pageable));
+        }
+        else {
+            //정렬 값이 없으면 예외 발생
+            throw new IllegalArgumentException("postNovelComments: invalid sortBy option");
+        }
     }
 
 
