@@ -37,26 +37,33 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
     @Override
     @Transactional
     public void saveCoinUseHistory(CoinUseCreateDto coinUseCreateDto) {
-        log.info("진입");
-        //유저 정보 확인
+        //유저 정보 유무 확인 확인
         Member member = memberService.getMember(coinUseCreateDto.getProviderId())
                 .orElseThrow(() -> new NoSuchElementException("Member 정보가 없습니다. providerId: " + coinUseCreateDto.getProviderId()));
 
-        //에피소드 정보 확인
+        //에피소드 정보 유무 확인
         Episode episode = episodeService.getEpisode(coinUseCreateDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("Episode 정보가 없습니다. episodeId: " + coinUseCreateDto.getEpisodeId()));
 
+        Integer usedCoins = coinUseCreateDto.getUsedCoins();
+
+        //유효성검사, null이거나 음수면 예외로 던짐
+        TypeValidationUtil.validateCoinAmount(usedCoins);
+
+        //유저의 코인수 차감, 유저 코인수가 null 이거나 현재 코인수가 사용 코인수보다 작을경우 예외로 던짐
+        memberService.deductMemberCoins(member.getProviderId(), usedCoins);
         try {
             //새로운 코인 사용 기록 엔티티 생성
             CoinUseHistory coinUseHistory = CoinUseHistory.builder()
-                    .member(member)
-                    .episode(episode)
+                    .member(member)//유저 엔티티
+                    .episode(episode)//에피소드 엔티티
+                    .amount(usedCoins)//사용한 코인 수
                     .build();
             //DB에 저장
             coinUseHistoryRepository.save(coinUseHistory);
 
         } catch (Exception ex) {
-            throw new ServiceMethodException("saveCoinUseHistory 메서드에서 오류 발생", ex);
+            throw new ServiceMethodException("saveCoinUseHistory 메서드에서 오류 발생" + ex.getMessage());
         }
 
     }
@@ -87,6 +94,7 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean hasMemberUsedCoinsForEpisode(String providerId, Long episodeId) {
 
         try {

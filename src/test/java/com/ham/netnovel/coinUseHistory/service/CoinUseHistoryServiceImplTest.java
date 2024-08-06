@@ -1,5 +1,6 @@
 package com.ham.netnovel.coinUseHistory.service;
 
+import com.ham.netnovel.coinUseHistory.dto.CoinUseCreateDto;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,23 @@ class CoinUseHistoryServiceImplTest {
     @Test
     void saveCoinUseHistory() {
 
-        String providerId = "";
-        Long episodeId = 2306L;
-        Integer amount = 2;
+        String providerId = "test";
+//        String providerId = "teㄷㄷㄷㄷst";//존재하지 않은 유저 테스트, NoSuchElementException로 던져짐
 
-//        new
-//        coinUseHistoryService.saveCoinUseHistory(providerId,episodeId,amount);
+//        Long episodeId = 3002L;
+        Long episodeId = 3002L;//존재하지 않는 에피소드 테스트, NoSuchElementException로 던져짐
+
+
+        Integer amount = 2;
+//        Integer amount = 200000;        //유저 코인수가 사용 코인수보다 적은경우 테스트 , NotEnoughCoinsException로 던져짐
+
+        CoinUseCreateDto dto = CoinUseCreateDto.builder()
+                .usedCoins(amount)
+                .episodeId(episodeId)
+                .providerId(providerId)
+                .build();
+
+        coinUseHistoryService.saveCoinUseHistory(dto);
 
 
     }
