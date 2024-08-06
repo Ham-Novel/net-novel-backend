@@ -54,6 +54,7 @@ public class Episode {
     private LocalDateTime updatedAt;
 
     //활성, 삭제 처리 상태
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EpisodeStatus status = EpisodeStatus.ACTIVE;
 

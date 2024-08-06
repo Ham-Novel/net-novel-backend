@@ -16,6 +16,7 @@ import com.ham.netnovel.novel.service.NovelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -109,26 +110,62 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<EpisodeListItemDto> getEpisodesByNovel(Long novelId) {
         try {
             return episodeRepository.findByNovel(novelId)
                     .stream()
-                    //Episode => EpisodeListItemDto 변환
-                    .map((episode -> EpisodeListItemDto.builder()
-                            .episodeId(episode.getId())
-                            .chapter(episode.getChapter())
-                            .title(episode.getTitle())
-                            .views(episode.getView())
-                            .letterCount(episode.getContent().length())
-                            .commentCount(episode.getComments().size())
-                            .uploadDate(episode.getCreatedAt())
-                            .coinCost(episode.getCostPolicy().getCoinCost())
-                            .build()))
+                    .map(this::convertEntityToListDto) //Episode => EpisodeListItemDto 변환
                     .collect(Collectors.toList());
         } catch (Exception ex) {
             //나머지 Repository 작업 예외 처리
             throw new ServiceMethodException("getEpisodesByNovel 메서드 에러 발생", ex.getCause());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EpisodeListItemDto> getEpisodesByNovelSortByRecent(Long novelId, Pageable pageable) {
+        try {
+            return episodeRepository.findByNovelOrderByCreatedAtDesc(novelId, pageable)
+                    .stream()
+                    .map(this::convertEntityToListDto) //Episode => EpisodeListItemDto 변환
+                    .collect(Collectors.toList());
+        } catch (Exception ex) {
+            //나머지 Repository 작업 예외 처리
+            throw new ServiceMethodException("getEpisodesByNovel 메서드 에러 발생", ex.getCause());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EpisodeListItemDto> getEpisodesByNovelSortByInitial(Long novelId, Pageable pageable) {
+        try {
+            return episodeRepository.findByNovelOrderByCreatedAtAsc(novelId, pageable)
+                    .stream()
+                    .map(this::convertEntityToListDto) //Episode => EpisodeListItemDto 변환
+                    .collect(Collectors.toList());
+        } catch (Exception ex) {
+            //나머지 Repository 작업 예외 처리
+            throw new ServiceMethodException("getEpisodesByNovel 메서드 에러 발생", ex.getCause());
+        }
+    }
+
+    /**
+     *  Episode Entity => EpisodeListItemDto 변환 메서드
+     * @param episode 에피소드 엔티티
+     * @return EpisodeListItemDto
+     */
+    private EpisodeListItemDto convertEntityToListDto(Episode episode) {
+        return EpisodeListItemDto.builder()
+                .episodeId(episode.getId())
+                .chapter(episode.getChapter())
+                .title(episode.getTitle())
+                .views(episode.getView())
+                .letterCount(episode.getContent().length())
+                .commentCount(episode.getComments().size())
+                .uploadDate(episode.getCreatedAt())
+                .coinCost(episode.getCostPolicy().getCoinCost())
+                .build();
     }
 }

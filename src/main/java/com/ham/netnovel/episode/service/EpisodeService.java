@@ -5,6 +5,7 @@ import com.ham.netnovel.episode.dto.EpisodeCreateDto;
 import com.ham.netnovel.episode.dto.EpisodeListItemDto;
 import com.ham.netnovel.episode.dto.EpisodeDeleteDto;
 import com.ham.netnovel.episode.dto.EpisodeUpdateDto;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +35,26 @@ public interface EpisodeService {
 
     /**
      * 해당 Novel에 속한 모든 Episodes List 데이터를 가져오는 메서드
+     * @param novelId 소설 id
      * @return List<EpisodeDataDto>
      */
     List<EpisodeListItemDto> getEpisodesByNovel(Long novelId);
+
+    /**
+     * 해당 Novel에 속한 모든 Episodes List dto를 최신순으로 가져오는 메서드.
+     * 페이지 단위로 일부만 가져옴.
+     * @param novelId 소설 id
+     * @param pageable 페이지 정보.
+     * @return List<EpisodeDataDto>
+     */
+    List<EpisodeListItemDto> getEpisodesByNovelSortByRecent(Long novelId, Pageable pageable);
+
+    /**
+     * 해당 Novel에 속한 모든 Episodes List dto를 최초순으로 가져오는 메서드.
+     * 페이지 단위로 일부만 가져옴.
+     * @param novelId 소설 id
+     * @param pageable 페이지 정보.
+     * @return List<EpisodeDataDto>
+     */
+    List<EpisodeListItemDto> getEpisodesByNovelSortByInitial(Long novelId, Pageable pageable);
 }
