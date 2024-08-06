@@ -21,6 +21,9 @@ public class CoinUseCreateDto {
     private String providerId;
 
 
+    private Integer usedCoins;
+
+
 
 
 
