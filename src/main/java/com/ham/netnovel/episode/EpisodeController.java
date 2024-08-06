@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/episode")
+@RequestMapping("/api")
 @Slf4j
 public class EpisodeController {
     private final EpisodeService episodeService;
@@ -22,9 +22,9 @@ public class EpisodeController {
         this.episodeService = episodeService;
     }
 
-    @GetMapping
+    @GetMapping("/novels/{novelId}/episodes")
     public ResponseEntity<List<EpisodeListItemDto>> getEpisodesByNovel(
-            @RequestParam(name = "novelId", required = true) Long novelId,
+            @PathVariable(name = "novelId") Long novelId,
             @RequestParam(name = "sortBy", defaultValue = "recent") String sortBy,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
@@ -40,7 +40,6 @@ public class EpisodeController {
         } else {
             //정렬 값이 없으면 예외 발생
             throw new IllegalArgumentException("getEpisodesByNovel: invalid sortBy option");
-
         }
     }
 }

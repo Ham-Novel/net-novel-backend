@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @Slf4j
-@RequestMapping("/api/member")
+@RequestMapping("/api")
 public class MemberController {
 
     private final Authenticator authenticator;
@@ -47,17 +47,17 @@ public class MemberController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 유저 정보 담은 응답 객체
      */
-    @GetMapping("/mypage")
+    @GetMapping("/members/mypage")
     @ResponseBody
     public ResponseEntity<?> showMyPage(
             Authentication authentication
     ) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
-        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+//        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
         //유저 정보 DB에서 찾아 반환, 닉네임, 코인갯수, 이메일 정보 포함
-        MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo(principal.getName());
-//        MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo("test");
+//        MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo(principal.getName());
+        MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo("test1");
 
         //유저 정보 전
         return ResponseEntity.ok(memberMyPageInfo);
@@ -71,7 +71,8 @@ public class MemberController {
      * @param authentication    유저의 인증 정보
      * @return ResponseEntity 요청 결과를 담은 응답 객체
      */
-    @PatchMapping("/nickname")
+    //Todo 송민규: Edit Profile 페이지를 구성하여 Nickname, Email, Gender을 일괄적으로 수정할 수 있도록 기능을 확장하는 건 어떨까요?
+    @PatchMapping("/members/nickname")
     public ResponseEntity<?> updateNickname(@Valid @RequestBody ChangeNickNameDto changeNickNameDto,
                                             BindingResult bindingResult,
                                             Authentication authentication) {
@@ -124,7 +125,7 @@ public class MemberController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 댓글과 대댓글의 정보 리스트를 담은 응답 객체
      */
-    @GetMapping("/comment")
+    @GetMapping("/members/comments")
     public ResponseEntity<?> getMemberCommentList(Authentication authentication,
                                                    @RequestParam(defaultValue = "0") int pageNumber,
                                                    @RequestParam(defaultValue = "10") int pageSize) {

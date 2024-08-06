@@ -1,6 +1,5 @@
 package com.ham.netnovel.novel;
 
-import com.ham.netnovel.comment.CommentStatus;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.data.NovelStatus;

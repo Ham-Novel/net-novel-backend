@@ -20,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("api/novel")
+@RequestMapping("/api")
 public class NovelController {
     private final NovelService novelService;
     private final Authenticator authenticator;
@@ -35,9 +35,8 @@ public class NovelController {
      * @param novelId novelId를 담은 url path variable
      * @return ResponseEntity NovelResponseDto로 Novel 데이터 반환.
      */
-    @GetMapping("/{novelId}")
+    @GetMapping("/novels/{novelId}")
     public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId) {
-
         return ResponseEntity.ok(novelService.getNovel(novelId));
     }
 
@@ -84,8 +83,8 @@ public class NovelController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
      */
-    @PutMapping("/{novelId}")
-    public ResponseEntity<String> updateNovel(@PathVariable("novelId") Long pathNovelId,
+    @PutMapping("/novels/{novelId}")
+    public ResponseEntity<String> updateNovel(@PathVariable("novelId") Long urlNovelId,
                                                         @Valid @RequestBody NovelUpdateDto reqBody,
                                                         BindingResult bindingResult,
                                                         Authentication authentication) {
@@ -103,7 +102,7 @@ public class NovelController {
         reqBody.setAccessorProviderId(principal.getName());
 
         //url의 novelId와 reqBody의 novelId가 같은지 검증
-        if (!pathNovelId.equals(reqBody.getNovelId())) {
+        if (!urlNovelId.equals(reqBody.getNovelId())) {
             String errorMessage = "updateNovel API Error = 'Path Variable Id != Message Body Id'";
             log.error(errorMessage);
             return ResponseEntity.badRequest().body(errorMessage);
@@ -120,8 +119,8 @@ public class NovelController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
      */
-    @DeleteMapping("/{novelId}")
-    public ResponseEntity<String> deleteNovel(@PathVariable("novelId") Long pathNovelId,
+    @DeleteMapping("/novels/{novelId}")
+    public ResponseEntity<String> deleteNovel(@PathVariable("novelId") Long urlNovelId,
                                                         @Valid @RequestBody NovelDeleteDto reqBody,
                                                         BindingResult bindingResult,
                                                         Authentication authentication) {
@@ -139,7 +138,7 @@ public class NovelController {
         reqBody.setAccessorProviderId(principal.getName());
 
         //url의 novelId와 reqBody의 novelId가 같은지 검증
-        if (!pathNovelId.equals(reqBody.getNovelId())) {
+        if (!urlNovelId.equals(reqBody.getNovelId())) {
             String errorMessage = "deleteNovel API Error = 'Path Variable Id != Message Body Id'";
             log.error(errorMessage);
             return ResponseEntity.badRequest().body(errorMessage);

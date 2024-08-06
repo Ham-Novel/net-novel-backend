@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @Controller
 @Slf4j
-@RequestMapping("/api/comment-likes")
+@RequestMapping("/api")
 public class CommentLikeController {
 
     private final CommentLikeService commentLikeService;
@@ -40,10 +41,12 @@ public class CommentLikeController {
      * @param authentication 유저 인증 정보
      * @return ResponseEntity body에 내용 담아 전달
      */
-    @PostMapping
-    public ResponseEntity<?> toggleCommentLikeStatus(@Valid @RequestBody CommentLikeToggleDto commentLikeToggleDto,
-                                                     BindingResult bindingResult,
-                                                     Authentication authentication) {
+    @PostMapping("comments/{commentId}/comment-likes")
+    public ResponseEntity<?> toggleCommentLikeStatus(
+            @PathVariable(name = "commentId") Long urlCommentId,
+            @Valid @RequestBody CommentLikeToggleDto commentLikeToggleDto,
+            BindingResult bindingResult,
+            Authentication authentication) {
 
         //클라이언트에서 보낸 데이터 유효성 검사, 에러가 있을경우 에러메시지 전송
         if (bindingResult.hasErrors()){
@@ -60,6 +63,13 @@ public class CommentLikeController {
 
         //DTO에 유저 인증 정보 저장
         commentLikeToggleDto.setProviderId(principal.getName());
+
+        //URL의 commentId와 RequestBody의 commentlId가 같은지 검증
+        if (!urlCommentId.equals(commentLikeToggleDto.getCommentId())) {
+            String errorMessage = "deleteComment API Error = 'Path Variable Id != Message Body Id'";
+            log.error(errorMessage);
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
 
         //유저가 댓글에 좋아요 누른 기록이 있으면 삭제후 false 반환, 없으면 DB에 저장후 true 반환
         boolean result = commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);

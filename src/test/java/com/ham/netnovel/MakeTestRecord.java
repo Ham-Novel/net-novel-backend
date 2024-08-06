@@ -71,11 +71,11 @@ public class MakeTestRecord {
     @Test
     void makeTestItems() {
         //DB records 전부 삭제
+        commentLikeRepository.deleteAll();
         commentRepository.deleteAll();
         episodeRepository.deleteAll();
         costPolicyRepository.deleteAll();
         novelRepository.deleteAll();
-        commentLikeRepository.deleteAll();
         memberRepository.deleteAll();
 
         //auto_increment id를 1부터 초기화.
@@ -140,8 +140,8 @@ public class MakeTestRecord {
             }
             CommentLikeToggleDto commentLikeToggleDto = CommentLikeToggleDto.builder()
                     .likeType(LikeType.LIKE)
-                    .providerId("test" + j)
-                    .commentId((long) i)
+                    .providerId("test" + i)
+                    .commentId((long) j)
                     .build();
             commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
         });
