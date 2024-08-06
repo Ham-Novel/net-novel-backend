@@ -101,13 +101,6 @@ public class NovelController {
         //DTO에 유저 정보(providerId) 값 저장
         reqBody.setAccessorProviderId(principal.getName());
 
-        //url의 novelId와 reqBody의 novelId가 같은지 검증
-        if (!urlNovelId.equals(reqBody.getNovelId())) {
-            String errorMessage = "updateNovel API Error = 'Path Variable Id != Message Body Id'";
-            log.error(errorMessage);
-            return ResponseEntity.badRequest().body(errorMessage);
-        }
-
         NovelResponseDto result = novelService.updateNovel(reqBody);
         return ResponseEntity.ok("updateNovel: " + result.toString());
     }
@@ -136,13 +129,6 @@ public class NovelController {
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
         //DTO에 유저 정보(providerId) 값 저장
         reqBody.setAccessorProviderId(principal.getName());
-
-        //url의 novelId와 reqBody의 novelId가 같은지 검증
-        if (!urlNovelId.equals(reqBody.getNovelId())) {
-            String errorMessage = "deleteNovel API Error = 'Path Variable Id != Message Body Id'";
-            log.error(errorMessage);
-            return ResponseEntity.badRequest().body(errorMessage);
-        }
 
         NovelResponseDto result = novelService.deleteNovel(reqBody);
         return ResponseEntity.ok("deleteNovel: " + result.toString());

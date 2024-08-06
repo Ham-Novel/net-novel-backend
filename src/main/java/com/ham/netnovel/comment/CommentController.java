@@ -108,13 +108,6 @@ public class CommentController {
         //DTO에 유저 정보(providerId) 값 저장
         commentUpdateDto.setProviderId(principal.getName());
 
-        //URL의 commentId와 RequestBody의 commentlId가 같은지 검증
-        if (!urlCommentId.equals(commentUpdateDto.getCommentId())) {
-            String errorMessage = "deleteComment API Error = 'Path Variable Id != Message Body Id'";
-            log.error(errorMessage);
-            return ResponseEntity.badRequest().body(errorMessage);
-        }
-
         commentService.updateComment(commentUpdateDto);
 
         return ResponseEntity.ok("댓글 수정 완료");
@@ -151,13 +144,6 @@ public class CommentController {
 
         //DTO에 유저 정보 할당
         commentDeleteDto.setProviderId(principal.getName());
-
-        //URL의 commentId와 RequestBody의 commentlId가 같은지 검증
-        if (!urlCommentId.equals(commentDeleteDto.getCommentId())) {
-            String errorMessage = "deleteComment API Error = 'Path Variable Id != Message Body Id'";
-            log.error(errorMessage);
-            return ResponseEntity.badRequest().body(errorMessage);
-        }
 
         //댓글의 상태를 삭제 상태로 변경
         commentService.deleteComment(commentDeleteDto);
