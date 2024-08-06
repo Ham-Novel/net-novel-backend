@@ -7,10 +7,7 @@ import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.EpisodeStatus;
-import com.ham.netnovel.episode.dto.EpisodeCreateDto;
-import com.ham.netnovel.episode.dto.EpisodeListItemDto;
-import com.ham.netnovel.episode.dto.EpisodeDeleteDto;
-import com.ham.netnovel.episode.dto.EpisodeUpdateDto;
+import com.ham.netnovel.episode.dto.*;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.service.NovelService;
 import lombok.extern.slf4j.Slf4j;
@@ -121,6 +118,16 @@ public class EpisodeServiceImpl implements EpisodeService {
             //나머지 Repository 작업 예외 처리
             throw new ServiceMethodException("getEpisodesByNovel 메서드 에러 발생", ex.getCause());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EpisodeListInfoDto getNovelEpisodesInfo(Long novelId) {
+        List<Episode> episodeList = episodeRepository.findByNovel(novelId);
+        return EpisodeListInfoDto.builder()
+                .chapterCount(episodeList.size())
+                .lastUpdatedAt(episodeList.get(0).getCreatedAt())
+                .build();
     }
 
     @Override

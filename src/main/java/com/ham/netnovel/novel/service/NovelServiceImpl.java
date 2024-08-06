@@ -186,7 +186,7 @@ public class NovelServiceImpl implements NovelService {
                 .title(novel.getTitle())
                 .description(novel.getDescription())
                 .authorName(novel.getAuthor().getNickName())
-                .view(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
+                .views(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
                 .episodeCount(novel.getEpisodes().size())
                 //Todo FavoriteNovel, NovelTag 도메인 완성되는 대로 작업
                 .favoriteCount(0)

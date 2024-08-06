@@ -32,7 +32,7 @@ public class NovelInfoDto {
 
     private String authorName; //작가 닉네임
 
-    private Integer view; //조회수
+    private Integer views; //조회수
 
     private Integer favoriteCount; //선호작 수
 

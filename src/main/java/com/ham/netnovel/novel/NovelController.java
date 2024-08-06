@@ -40,7 +40,6 @@ public class NovelController {
         return ResponseEntity.ok(novelService.getNovelInfo(novelId));
     }
 
-    //ToDo List로 Novel 데이터들을 가져오는 getNovelList() 구현
     @GetMapping
     public ResponseEntity<List<NovelInfoDto>> getNovelList() {
         return null;

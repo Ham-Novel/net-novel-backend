@@ -173,7 +173,7 @@ public class CommentController {
      * 댓글과 대댓글 DTO는 엔티티PK, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
-    @GetMapping("/episode/{episodeId}/comments")
+    @GetMapping("/episodes/{episodeId}/comments")
     public ResponseEntity<?> getEpisodeComments(
             @PathVariable(name = "episodeId") Long episodeId,
             @RequestParam(name = "sortBy", defaultValue = "recent") String sortBy,
@@ -202,7 +202,7 @@ public class CommentController {
      * 댓글은 최신 순으로 정렬
      * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
      */
-    @GetMapping("/novel/{novelId}/comments")
+    @GetMapping("/novels/{novelId}/comments")
     public ResponseEntity<List<CommentEpisodeListDto>> getNovelComments(
             @PathVariable(name = "novelId") Long novelId,
             @RequestParam(name = "sortBy", defaultValue = "recent") String sortBy,

@@ -12,7 +12,8 @@ public interface EpisodeRepository extends JpaRepository<Episode,Long> {
     @Query("select e from Episode e " +
             "join fetch e.novel n " +
             "where n.id = :novelId " +
-            "and e.status = 'ACTIVE' ") //ACTIVE 상태인 댓글만 가져옴
+            "and e.status = 'ACTIVE' " + //ACTIVE 상태인 댓글만 가져옴
+            "order by e.createdAt desc") //최신순
     List<Episode> findByNovel(@Param("novelId") Long novelId);
 
 
