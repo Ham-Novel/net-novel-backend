@@ -16,6 +16,9 @@ public class NovelUpdateDto {
     @NotNull
     private Long novelId;
 
+    @NotNull
+    private String accessorProviderId;
+
     @Size(max = 30)
     private String title;
 
@@ -23,6 +26,4 @@ public class NovelUpdateDto {
     private String description;
 
     private NovelType type;
-
-    private String accessorProviderId;
 }

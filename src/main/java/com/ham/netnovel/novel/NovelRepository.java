@@ -9,6 +9,12 @@ import java.util.List;
 public interface NovelRepository extends JpaRepository<Novel, Long> {
 
 
+    @Query("select n from Novel n " +
+            "join fetch n.author m " +
+            "where m.id = :providerId")
+    List<Novel> findNovelsByMember(@Param("providerId") String providerId);
+
+
 
     @Query("select n from Novel n " +
             "where n.id in " +

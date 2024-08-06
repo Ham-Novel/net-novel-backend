@@ -34,9 +34,9 @@ public class EpisodeController {
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
 
         if (sortBy.equals("recent")) {
-            return ResponseEntity.ok(episodeService.getEpisodesByNovelSortByRecent(novelId, pageable));
+            return ResponseEntity.ok(episodeService.getNovelEpisodesByRecent(novelId, pageable));
         } else if (sortBy.equals("initial")) {
-            return ResponseEntity.ok(episodeService.getEpisodesByNovelSortByInitial(novelId, pageable));
+            return ResponseEntity.ok(episodeService.getNovelEpisodesByInitial(novelId, pageable));
         } else {
             //정렬 값이 없으면 예외 발생
             throw new IllegalArgumentException("getEpisodesByNovel: invalid sortBy option");

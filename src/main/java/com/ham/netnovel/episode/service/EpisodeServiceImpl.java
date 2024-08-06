@@ -48,7 +48,7 @@ public class EpisodeServiceImpl implements EpisodeService {
     @Override
     @Transactional
     public void createEpisode(EpisodeCreateDto episodeCreateDto) {
-        Novel novelProperty = novelService.getNovelEntity(episodeCreateDto.getNovelId())
+        Novel novelProperty = novelService.getNovel(episodeCreateDto.getNovelId())
                 .orElseThrow(() -> new NoSuchElementException("Novel 정보 없음"));
 
         CoinCostPolicy costPolicyProperty = costPolicyService.getPolicyEntity(episodeCreateDto.getCostPolicyId())
@@ -111,7 +111,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EpisodeListItemDto> getEpisodesByNovel(Long novelId) {
+    public List<EpisodeListItemDto> getNovelEpisodes(Long novelId) {
         try {
             return episodeRepository.findByNovel(novelId)
                     .stream()
@@ -125,7 +125,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EpisodeListItemDto> getEpisodesByNovelSortByRecent(Long novelId, Pageable pageable) {
+    public List<EpisodeListItemDto> getNovelEpisodesByRecent(Long novelId, Pageable pageable) {
         try {
             return episodeRepository.findByNovelOrderByCreatedAtDesc(novelId, pageable)
                     .stream()
@@ -139,7 +139,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EpisodeListItemDto> getEpisodesByNovelSortByInitial(Long novelId, Pageable pageable) {
+    public List<EpisodeListItemDto> getNovelEpisodesByInitial(Long novelId, Pageable pageable) {
         try {
             return episodeRepository.findByNovelOrderByCreatedAtAsc(novelId, pageable)
                     .stream()

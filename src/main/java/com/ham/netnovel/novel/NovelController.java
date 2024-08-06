@@ -6,7 +6,7 @@ import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
-import com.ham.netnovel.novel.dto.NovelResponseDto;
+import com.ham.netnovel.novel.dto.NovelInfoDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novel.service.NovelService;
 import jakarta.validation.Valid;
@@ -33,16 +33,16 @@ public class NovelController {
     /**
      * 소설 상세 페이지에서 Novel 데이터 응답하는 API
      * @param novelId novelId를 담은 url path variable
-     * @return ResponseEntity NovelResponseDto로 Novel 데이터 반환.
+     * @return ResponseEntity
      */
     @GetMapping("/novels/{novelId}")
-    public ResponseEntity<NovelResponseDto> getNovel(@PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(novelService.getNovel(novelId));
+    public ResponseEntity<NovelInfoDto> getNovel(@PathVariable("novelId") Long novelId) {
+        return ResponseEntity.ok(novelService.getNovelInfo(novelId));
     }
 
     //ToDo List로 Novel 데이터들을 가져오는 getNovelList() 구현
     @GetMapping
-    public ResponseEntity<List<NovelResponseDto>> getNovelList() {
+    public ResponseEntity<List<NovelInfoDto>> getNovelList() {
         return null;
     }
 
@@ -71,9 +71,7 @@ public class NovelController {
         //DTO에 유저 정보(providerId) 값 저장
         reqBody.setAccessorProviderId(principal.getName());
 
-        //DTO를 서비스로 넘겨서 Novel DB에 저장. 에러 발생 시 내부에서 예외 처리.
-        NovelResponseDto result = novelService.createNovel(reqBody);
-        return ResponseEntity.ok("createNovel: " + result.toString());
+        return ResponseEntity.ok("작품 생성 완료.");
     }
 
     /**
@@ -108,8 +106,7 @@ public class NovelController {
             return ResponseEntity.badRequest().body(errorMessage);
         }
 
-        NovelResponseDto result = novelService.updateNovel(reqBody);
-        return ResponseEntity.ok("updateNovel: " + result.toString());
+        return ResponseEntity.ok("작품 업데이트 완료.");
     }
 
     /**
@@ -144,8 +141,6 @@ public class NovelController {
             return ResponseEntity.badRequest().body(errorMessage);
         }
 
-        NovelResponseDto result = novelService.deleteNovel(reqBody);
-        return ResponseEntity.ok("deleteNovel: " + result.toString());
-
+        return ResponseEntity.ok("작품 삭제 완료.");
     }
 }
