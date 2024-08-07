@@ -47,7 +47,7 @@ public class NovelInfoDto {
     @NotNull
     private Integer episodeCount; //에피소드 총 화수
 
-    @NotNull
-    private List<Tag> tags; //작품 태그
+//    @NotNull
+//    private List<Tag> tags; //작품 태그
 
 }

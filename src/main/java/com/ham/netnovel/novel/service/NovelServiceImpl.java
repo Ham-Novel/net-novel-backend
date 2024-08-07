@@ -12,12 +12,14 @@ import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
 import com.ham.netnovel.novel.dto.NovelInfoDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
+import com.ham.netnovel.novelAverageRating.NovelAverageRating;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.nio.file.AccessDeniedException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -179,17 +181,23 @@ public class NovelServiceImpl implements NovelService {
     }
 
     NovelInfoDto convertEntityToInfoDto(Novel novel) {
+        NovelAverageRating averageRating = Optional.ofNullable(novel.getNovelAverageRating())
+                .orElse(NovelAverageRating.builder()
+                        .novel(novel)
+                        .averageRating(BigDecimal.valueOf(0))
+                        .ratingCount(0)
+                .build());
         return NovelInfoDto.builder()
                 .novelId(novel.getId())
                 .title(novel.getTitle())
                 .description(novel.getDescription())
                 .authorName(novel.getAuthor().getNickName())
                 .views(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
-                .averageRating(novel.getNovelAverageRating().getAverageRating())
+                .averageRating(averageRating.getAverageRating())
                 .episodeCount(novel.getEpisodes().size())
-                //Todo FavoriteNovel, NovelTag 도메인 완성되는 대로 작업
+                //Todo FavoriteNovel 도메인 완성되는 대로 작업
                 .favoriteCount(0)
-                .tags(Collections.emptyList())
+//                .tags(Collections.emptyList())
                 .build();
     }
 }

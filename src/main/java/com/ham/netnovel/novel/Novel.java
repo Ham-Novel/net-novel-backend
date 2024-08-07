@@ -21,7 +21,7 @@ public class Novel {
     private Long id;
 
     //제목
-    @Column(nullable = false, length = 30) //null 불가능
+    @Column(unique = true, nullable = false, length = 30) //null 불가능
     private String title;
 
     //작품 설명

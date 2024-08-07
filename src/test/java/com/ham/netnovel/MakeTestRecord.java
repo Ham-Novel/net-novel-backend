@@ -6,7 +6,6 @@ import com.ham.netnovel.coinCostPolicy.service.CoinCostPolicyService;
 import com.ham.netnovel.comment.CommentRepository;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.service.CommentService;
-import com.ham.netnovel.commentLike.CommentLike;
 import com.ham.netnovel.commentLike.CommentLikeRepository;
 import com.ham.netnovel.commentLike.LikeType;
 import com.ham.netnovel.commentLike.dto.CommentLikeToggleDto;
@@ -14,7 +13,6 @@ import com.ham.netnovel.commentLike.service.CommentLikeService;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.dto.EpisodeCreateDto;
 import com.ham.netnovel.episode.service.EpisodeService;
-import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.member.OAuthProvider;
 import com.ham.netnovel.member.data.Gender;
@@ -24,12 +22,16 @@ import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.service.NovelService;
-import com.ham.netnovel.novelAverageRating.NovelAverageRating;
-import com.ham.netnovel.novelAverageRating.NovelAverageRatingRepository;
-import com.ham.netnovel.novelAverageRating.service.NovelAverageRatingService;
 import com.ham.netnovel.novelRating.NovelRatingRepository;
 import com.ham.netnovel.novelRating.dto.NovelRatingSaveDto;
 import com.ham.netnovel.novelRating.service.NovelRatingService;
+import com.ham.netnovel.novelTag.NovelTagRepository;
+import com.ham.netnovel.novelTag.dto.NovelTagCreateDto;
+import com.ham.netnovel.novelTag.dto.NovelTagListDto;
+import com.ham.netnovel.novelTag.service.NovelTagService;
+import com.ham.netnovel.tag.TagRepository;
+import com.ham.netnovel.tag.dto.TagCreateDto;
+import com.ham.netnovel.tag.service.TagService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +80,16 @@ public class MakeTestRecord {
     CommentLikeService commentLikeService;
 
     @Autowired
+    TagRepository tagRepository;
+    @Autowired
+    TagService tagService;
+
+    @Autowired
+    NovelTagRepository novelTagRepository;
+    @Autowired
+    NovelTagService novelTagService;
+
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Test
@@ -111,7 +123,6 @@ public class MakeTestRecord {
         //좋아요 랜덤 설정
         long likesFirst = random.nextLong(50);
         long likesSecond = random.nextLong(90);
-        long likesThird = random.nextLong(100);
 
         IntStream.rangeClosed(1, 100).forEach(i -> {
 
@@ -162,7 +173,7 @@ public class MakeTestRecord {
 
             //댓글 좋아요 생성
             long commentId = 1L;
-            if (i >= 50) {
+            if (i >= 70) {
                 commentId = likesFirst;
             }
             else if (i >= 90) {
@@ -174,6 +185,32 @@ public class MakeTestRecord {
                     .commentId(commentId)
                     .build();
             commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
+        });
+    }
+
+    @Test
+    void makeTagItems() {
+        novelTagRepository.deleteAll();
+        tagRepository.deleteAll();
+
+        jdbcTemplate.execute("ALTER TABLE tag ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE novel_tag ALTER COLUMN id RESTART WITH 1");
+
+
+        Random random = new Random();
+
+        IntStream.rangeClosed(1, 100).forEach(i -> {
+            //태그 엔티티 생성
+            TagCreateDto tagCreateDto = TagCreateDto.builder().name("태그" + i).build();
+            tagService.createTag(tagCreateDto);
+
+            //테그 노벨 엔티티 생성
+            long randNovelId = random.nextLong(1, 10);
+            NovelTagCreateDto novelTagCreateDto = NovelTagCreateDto.builder()
+                    .tagName("태그" + i)
+                    .novelId(randNovelId)
+                    .build();
+            novelTagService.createNovelTag(novelTagCreateDto);
         });
     }
 }
