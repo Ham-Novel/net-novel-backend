@@ -65,7 +65,15 @@ dependencies {
 
 
     //Spring Session Library for JDBC
-    implementation 'org.springframework.session:spring-session-jdbc'
+//    implementation 'org.springframework.session:spring-session-jdbc'
+
+    //Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    //Spring Session Library for Redis
+    implementation 'org.springframework.session:spring-session-data-redis'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 
 
 
