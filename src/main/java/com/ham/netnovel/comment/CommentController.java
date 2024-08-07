@@ -9,7 +9,6 @@ import com.ham.netnovel.comment.dto.CommentUpdateDto;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.common.utils.PageableUtil;
-import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,7 @@ import java.util.Map;
 
 @Controller
 @Slf4j
-@RequestMapping("/api/comments")
+@RequestMapping("/api")
 public class CommentController {
 
 
@@ -50,7 +49,7 @@ public class CommentController {
      * @param authentication   유저의 인증정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
-    @PostMapping
+    @PostMapping("/comments")
     public ResponseEntity<String> createComment(@Valid @RequestBody CommentCreateDto commentCreateDto,
                                                 BindingResult bindingResult,
                                                 Authentication authentication) {
@@ -86,10 +85,13 @@ public class CommentController {
      * @param authentication   유저의 인증 정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
-    @PatchMapping
-    public ResponseEntity<String> updateComment(@Valid @RequestBody CommentUpdateDto commentUpdateDto,
-                                                BindingResult bindingResult,
-                                                Authentication authentication) {
+    @PatchMapping("/comments/{commentId}")
+    public ResponseEntity<String> updateComment(
+            @PathVariable(name = "commentId") Long urlCommentId,
+            @Valid @RequestBody CommentUpdateDto commentUpdateDto,
+            BindingResult bindingResult,
+            Authentication authentication
+    ) {
 
         //CommentUpdateDto Validation 에러가 있을경우 badRequest 전송
         if (bindingResult.hasErrors()) {
@@ -106,7 +108,6 @@ public class CommentController {
         //DTO에 유저 정보(providerId) 값 저장
         commentUpdateDto.setProviderId(principal.getName());
 
-        //
         commentService.updateComment(commentUpdateDto);
 
         return ResponseEntity.ok("댓글 수정 완료");
@@ -122,11 +123,12 @@ public class CommentController {
      * @param authentication   유저의 인증 정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
-    @DeleteMapping
-    public ResponseEntity<String> deleteComment(@Valid @RequestBody CommentDeleteDto commentDeleteDto,
-                                                BindingResult bindingResult,
-                                                Authentication authentication) {
-
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<String> deleteComment(
+            @PathVariable(name = "commentId") Long urlCommentId,
+            @Valid @RequestBody CommentDeleteDto commentDeleteDto,
+            BindingResult bindingResult,
+            Authentication authentication) {
 
         //CommentUpdateDto Validation 에러가 있을경우 badRequest 전송
         if (bindingResult.hasErrors()) {
@@ -157,12 +159,12 @@ public class CommentController {
      * 댓글과 대댓글 DTO는 엔티티PK, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
-    @GetMapping("/episode{episodeId}/{sortBy}")
+    @GetMapping("/episode/{episodeId}/comments")
     public ResponseEntity<?> getEpisodeComments(
             @PathVariable(name = "episodeId") Long episodeId,
-            @PathVariable(name = "sortBy") String sortBy,
-            @RequestParam(name = "pageNumber",defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize",defaultValue = "10") int pageSize){
+            @RequestParam(name = "sortBy", defaultValue = "recent") String sortBy,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize){
 
         //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
@@ -186,12 +188,12 @@ public class CommentController {
      * 댓글은 최신 순으로 정렬
      * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
      */
-    @GetMapping("/novel{novelId}/{sortBy}")
+    @GetMapping("/novel/{novelId}/comments")
     public ResponseEntity<List<CommentEpisodeListDto>> getNovelComments(
             @PathVariable(name = "novelId") Long novelId,
-            @PathVariable(name = "sortBy") String sortBy,
-            @RequestParam(name = "pageNumber",defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize",defaultValue = "10") int pageSize
+            @RequestParam(name = "sortBy", defaultValue = "recent") String sortBy,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
 
         //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
@@ -207,7 +209,7 @@ public class CommentController {
         }
         else {
             //정렬 값이 없으면 예외 발생
-            throw new IllegalArgumentException("postNovelComments: invalid sortBy option");
+            throw new IllegalArgumentException("getNovelComments: invalid sortBy option");
         }
     }
 

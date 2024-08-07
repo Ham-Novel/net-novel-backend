@@ -1,18 +1,18 @@
 package com.ham.netnovel.episode;
 
-import com.ham.netnovel.episode.dto.EpisodeCreateDto;
+import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.episode.dto.EpisodeListItemDto;
 import com.ham.netnovel.episode.service.EpisodeService;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/episode")
+@RequestMapping("/api")
 @Slf4j
 public class EpisodeController {
     private final EpisodeService episodeService;
@@ -22,16 +22,24 @@ public class EpisodeController {
         this.episodeService = episodeService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<EpisodeListItemDto>> getEpisodeListByNovel(@RequestParam("novelId") Long novelId) {
-        List<EpisodeListItemDto> episodesByNovel = episodeService.getEpisodesByNovel(novelId);
-        return ResponseEntity.ok(episodesByNovel);
-    }
+    @GetMapping("/novels/{novelId}/episodes")
+    public ResponseEntity<List<EpisodeListItemDto>> getEpisodesByNovel(
+            @PathVariable(name = "novelId") Long novelId,
+            @RequestParam(name = "sortBy", defaultValue = "recent") String sortBy,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
+    ) {
 
-    @PostMapping
-    public ResponseEntity<String> createEpisode(@Valid @RequestBody EpisodeCreateDto reqBody) {
-        episodeService.createEpisode(reqBody);
-        return ResponseEntity.ok("Episode Create Execution");
-    }
+        //Pageable 객체 생성. null or 음수이면 예외 발생
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
 
+        if (sortBy.equals("recent")) {
+            return ResponseEntity.ok(episodeService.getEpisodesByNovelSortByRecent(novelId, pageable));
+        } else if (sortBy.equals("initial")) {
+            return ResponseEntity.ok(episodeService.getEpisodesByNovelSortByInitial(novelId, pageable));
+        } else {
+            //정렬 값이 없으면 예외 발생
+            throw new IllegalArgumentException("getEpisodesByNovel: invalid sortBy option");
+        }
+    }
 }

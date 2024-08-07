@@ -19,7 +19,7 @@ import java.util.List;
 
 @Controller
 @Slf4j
-@RequestMapping("/api/coin-charge-history")
+@RequestMapping("/api")
 public class CoinChargeHistoryController {
 
     private final CoinChargeHistoryService coinChargeHistoryService;
@@ -30,7 +30,7 @@ public class CoinChargeHistoryController {
         this.authenticator = authenticator;
     }
 
-    @PostMapping
+    @PostMapping("/coin-charge-history")
     public ResponseEntity<?> chargeMemberCoins(@Valid @RequestBody CoinChargeCreateDto coinChargeCreateDto,
                                                BindingResult bindingResult,
                                                Authentication authentication){
