@@ -8,11 +8,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberOAuthDto {
+public class MemberOAuthDto implements Serializable {
 
     //인증 제공자에서 지정한 유저 ID값
     private String providerId;
