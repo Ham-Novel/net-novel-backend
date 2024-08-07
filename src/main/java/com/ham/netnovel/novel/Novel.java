@@ -41,9 +41,11 @@ public class Novel {
     @JoinColumn(name = "member_id")
     private Member author;
 
+    //작품 에피소드들
     @OneToMany(mappedBy = "novel")
     private List<Episode> episodes = new ArrayList<>();
 
+    //평균 별점
     @OneToOne(mappedBy = "novel")
     private NovelAverageRating novelAverageRating;
 

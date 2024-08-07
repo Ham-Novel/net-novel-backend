@@ -141,7 +141,7 @@ public class NovelServiceImpl implements NovelService {
         try {
             return convertEntityToInfoDto(targetNovel);
         } catch (Exception ex) {
-            throw new ServiceMethodException("getNovelInfo 메서드 에러 발생", ex.getCause());
+            throw new ServiceMethodException("getNovelInfo 메서드 에러 발생: " + ex.getMessage());
         }
     }
 
@@ -161,8 +161,6 @@ public class NovelServiceImpl implements NovelService {
         } catch (Exception ex) {//예외 발생시 처리
             throw new ServiceMethodException("getFavoriteNovels 메서드 에러 발생", ex.getCause());
         }
-
-
     }
 
     @Override
@@ -187,6 +185,7 @@ public class NovelServiceImpl implements NovelService {
                 .description(novel.getDescription())
                 .authorName(novel.getAuthor().getNickName())
                 .views(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
+                .averageRating(novel.getNovelAverageRating().getAverageRating())
                 .episodeCount(novel.getEpisodes().size())
                 //Todo FavoriteNovel, NovelTag 도메인 완성되는 대로 작업
                 .favoriteCount(0)

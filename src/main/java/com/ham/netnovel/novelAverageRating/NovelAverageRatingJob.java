@@ -22,7 +22,7 @@ public class NovelAverageRatingJob implements Job {
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-//        log.info("Novel 평균 별점 업데이트 시작");
-//        novelAverageRatingService.updateAverageRatingForAllRatedNovels();
+        log.info("Novel 평균 별점 업데이트 시작");
+        novelAverageRatingService.updateAverageRatingForAllRatedNovels();
     }
 }

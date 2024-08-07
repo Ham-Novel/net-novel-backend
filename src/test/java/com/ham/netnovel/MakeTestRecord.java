@@ -24,12 +24,19 @@ import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.service.NovelService;
+import com.ham.netnovel.novelAverageRating.NovelAverageRating;
+import com.ham.netnovel.novelAverageRating.NovelAverageRatingRepository;
+import com.ham.netnovel.novelAverageRating.service.NovelAverageRatingService;
+import com.ham.netnovel.novelRating.NovelRatingRepository;
+import com.ham.netnovel.novelRating.dto.NovelRatingSaveDto;
+import com.ham.netnovel.novelRating.service.NovelRatingService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.Random;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -49,6 +56,11 @@ public class MakeTestRecord {
     EpisodeRepository episodeRepository;
     @Autowired
     EpisodeService episodeService;
+
+    @Autowired
+    NovelRatingRepository novelRatingRepository;
+    @Autowired
+    NovelRatingService novelRatingService;
 
     @Autowired
     CoinCostPolicyRepository costPolicyRepository;
@@ -75,6 +87,7 @@ public class MakeTestRecord {
         commentRepository.deleteAll();
         episodeRepository.deleteAll();
         costPolicyRepository.deleteAll();
+        novelRatingRepository.deleteAll();
         novelRepository.deleteAll();
         memberRepository.deleteAll();
 
@@ -93,8 +106,16 @@ public class MakeTestRecord {
         String email = "test";
         String nickName = "testName";
         String providerId = "test";
+        Random random = new Random();
+
+        //좋아요 랜덤 설정
+        long likesFirst = random.nextLong(50);
+        long likesSecond = random.nextLong(90);
+        long likesThird = random.nextLong(100);
 
         IntStream.rangeClosed(1, 100).forEach(i -> {
+
+            //유저 생성
             MemberCreateDto build = MemberCreateDto.builder()
                     .email(email + i + "@naver.com")
                     .role(MemberRole.READER)
@@ -105,7 +126,7 @@ public class MakeTestRecord {
                     .build();
             memberService.createNewMember(build);
 
-
+            //작품 생성
             NovelCreateDto novelDto = NovelCreateDto.builder()
                     .title("소설 제목" + i)
                     .description("Duis ea aliquip dolor sit dolore ut adipisicing eu tempor.")
@@ -113,6 +134,16 @@ public class MakeTestRecord {
                     .build();
             novelService.createNovel(novelDto);
 
+            //작품 별점 생성
+            int randomRating = random.nextInt(1,10);
+            NovelRatingSaveDto ratingSaveDto = NovelRatingSaveDto.builder()
+                    .novelId(1L)
+                    .providerId("test" + i)
+                    .rating(randomRating)
+                    .build();
+            novelRatingService.saveNovelRating(ratingSaveDto);
+
+            //에피소드 생성
             EpisodeCreateDto episodeDto = EpisodeCreateDto.builder()
                     .novelId(1L)
                     .title("에피소드 제목" + i)
@@ -121,6 +152,7 @@ public class MakeTestRecord {
                     .build();
             episodeService.createEpisode(episodeDto);
 
+            //댓글 생성
             CommentCreateDto commentCreateDto = CommentCreateDto.builder()
                     .episodeId(Long.valueOf(i))
                     .content("댓글 내용" + i)
@@ -128,20 +160,18 @@ public class MakeTestRecord {
                     .build();
             commentService.createComment(commentCreateDto);
 
-            int j;
-            if (i <= 60) {
-                j = 1;
+            //댓글 좋아요 생성
+            long commentId = 1L;
+            if (i >= 50) {
+                commentId = likesFirst;
             }
-            else if (i <= 90) {
-                j = 2;
-            }
-            else {
-                j = 3;
+            else if (i >= 90) {
+                commentId = likesSecond;
             }
             CommentLikeToggleDto commentLikeToggleDto = CommentLikeToggleDto.builder()
                     .likeType(LikeType.LIKE)
                     .providerId("test" + i)
-                    .commentId((long) j)
+                    .commentId(commentId)
                     .build();
             commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
         });

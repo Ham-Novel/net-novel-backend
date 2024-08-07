@@ -4,8 +4,12 @@ package com.ham.netnovel.novelTag;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.tag.Tag;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class NovelTag {
 
     @Id

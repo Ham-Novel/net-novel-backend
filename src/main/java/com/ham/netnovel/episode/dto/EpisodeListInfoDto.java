@@ -16,9 +16,6 @@ import java.time.LocalDateTime;
 public class EpisodeListInfoDto {
 
     @NotNull
-    private Long novelId;
-
-    @NotNull
     private Integer chapterCount;
 
     @NotNull

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -28,16 +29,25 @@ public class NovelInfoDto {
     @Size(max = 300)
     private String description; //작품 소개
 
-    private NovelType type; //소설 등급
-
+    @NotNull
     private String authorName; //작가 닉네임
 
+    @NotNull
     private Integer views; //조회수
 
+    @NotNull
+    private BigDecimal averageRating; //평균 별점
+
+    @NotNull
     private Integer favoriteCount; //선호작 수
 
+    @NotNull
+    private NovelType type; //소설 등급
+
+    @NotNull
     private Integer episodeCount; //에피소드 총 화수
 
+    @NotNull
     private List<Tag> tags; //작품 태그
 
 }
