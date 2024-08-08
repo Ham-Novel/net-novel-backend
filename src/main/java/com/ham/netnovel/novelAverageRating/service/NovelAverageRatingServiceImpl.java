@@ -40,7 +40,7 @@ public class NovelAverageRatingServiceImpl implements NovelAverageRatingService 
     public void updateNovelAverageRating(Long novelId) {
 
         //novel 엔티티 조회, 없으면 예외로 던짐
-        Novel novel = novelService.getNovelEntity(novelId)
+        Novel novel = novelService.getNovel(novelId)
                 .orElseThrow(() -> new NoSuchElementException("updateNovelAverageRating 에러, Novel 정보가 없습니다, novelId = " + novelId));
 
 

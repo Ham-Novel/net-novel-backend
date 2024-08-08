@@ -1,10 +1,7 @@
 package com.ham.netnovel.episode.service;
 
 import com.ham.netnovel.episode.Episode;
-import com.ham.netnovel.episode.dto.EpisodeCreateDto;
-import com.ham.netnovel.episode.dto.EpisodeListItemDto;
-import com.ham.netnovel.episode.dto.EpisodeDeleteDto;
-import com.ham.netnovel.episode.dto.EpisodeUpdateDto;
+import com.ham.netnovel.episode.dto.*;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -38,7 +35,14 @@ public interface EpisodeService {
      * @param novelId 소설 id
      * @return List<EpisodeDataDto>
      */
-    List<EpisodeListItemDto> getEpisodesByNovel(Long novelId);
+    List<EpisodeListItemDto> getNovelEpisodes(Long novelId);
+
+    /**
+     * 해당 Novel에 속한 모든 Episodes List의 메타 데이터를 가져오는 메서드
+     * @param novelId 소설 id
+     * @return EpisodeListInfoDto
+     */
+    EpisodeListInfoDto getNovelEpisodesInfo(Long novelId);
 
     /**
      * 해당 Novel에 속한 모든 Episodes List dto를 최신순으로 가져오는 메서드.
@@ -47,7 +51,7 @@ public interface EpisodeService {
      * @param pageable 페이지 정보.
      * @return List<EpisodeDataDto>
      */
-    List<EpisodeListItemDto> getEpisodesByNovelSortByRecent(Long novelId, Pageable pageable);
+    List<EpisodeListItemDto> getNovelEpisodesByRecent(Long novelId, Pageable pageable);
 
     /**
      * 해당 Novel에 속한 모든 Episodes List dto를 최초순으로 가져오는 메서드.
@@ -56,5 +60,5 @@ public interface EpisodeService {
      * @param pageable 페이지 정보.
      * @return List<EpisodeDataDto>
      */
-    List<EpisodeListItemDto> getEpisodesByNovelSortByInitial(Long novelId, Pageable pageable);
+    List<EpisodeListItemDto> getNovelEpisodesByInitial(Long novelId, Pageable pageable);
 }

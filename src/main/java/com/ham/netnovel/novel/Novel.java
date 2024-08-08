@@ -4,8 +4,6 @@ import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.data.NovelType;
-import com.ham.netnovel.novel.dto.NovelResponseDto;
-import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novelAverageRating.NovelAverageRating;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,7 +21,7 @@ public class Novel {
     private Long id;
 
     //제목
-    @Column(nullable = false, length = 30) //null 불가능
+    @Column(unique = true, nullable = false, length = 30) //null 불가능
     private String title;
 
     //작품 설명
@@ -43,9 +41,11 @@ public class Novel {
     @JoinColumn(name = "member_id")
     private Member author;
 
+    //작품 에피소드들
     @OneToMany(mappedBy = "novel")
     private List<Episode> episodes = new ArrayList<>();
 
+    //평균 별점
     @OneToOne(mappedBy = "novel")
     private NovelAverageRating novelAverageRating;
 
@@ -64,21 +64,14 @@ public class Novel {
     }
 
     //댓글 엔티티 내용 변경
-    public void updateNovel(NovelUpdateDto updateDto){
-        this.title = updateDto.getTitle();
-        this.description = updateDto.getDescription();
-        this.type = updateDto.getType();
+    public void updateTitle(String title){
+        this.title = title;
+    }
+    public void updateDesc(String description){
+        this.description = description;
+    }
+    public void updateType(NovelType type){
+        this.type = type;
     }
 
-    public NovelResponseDto parseResponseDto() {
-        return NovelResponseDto.builder()
-                .novelId(this.id)
-                .title(this.title)
-                .description(this.description)
-                .authorName(this.author.getNickName())
-                .type(this.type)
-                .view(episodes.stream().mapToInt(epi->epi.getView()).sum())
-                .episodeAmount(episodes.size())
-                .build();
-    }
 }

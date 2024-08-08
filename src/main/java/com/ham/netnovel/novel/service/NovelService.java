@@ -3,55 +3,62 @@ package com.ham.netnovel.novel.service;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
-import com.ham.netnovel.novel.dto.NovelFavoriteDto;
-import com.ham.netnovel.novel.dto.NovelResponseDto;
+import com.ham.netnovel.novel.dto.NovelInfoDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface NovelService {
 
-    List<Novel> getAllNovels();
-
 
     /**
-     * novelId 값으로 DB에서 Novel 데이터 반환. 내부에서 Null 체크 수행.
-     * @param novelId Novel의 PK값
-     * @return NovelResponseDto
-     */
-    NovelResponseDto getNovel(Long novelId);
-
-    //Novel Entity가 필요한 경우. Service 단에서만 사용.
-
-    /**
-     * novelId 값으로 DB에서 Novel 엔티티 반환. 외부에서 Null 체크 필요.
-     * Service 계층에서 Novel 엔티티를 받아야하는 용도. 절대로 다른 계층에서 사용 금지.
+     * novelId 값으로 DB에서 Novel 엔티티 반환. Null 체크 필요.
      * @param novelId Novel의 PK값
      * @return Optional<Novel>
      */
-    Optional<Novel> getNovelEntity(Long novelId);
+    Optional<Novel> getNovel(Long novelId);
+
+    /**
+     * providerId 값으로 DB에서 Novel 엔티티 리스트 반환. Null 체크 필요.
+     * @param providerId 유저 id
+     * @return Optional<Novel>
+     */
+    List<Novel> getNovelsByAuthor(String providerId);
 
     /**
      * 유저가 생성한 Novel을 DB 저장.
-     * @param novelCreateDto
-     * @return NovelResponseDto
+     * @param novelCreateDto 생성 정보가 담긴 dto
      */
-    NovelResponseDto createNovel(NovelCreateDto novelCreateDto);
+    void createNovel(NovelCreateDto novelCreateDto);
 
     /**
      * DB에 저장된 Novel 데이터 변경.
-     * @param novelUpdateDto
-     * @return NovelResponseDto
+     * @param novelUpdateDto 업데이트 정보가 담긴 dto
      */
-    NovelResponseDto updateNovel(NovelUpdateDto novelUpdateDto);
+    void updateNovel(NovelUpdateDto novelUpdateDto);
 
     /**
      * DB에 저장된 Novel 삭제.
-     * @param novelDeleteDto
-     * @return NovelResponseDto
+     * @param novelDeleteDto 삭제 정보가 담긴 dto
      */
-    NovelResponseDto deleteNovel(NovelDeleteDto novelDeleteDto);
+    void deleteNovel(NovelDeleteDto novelDeleteDto);
+
+    /**
+     * Novel 엔티티를 대략적으로 설명하는 데이터를 가져오는 메서드
+     * @param novelId Novel PK 값
+     * @return NovelInfoDto
+     */
+    NovelInfoDto getNovelInfo(Long novelId);
+
+    /**
+     * DB의 저장된 모든 Novel 리스트를 최신순으로 가져오는 메서드.
+     * 페이지 단위로 일부 리스트만 가져온다.
+     * @param pageable page number, page size
+     * @return
+     */
+    List<Novel> getNovels(Pageable pageable);
 
     /**
      * 유저의 선호작 Novel 리스트 반환.

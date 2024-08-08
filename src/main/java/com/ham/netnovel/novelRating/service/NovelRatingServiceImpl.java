@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -43,7 +42,7 @@ public class NovelRatingServiceImpl implements NovelRatingService {
                 .orElseThrow(() ->
                         new NoSuchElementException("saveNovelRating 메서드 에러, 유저 정보가 null입니다. providerId=" + novelRatingSaveDto.getProviderId()));
 
-        Novel novel = novelService.getNovelEntity(novelRatingSaveDto.getNovelId())
+        Novel novel = novelService.getNovel(novelRatingSaveDto.getNovelId())
                 .orElseThrow(() ->
                         new NoSuchElementException("saveNovelRating 메서드 에러, 유저 정보가 null입니다. providerId=" + novelRatingSaveDto.getNovelId()));
 

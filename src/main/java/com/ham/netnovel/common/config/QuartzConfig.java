@@ -25,8 +25,8 @@ public class QuartzConfig {
                 .forJob(novelAverageRatingJobDetail())//트리거와 novelAverageRatingJobDetail 연결
                 .withIdentity("novelAverageRatingTrigger")//트리거 식별자 설정
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()//단순 스케쥴 설정
-//                        .withIntervalInSeconds(5)//시간설정
-                        .withIntervalInHours(12)
+                        .withIntervalInSeconds(60)//시간설정
+//                        .withIntervalInHours(12)
                         .repeatForever())//무한반복설정
                 .build();
     }
