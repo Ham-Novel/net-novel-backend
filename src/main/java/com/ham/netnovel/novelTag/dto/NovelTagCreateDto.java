@@ -13,7 +13,7 @@ import lombok.*;
 public class NovelTagCreateDto {
     @NotNull
     private Long novelId;
-
     @NotBlank
     private String tagName;
+
 }

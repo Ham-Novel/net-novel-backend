@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -124,9 +125,10 @@ public class EpisodeServiceImpl implements EpisodeService {
     @Transactional(readOnly = true)
     public EpisodeListInfoDto getNovelEpisodesInfo(Long novelId) {
         List<Episode> episodeList = episodeRepository.findByNovel(novelId);
+        LocalDateTime lastUpdatedAt = episodeList.isEmpty() ? null : episodeList.get(0).getCreatedAt();
         return EpisodeListInfoDto.builder()
                 .chapterCount(episodeList.size())
-                .lastUpdatedAt(episodeList.get(0).getCreatedAt())
+                .lastUpdatedAt(lastUpdatedAt)
                 .build();
     }
 
