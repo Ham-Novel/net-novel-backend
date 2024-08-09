@@ -146,7 +146,7 @@ public class MakeTestRecord {
             novelService.createNovel(novelDto);
 
             //작품 별점 생성
-            int randomRating = random.nextInt(1,10);
+            int randomRating = random.nextInt(1, 10);
             NovelRatingSaveDto ratingSaveDto = NovelRatingSaveDto.builder()
                     .novelId(1L)
                     .providerId("test" + i)
@@ -175,8 +175,7 @@ public class MakeTestRecord {
             long commentId = 1L;
             if (i >= 70) {
                 commentId = likesFirst;
-            }
-            else if (i >= 90) {
+            } else if (i >= 90) {
                 commentId = likesSecond;
             }
             CommentLikeToggleDto commentLikeToggleDto = CommentLikeToggleDto.builder()
@@ -213,4 +212,68 @@ public class MakeTestRecord {
             novelTagService.createNovelTag(novelTagCreateDto);
         });
     }
+
+    //댓글생성
+    @Test
+    void makeCommentItems() {
+        Long episodeId = 4L;//댓글 생성할 에피소드
+        String providerId = "test1";//작성자
+
+        int max = 10;//생성할 엔티티 번호 max
+        IntStream.rangeClosed(1, max).forEach(i -> {
+            CommentCreateDto commentCreateDto = CommentCreateDto.builder()
+                    .episodeId(episodeId)
+                    .content("댓글 내용")
+                    .providerId(providerId)//작성자
+                    .build();
+            commentService.createComment(commentCreateDto);
+        });
+    }
+
+    @Test
+    void makeCommentLikeItems(){
+
+        String providerId = "test1";//좋아요 누른 유저
+        Long commentId = 3L;//좋아요 누를 댓글 id
+
+        int max = 10;//생성할 엔티티 번호 max
+
+        IntStream.rangeClosed(1, max).forEach(i -> {
+            CommentLikeToggleDto commentLikeToggleDto = CommentLikeToggleDto.builder()
+                    .likeType(LikeType.LIKE)
+                    .providerId("test" + i)
+                    .commentId(commentId)
+                    .build();
+            commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
+
+                });
+
+
+    }
+
+    @Test
+    void makeMemberItems() {
+        int max = 10;//생성할 엔티티 번호 max
+//        Random random = new Random();
+
+        // min (포함) 과 max (포함) 사이의 랜덤 정수 반환
+
+        IntStream.rangeClosed(1, max).forEach(i -> {
+            MemberCreateDto build = MemberCreateDto.builder()
+                    .email("test" + i + "@naver.com")
+                    .role(MemberRole.READER)
+                    .gender(Gender.MALE)
+                    .nickName("nick" + i)
+                    .providerId("test" + i)
+                    .provider(OAuthProvider.NAVER)
+                    .build();
+            memberService.createNewMember(build);
+
+
+        });
+    }
+
+
 }
+
+
