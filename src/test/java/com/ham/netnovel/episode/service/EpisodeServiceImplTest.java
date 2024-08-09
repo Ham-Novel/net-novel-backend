@@ -52,7 +52,7 @@ class EpisodeServiceImplTest {
                 .build();
         //when
         service.createEpisode(createDto);
-        log.info(createDto.toString());
+//        log.info(createDto.toString());
 
         //then
         Episode getEntity = service.getEpisode(1L)
