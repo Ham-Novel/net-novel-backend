@@ -1,4 +1,4 @@
-package com.ham.netnovel.novel.dto;
+package com.ham.netnovel.tag.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -9,10 +9,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NovelDeleteDto {
+public class TagDeleteDto {
     @NotNull
-    private Long novelId;
-
-    @NotNull
-    private String accessorProviderId;
+    Long tagId;
 }

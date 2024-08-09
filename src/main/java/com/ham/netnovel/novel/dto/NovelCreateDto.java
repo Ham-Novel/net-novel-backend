@@ -1,6 +1,7 @@
 package com.ham.netnovel.novel.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -18,6 +19,6 @@ public class NovelCreateDto {
     @Size(max = 300)
     private String description;
 
-    //실행자 유저 ID
-    private String accessorProviderId;
+    @NotNull
+    private String accessorProviderId; //실행자 유저 ID
 }

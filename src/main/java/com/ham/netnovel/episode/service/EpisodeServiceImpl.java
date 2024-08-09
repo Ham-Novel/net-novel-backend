@@ -7,10 +7,7 @@ import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.EpisodeStatus;
-import com.ham.netnovel.episode.dto.EpisodeCreateDto;
-import com.ham.netnovel.episode.dto.EpisodeListItemDto;
-import com.ham.netnovel.episode.dto.EpisodeDeleteDto;
-import com.ham.netnovel.episode.dto.EpisodeUpdateDto;
+import com.ham.netnovel.episode.dto.*;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.service.NovelService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -48,7 +46,7 @@ public class EpisodeServiceImpl implements EpisodeService {
     @Override
     @Transactional
     public void createEpisode(EpisodeCreateDto episodeCreateDto) {
-        Novel novelProperty = novelService.getNovelEntity(episodeCreateDto.getNovelId())
+        Novel novelProperty = novelService.getNovel(episodeCreateDto.getNovelId())
                 .orElseThrow(() -> new NoSuchElementException("Novel 정보 없음"));
 
         CoinCostPolicy costPolicyProperty = costPolicyService.getPolicyEntity(episodeCreateDto.getCostPolicyId())
@@ -111,7 +109,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EpisodeListItemDto> getEpisodesByNovel(Long novelId) {
+    public List<EpisodeListItemDto> getNovelEpisodes(Long novelId) {
         try {
             return episodeRepository.findByNovel(novelId)
                     .stream()
@@ -125,7 +123,18 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EpisodeListItemDto> getEpisodesByNovelSortByRecent(Long novelId, Pageable pageable) {
+    public EpisodeListInfoDto getNovelEpisodesInfo(Long novelId) {
+        List<Episode> episodeList = episodeRepository.findByNovel(novelId);
+        LocalDateTime lastUpdatedAt = episodeList.isEmpty() ? null : episodeList.get(0).getCreatedAt();
+        return EpisodeListInfoDto.builder()
+                .chapterCount(episodeList.size())
+                .lastUpdatedAt(lastUpdatedAt)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EpisodeListItemDto> getNovelEpisodesByRecent(Long novelId, Pageable pageable) {
         try {
             return episodeRepository.findByNovelOrderByCreatedAtDesc(novelId, pageable)
                     .stream()
@@ -139,7 +148,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EpisodeListItemDto> getEpisodesByNovelSortByInitial(Long novelId, Pageable pageable) {
+    public List<EpisodeListItemDto> getNovelEpisodesByInitial(Long novelId, Pageable pageable) {
         try {
             return episodeRepository.findByNovelOrderByCreatedAtAsc(novelId, pageable)
                     .stream()

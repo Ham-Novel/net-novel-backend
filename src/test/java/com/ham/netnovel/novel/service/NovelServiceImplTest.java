@@ -5,83 +5,96 @@ import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
+import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
-import com.ham.netnovel.novel.dto.NovelResponseDto;
+import com.ham.netnovel.novel.dto.NovelDeleteDto;
+import com.ham.netnovel.novel.dto.NovelInfoDto;
+import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @SpringBootTest
 @Slf4j
 class NovelServiceImplTest {
-    @Autowired
-    NovelRepository novelRepository;
-
-    @Autowired
-    MemberRepository memberRepository;
-
-    @Autowired
-    MemberService memberService;
 
     @Autowired
     NovelServiceImpl novelService;
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    void setup() {
-        //DB records 전부 삭제
-        novelRepository.deleteAll();
-
-        //auto_increment id를 1부터 초기화.
-        String sql = "ALTER TABLE novel ALTER COLUMN id RESTART WITH 1";
-        jdbcTemplate.execute(sql);
-    }
-
     @Test
     void readTest() {
-        //given
-        Member member = Member.builder()
-                .providerId("1111")
-                .build();
-
-        Novel newNovel = Novel.builder()
-                .title("전형적인 빙의물")
-                .description("그냥 평범한 판타지 빙의물입니다.")
-                .build();
-        System.out.println(">> Novel Model: " + newNovel.toString());
-
         // when
-        memberRepository.save(member);
-        novelRepository.save(newNovel);
+        Optional<Novel> novel = novelService.getNovel(1L);
 
         // then
-        Novel loadNovel = novelService.getNovelEntity(1L).get();
-        System.out.println(">> Novel Model: " + loadNovel.toString());
+        Assertions.assertThat(novel.isPresent()).isTrue();
     }
 
     @Test
     void createTest() {
         //given
-        setup();
+        String authorId = "test2";
         NovelCreateDto createDto = NovelCreateDto.builder()
                 .title("소설1")
                 .description("Duis ea aliquip dolor sit dolore ut adipisicing eu tempor.")
-                .accessorProviderId("test100")
+                .accessorProviderId(authorId)
                 .build();
         log.info(createDto.toString());
 
         // when
-        NovelResponseDto responseDto = novelService.createNovel(createDto);
+        novelService.createNovel(createDto);
 
         // then
-        log.info(responseDto.toString());
+        List<Novel> novels = novelService.getNovelsByAuthor(authorId);
+        Novel recentCreated = novels.get(novels.size() - 1);
+        Assertions.assertThat(recentCreated.getTitle()).isEqualTo(createDto.getTitle());
+        Assertions.assertThat(recentCreated.getDescription()).isEqualTo(createDto.getDescription());
     }
 
+    @Test
+    void updateTest() {
+        //given
+        Long id = 1L;
+        NovelUpdateDto updateDto = NovelUpdateDto.builder()
+                .novelId(id)
+                .accessorProviderId("test1")
+                .title("변경된 작품 소개")
+                .build();
+        log.info(updateDto.toString());
+
+        //when
+        novelService.updateNovel(updateDto);
+
+        //then
+        NovelInfoDto novelInfo = novelService.getNovelInfo(id);
+        Assertions.assertThat(novelInfo.getTitle()).isEqualTo(updateDto.getTitle());
+    }
+
+    @Test
+    void deleteNovel() {
+        //given
+        Long id = 1L;
+        NovelDeleteDto deleteDto = NovelDeleteDto.builder()
+                .novelId(id)
+                .accessorProviderId("test1")
+                .build();
+        log.info(deleteDto.toString());
+
+        //when
+        novelService.deleteNovel(deleteDto);
+
+        //then
+        Novel novel = novelService.getNovel(id)
+                .orElseThrow(() -> new NoSuchElementException("에러"));
+        Assertions.assertThat(novel.getStatus()).isEqualTo(NovelStatus.DELETED_BY_USER);
+    }
 
     @Test
     void getMemberFavoriteNovels(){

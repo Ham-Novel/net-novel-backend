@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController("/api")
 @Slf4j
 public class ReCommentController {
 
@@ -60,7 +60,6 @@ public class ReCommentController {
 
 
     @PatchMapping("/recomment")
-
     public ResponseEntity<String> updateReComment(@Valid @RequestBody ReCommentUpdateDto reCommentUpdateDto,
                                                   BindingResult bindingResult,
                                                   Authentication authentication) {
