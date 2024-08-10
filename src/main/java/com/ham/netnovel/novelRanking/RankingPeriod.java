@@ -2,7 +2,7 @@ package com.ham.netnovel.novelRanking;
 
 public enum RankingPeriod {
     DAILY,
-    WEEKLEY,
+    WEEKLY,
     MONTHLY,
     ALL_TIME
 

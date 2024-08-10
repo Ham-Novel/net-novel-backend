@@ -45,4 +45,19 @@ class NovelRankingServiceImplTest {
     @Test
     void updateMonthlyRankings() {
     }
+
+    @Test
+    void saveRankingToRedis(){
+//        RankingPeriod period = RankingPeriod.DAILY;
+        RankingPeriod period = RankingPeriod.WEEKLY;
+        novelRankingService.saveRankingToRedis(period);
+
+    }
+    @Test
+    void getRankingFromRedis(){
+
+        String period = "daily";
+        novelRankingService.getRankingFromRedis(period);
+
+    }
 }
