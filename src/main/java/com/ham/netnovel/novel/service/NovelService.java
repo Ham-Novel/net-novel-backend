@@ -74,4 +74,13 @@ public interface NovelService {
     List<Long> getRatedNovelIds();
 
 
+    /**
+     *랭킹에 따른 소설 상세정보를 전달하는 메서드
+     * @param period 랭킹주기(daily,weekly,monthly,all-time 디폴트값은 daily)
+     * @return List<NovelInfoDto>
+     */
+    List<NovelInfoDto> getNovelsByRanking(String period);
+
+
+
 }

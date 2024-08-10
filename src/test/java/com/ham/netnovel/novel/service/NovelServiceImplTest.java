@@ -46,7 +46,7 @@ class NovelServiceImplTest {
                 .description("Duis ea aliquip dolor sit dolore ut adipisicing eu tempor.")
                 .accessorProviderId(authorId)
                 .build();
-        log.info(createDto.toString());
+//        log.info(createDto.toString());
 
         // when
         novelService.createNovel(createDto);
@@ -67,7 +67,7 @@ class NovelServiceImplTest {
                 .accessorProviderId("test1")
                 .title("변경된 작품 소개")
                 .build();
-        log.info(updateDto.toString());
+//        log.info(updateDto.toString());
 
         //when
         novelService.updateNovel(updateDto);
@@ -85,7 +85,7 @@ class NovelServiceImplTest {
                 .novelId(id)
                 .accessorProviderId("test1")
                 .build();
-        log.info(deleteDto.toString());
+//        log.info(deleteDto.toString());
 
         //when
         novelService.deleteNovel(deleteDto);
@@ -130,6 +130,19 @@ class NovelServiceImplTest {
         List<Long> ratedNovelIds = novelService.getRatedNovelIds();
         for (Long ratedNovelId : ratedNovelIds) {
             System.out.println("novelId ="+ratedNovelId);
+
+        }
+
+    }
+
+    //테스트성공
+    @Test
+    public void getRankedNovels(){
+
+        String period = "daily";
+        List<NovelInfoDto> rankedNovels = novelService.getNovelsByRanking(period);
+        for (NovelInfoDto rankedNovel : rankedNovels) {
+            System.out.println(rankedNovel.toString());
 
         }
 
