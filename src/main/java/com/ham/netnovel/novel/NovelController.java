@@ -45,6 +45,18 @@ public class NovelController {
         return null;
     }
 
+    /**
+     * 주어진 랭킹 기간에 따라 소설 랭킹 정보를 조회하고 반환하는 API
+     * @param period 쿼리 파라미터로 랭킹 기간을 받음, (daily, weekly, monthly, all-time 중 하나)
+     * @return ResponseEntity<List<NovelInfoDto>> 소설 정보를 담은 객체 반환.
+     */
+    @GetMapping("/novels/ranking")
+    public ResponseEntity<List<NovelInfoDto>> getNovelsByRanking(@RequestParam("period") String period){
+        //유저가 요청한 랭킹 기간에 따라, 소설 정보를 랭킹 순서대로 정렬하여 List에 담음
+        List<NovelInfoDto> rankedNovels = novelService.getNovelsByRanking(period);
+        return ResponseEntity.ok(rankedNovels);//소설 정보 전송
+    }
+
 
     /**
      * 유저가 생성한 소설(Novel) 서버에 저장하는 API
@@ -127,4 +139,8 @@ public class NovelController {
 
         return ResponseEntity.ok("작품 삭제 완료.");
     }
+
+
+
+
 }
