@@ -13,6 +13,7 @@ import com.ham.netnovel.novel.dto.NovelDeleteDto;
 import com.ham.netnovel.novel.dto.NovelInfoDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novelAverageRating.NovelAverageRating;
+import com.ham.netnovel.novelRanking.service.NovelRankingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -31,10 +32,13 @@ public class NovelServiceImpl implements NovelService {
     private final NovelRepository novelRepository;
     private final MemberService memberService;
 
+    private final NovelRankingService novelRankingService;
+
     @Autowired
-    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService) {
+    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService, NovelRankingService novelRankingService) {
         this.novelRepository = novelRepository;
         this.memberService = memberService;
+        this.novelRankingService = novelRankingService;
     }
 
 
@@ -180,13 +184,40 @@ public class NovelServiceImpl implements NovelService {
         }
     }
 
+    @Override
+    @Transactional
+    public List<NovelInfoDto> getNovelsByRanking(String period) {
+
+        try {
+
+
+        }catch (Exception ex){
+            throw new ServiceMethodException("getRankedNovels 메서드 에러 발생"+ex.getMessage());
+
+        }
+        //랭킹 주기에 맞춰, 소설 랭킹과 소설 id 값을 List로 받아옴
+        List<Map<String, Object>> rankingFromRedis = novelRankingService.getRankingFromRedis(period);
+        // List에 담겨있는 novelId를 순서와 함께 추출
+        List<Long> novelIds = rankingFromRedis.stream()
+                .sorted(Comparator.comparing(ranking -> (Integer) ranking.get("ranking"))) // ranking 순으로 정렬
+                .map(ranking -> (Long) ranking.get("novelId"))
+                .toList();
+        // novel 정보를 NovelInfoDto로 변환하여 반환 (랭킹 순서로 반환)
+        return novelRepository.findAllById(novelIds)
+                .stream()
+                .sorted(Comparator.comparing(novel -> novelIds.indexOf(novel.getId()))) // novelIds 순서로 정렬(JPA는 id 순서로 정렬함)
+                .map(this::convertEntityToInfoDto)
+                .collect(Collectors.toList());
+    }
+
     NovelInfoDto convertEntityToInfoDto(Novel novel) {
         NovelAverageRating averageRating = Optional.ofNullable(novel.getNovelAverageRating())
                 .orElse(NovelAverageRating.builder()
                         .novel(novel)
                         .averageRating(BigDecimal.valueOf(0))
                         .ratingCount(0)
-                .build());
+                        .build());
+
         return NovelInfoDto.builder()
                 .novelId(novel.getId())
                 .title(novel.getTitle())
