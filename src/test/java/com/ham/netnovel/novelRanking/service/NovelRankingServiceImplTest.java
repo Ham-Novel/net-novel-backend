@@ -31,11 +31,12 @@ class NovelRankingServiceImplTest {
         System.out.println(novelRankingEntity.get().getId());
     }
 
+    //테스트 성공
     @Test
     void updateDailyRankings() {
         novelRankingService.updateDailyRankings();
     }
-
+    //테스트 성공
     @Test
     void updateWeeklyRankings() {
         novelRankingService.updateWeeklyRankings();
@@ -48,8 +49,8 @@ class NovelRankingServiceImplTest {
 
     @Test
     void saveRankingToRedis(){
-//        RankingPeriod period = RankingPeriod.DAILY;
-        RankingPeriod period = RankingPeriod.WEEKLY;
+        RankingPeriod period = RankingPeriod.DAILY;
+//        RankingPeriod period = RankingPeriod.WEEKLY;
         novelRankingService.saveRankingToRedis(period);
 
     }

@@ -80,45 +80,45 @@ public class NovelRankingServiceImpl implements NovelRankingService {
 
     }
 
+
     @Override
     @Transactional
     public void updateWeeklyRankings() {
         //메서드 실행시점 연 월 일 객체에 저장
         LocalDate todayDate = LocalDate.now();
-        //오늘 날짜로 소설 조회수 랭킹 데이터 가져옴
-        List<NovelRankingUpdateDto> weeklyRanking = episodeViewCountService.getWeeklyRanking(todayDate);
-        //DB에 저장할 사용할 List 객체 생성
+        LocalDate endDate = todayDate.minusDays(1);//메서드 실행 날로부터 하루전 정보
+        LocalDate startDate = todayDate.minusDays(7);//메서드 실행 날로부터 일주일 전 정보
+
+        List<Object[]> result = novelRakingRepository.findTotalViewsByDateAndRankingPeriod(endDate, startDate, RankingPeriod.DAILY)
+                .stream()
+                .sorted((obj1, obj2) -> {//결과를 totalViews로 정렬
+                    Long totalViews1 = (Long) obj1[1];//인덱스 1번은 totalViews
+                    Long totalViews2 = (Long) obj2[1];
+                    return totalViews2.compareTo(totalViews1);//totalView 비교, 내림차순으로 정렬
+                }).toList();//List로 추출
+
+        //DB에 저장하기 위한 객체 리스트 생성
         List<NovelRanking> rankingsToSave = new ArrayList<>();
 
-        for (NovelRankingUpdateDto updateDto : weeklyRanking) {
-            Novel novel = updateDto.getNovel();
-            Optional<NovelRanking> novelRankingEntity = getNovelRankingEntity(novel.getId(), todayDate, RankingPeriod.WEEKLY);
-
-            if (novelRankingEntity.isPresent()) {
-                log.info("엔티티 Weekly 랭킹 기록 업데이트, Novel Id = {}, 상세정보 ={} ", updateDto.getNovel().getId(), updateDto.toString());
-                NovelRanking novelRanking = novelRankingEntity.get();
-                novelRanking.updateNovelRanking(updateDto.getRanking(), updateDto.getTotalViews());
-                rankingsToSave.add(novelRanking);
-            } else {
-                log.info("엔티티 Weekly 랭킹 기록 생성, Novel Id = {}, 상세정보 ={} ", updateDto.getNovel().getId(), updateDto.toString());
-                NovelRanking newNovelRanking = NovelRanking.builder()
-                        .rankingPeriod(RankingPeriod.WEEKLY)
-                        .novel(updateDto.getNovel())
-                        .totalViews(updateDto.getTotalViews())
-                        .rankingDate(todayDate)
-                        .ranking(updateDto.getRanking())
-                        .build();
-                rankingsToSave.add(newNovelRanking);
-            }
+        for (int i = 0; i < result.size(); i++) {
+            Novel novel = (Novel) result.get(i)[0];//인덱스 0번은 Novel 엔티티
+            Long totalViews = (Long) result.get(i)[1];//인덱스 1번은 totalViews
+            log.info("엔티티 Weekly 랭킹 기록 생성, Novel Id = {}", novel.getId());
+            NovelRanking newNovelRanking = NovelRanking.builder()//NovelRanking 엔티티 생성
+                    .rankingPeriod(RankingPeriod.WEEKLY)//주간 랭킹 정보
+                    .novel(novel)//소설 엔티티
+                    .totalViews(totalViews)//1주간 조회수 총합
+                    .rankingDate(todayDate)//저장날짜(오늘)
+                    .ranking(i+1)//랭킹순서로 정렬되어 있으므로, i+1이 랭킹
+                    .build();
+            rankingsToSave.add(newNovelRanking);//리스트에 객체 추가
         }
-        novelRakingRepository.saveAll(rankingsToSave);
-
-
+        novelRakingRepository.saveAll(rankingsToSave);//엔티티 리스트 저장
     }
+
 
     @Override
     public void updateMonthlyRankings() {
-
 
     }
 
