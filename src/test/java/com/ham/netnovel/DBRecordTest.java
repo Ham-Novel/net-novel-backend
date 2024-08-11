@@ -10,25 +10,33 @@ import com.ham.netnovel.commentLike.CommentLikeRepository;
 import com.ham.netnovel.commentLike.LikeType;
 import com.ham.netnovel.commentLike.dto.CommentLikeToggleDto;
 import com.ham.netnovel.commentLike.service.CommentLikeService;
+import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.dto.EpisodeCreateDto;
 import com.ham.netnovel.episode.service.EpisodeService;
+import com.ham.netnovel.favoriteNovel.FavoriteNovelRepository;
+import com.ham.netnovel.favoriteNovel.service.FavoriteNovelService;
+import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.member.OAuthProvider;
 import com.ham.netnovel.member.data.Gender;
 import com.ham.netnovel.member.data.MemberRole;
 import com.ham.netnovel.member.dto.MemberCreateDto;
 import com.ham.netnovel.member.service.MemberService;
+import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.service.NovelService;
+import com.ham.netnovel.novelAverageRating.NovelAverageRatingRepository;
 import com.ham.netnovel.novelRating.NovelRatingRepository;
 import com.ham.netnovel.novelRating.dto.NovelRatingSaveDto;
 import com.ham.netnovel.novelRating.service.NovelRatingService;
 import com.ham.netnovel.novelTag.NovelTagRepository;
 import com.ham.netnovel.novelTag.dto.NovelTagCreateDto;
-import com.ham.netnovel.novelTag.dto.NovelTagListDto;
 import com.ham.netnovel.novelTag.service.NovelTagService;
+import com.ham.netnovel.recentRead.RecentReadId;
+import com.ham.netnovel.recentRead.RecentReadRepository;
+import com.ham.netnovel.recentRead.service.RecentReadService;
 import com.ham.netnovel.tag.TagRepository;
 import com.ham.netnovel.tag.dto.TagCreateDto;
 import com.ham.netnovel.tag.service.TagService;
@@ -37,13 +45,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.Commit;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 import java.util.stream.IntStream;
 
 @SpringBootTest
 @Slf4j
-public class MakeTestRecord {
+public class DBRecordTest {
     @Autowired
     MemberRepository memberRepository;
     @Autowired
@@ -59,6 +69,8 @@ public class MakeTestRecord {
     @Autowired
     EpisodeService episodeService;
 
+    @Autowired
+    NovelAverageRatingRepository averageRatingRepository;
     @Autowired
     NovelRatingRepository novelRatingRepository;
     @Autowired
@@ -90,17 +102,34 @@ public class MakeTestRecord {
     NovelTagService novelTagService;
 
     @Autowired
+    RecentReadService recentReadService;
+    @Autowired
+    RecentReadRepository recentReadRepository;
+
+    @Autowired
+    FavoriteNovelRepository favoriteNovelRepository;
+    @Autowired
+    FavoriteNovelService favoriteNovelService;
+
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
+    //DB records 전부 삭제
     @Test
-    void makeTestItems() {
-        //DB records 전부 삭제
+    void clear() {
         commentLikeRepository.deleteAll();
         commentRepository.deleteAll();
         episodeRepository.deleteAll();
         costPolicyRepository.deleteAll();
+
+        averageRatingRepository.deleteAll();
         novelRatingRepository.deleteAll();
+        novelTagRepository.deleteAll();
+        tagRepository.deleteAll();
+        favoriteNovelRepository.deleteAll();
+        recentReadRepository.deleteAll();
         novelRepository.deleteAll();
+
         memberRepository.deleteAll();
 
         //auto_increment id를 1부터 초기화.
@@ -109,7 +138,13 @@ public class MakeTestRecord {
         jdbcTemplate.execute("ALTER TABLE episode ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE comment ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE member ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE tag ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE novel_tag ALTER COLUMN id RESTART WITH 1");
 
+    }
+
+    @Test
+    void makeBasicItems() {
         costPolicyService.createPolicy(CostPolicyCreateDto.builder()
                 .name("유료")
                 .coinCost(1)
@@ -121,8 +156,8 @@ public class MakeTestRecord {
         Random random = new Random();
 
         //좋아요 랜덤 설정
-        long likesFirst = random.nextLong(50);
-        long likesSecond = random.nextLong(90);
+        long likesFirst = random.nextLong(70);
+        long likesSecond = random.nextLong(50);
 
         IntStream.rangeClosed(1, 100).forEach(i -> {
 
@@ -175,7 +210,7 @@ public class MakeTestRecord {
             long commentId = 1L;
             if (i >= 70) {
                 commentId = likesFirst;
-            } else if (i >= 90) {
+            } else if (i >= 50) {
                 commentId = likesSecond;
             }
             CommentLikeToggleDto commentLikeToggleDto = CommentLikeToggleDto.builder()
@@ -186,6 +221,27 @@ public class MakeTestRecord {
             commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
         });
     }
+
+
+    @Test
+    @Transactional
+    @Commit
+    void makeEpisodeItems() {
+//        episodeRepository.deleteAll();
+//        jdbcTemplate.execute("ALTER TABLE episode ALTER COLUMN id RESTART WITH 1");
+
+        Random random = new Random();
+        IntStream.rangeClosed(1, 50).forEach(i->{
+            long next = random.nextLong(5, 10);
+            episodeService.createEpisode(EpisodeCreateDto.builder()
+                            .novelId(next)
+                            .title("테스트 데이터"+i)
+                            .costPolicyId(1L)
+                            .content("콘텐츠입니다")
+                    .build());
+        });
+    }
+
 
     @Test
     void makeTagItems() {
@@ -247,33 +303,41 @@ public class MakeTestRecord {
             commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
 
                 });
-
-
     }
 
     @Test
-    void makeMemberItems() {
-        int max = 10;//생성할 엔티티 번호 max
+    @Transactional
+    @Commit
+    void makeHistoryItems() {
+        recentReadRepository.deleteAll();
+//        jdbcTemplate.execute("ALTER TABLE recent_read ALTER COLUMN id RESTART WITH 1");
+
 //        Random random = new Random();
+//        long next = random.nextLong(1, 5);
 
-        // min (포함) 과 max (포함) 사이의 랜덤 정수 반환
+        Member member = memberService.getMember("test1").get();
 
-        IntStream.rangeClosed(1, max).forEach(i -> {
-            MemberCreateDto build = MemberCreateDto.builder()
-                    .email("test" + i + "@naver.com")
-                    .role(MemberRole.READER)
-                    .gender(Gender.MALE)
-                    .nickName("nick" + i)
-                    .providerId("test" + i)
-                    .provider(OAuthProvider.NAVER)
-                    .build();
-            memberService.createNewMember(build);
-
+        IntStream.rangeClosed(1, 4).forEach(i->{
+            Novel novel = novelService.getNovel((long) i).get();
+            Episode episode = novel.getEpisodes().get(0);
+            RecentReadId recentReadId = new RecentReadId(member.getId(), novel.getId());
+            recentReadService.createRecentRead(recentReadId, member, episode, novel);
 
         });
     }
 
+    @Test
+    @Transactional
+    @Commit
+    void makeLibraryItems() {
+        favoriteNovelRepository.deleteAll();
 
+        Random random = new Random();
+
+        IntStream.rangeClosed(1, 50).forEach(i-> {
+            long user = random.nextLong(1, 100);
+            long novel = random.nextLong(1, 10);
+            favoriteNovelService.toggleFavoriteNovel("test"+user, novel);
+        });
+    }
 }
-
-

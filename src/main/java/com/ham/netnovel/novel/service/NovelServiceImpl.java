@@ -14,6 +14,7 @@ import com.ham.netnovel.novel.dto.NovelInfoDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novelAverageRating.NovelAverageRating;
 import com.ham.netnovel.novelRanking.service.NovelRankingService;
+import com.ham.netnovel.tag.dto.TagDataDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -153,8 +154,11 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Novel> getNovels(Pageable pageable) {
-        return null;
+    public List<NovelInfoDto> getNovelsRecent(Pageable pageable) {
+        List<Novel> recentNovels = novelRepository.findByLatestEpisodesOrderByCreatedAt(pageable);
+        return recentNovels.stream()
+                .map(this::convertEntityToInfoDto)
+                .toList();
     }
 
     //단순히 엔티티 List만 반환하는 메서드
@@ -216,19 +220,23 @@ public class NovelServiceImpl implements NovelService {
                         .novel(novel)
                         .averageRating(BigDecimal.valueOf(0))
                         .ratingCount(0)
-                        .build());
+                .build());
+
+        //작품의 태그들 가져오기
+        List<TagDataDto> dataDtoList = novel.getNovelTags().stream()
+                .map(novelTag -> novelTag.getTag().getData())
+                .toList();
 
         return NovelInfoDto.builder()
-                .novelId(novel.getId())
+                .id(novel.getId())
                 .title(novel.getTitle())
-                .description(novel.getDescription())
+                .desc(novel.getDescription())
                 .authorName(novel.getAuthor().getNickName())
                 .views(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
                 .averageRating(averageRating.getAverageRating())
                 .episodeCount(novel.getEpisodes().size())
-                //Todo FavoriteNovel 도메인 완성되는 대로 작업
-                .favoriteCount(0)
-//                .tags(Collections.emptyList())
+                .favoriteCount(novel.getFavorites().size())
+                .tags(dataDtoList)
                 .build();
     }
 }

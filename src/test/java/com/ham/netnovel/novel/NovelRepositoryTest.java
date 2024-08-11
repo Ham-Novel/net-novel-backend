@@ -1,11 +1,18 @@
 package com.ham.netnovel.novel;
 
+import com.ham.netnovel.common.utils.PageableUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 
-@DataJpaTest
+import java.util.List;
+
+@SpringBootTest
+@Slf4j
 class NovelRepositoryTest {
 
     @Autowired
@@ -31,6 +38,16 @@ class NovelRepositoryTest {
         Assertions.assertThat(loadNovel.getTitle()).isEqualTo(newNovel.getTitle());
         Assertions.assertThat(loadNovel.getDescription()).isEqualTo(newNovel.getDescription());
 
+    }
+
+    @Test
+    void queryTest() {
+        Pageable pageable = PageableUtil.createPageable(0, 5);
+        List<Novel> list = novelRepository.findByLatestEpisodesOrderByCreatedAt(pageable);
+        Assertions.assertThat(list.isEmpty()).isFalse();
+        list.forEach(novel -> {
+            log.info("id = {}, title = {}", novel.getId(), novel.getTitle());
+        });
     }
 
 }

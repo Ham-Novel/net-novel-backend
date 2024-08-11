@@ -2,6 +2,7 @@ package com.ham.netnovel.novel;
 
 import com.ham.netnovel.OAuth.CustomOAuth2User;
 import com.ham.netnovel.common.utils.Authenticator;
+import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
@@ -11,6 +12,7 @@ import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novel.service.NovelService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -140,7 +142,13 @@ public class NovelController {
         return ResponseEntity.ok("작품 삭제 완료.");
     }
 
-
-
+    @GetMapping("/novels")
+    public ResponseEntity<List<NovelInfoDto>> getNovelsBySorted(
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
+    ) {
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+        return ResponseEntity.ok(novelService.getNovelsRecent(pageable));
+    }
 
 }

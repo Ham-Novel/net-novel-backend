@@ -1,7 +1,7 @@
 package com.ham.netnovel.novel.dto;
 
 import com.ham.netnovel.novel.data.NovelType;
-import com.ham.netnovel.tag.Tag;
+import com.ham.netnovel.tag.dto.TagDataDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -19,7 +19,7 @@ import java.util.List;
 public class NovelInfoDto {
 
     @NotNull
-    private Long novelId; //소설 id
+    private Long id; //소설 id
 
     @NotBlank
     @Size(max = 30)
@@ -27,7 +27,7 @@ public class NovelInfoDto {
 
     @NotBlank
     @Size(max = 300)
-    private String description; //작품 소개
+    private String desc; //작품 소개
 
     @NotNull
     private String authorName; //작가 닉네임
@@ -42,12 +42,12 @@ public class NovelInfoDto {
     private Integer favoriteCount; //선호작 수
 
     @NotNull
+    private List<TagDataDto> tags; //작품 태그
+
+    @NotNull
     private NovelType type; //소설 등급
 
     @NotNull
     private Integer episodeCount; //에피소드 총 화수
-
-//    @NotNull
-//    private List<Tag> tags; //작품 태그
 
 }

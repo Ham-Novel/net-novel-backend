@@ -47,11 +47,10 @@ public class NovelTagServiceImpl implements NovelTagService {
     public List<NovelTagListDto> getTagsByNovel(Long novelId) {
         List<NovelTag> novelTags = novelTagRepository.findByIdNovelId(novelId);
 
-        List<NovelTagListDto> dtoList = novelTags.stream()
+        return novelTags.stream()
                 .map(NovelTag::getTag)
                 .map(this::convertTagToListDto)
                 .toList();
-        return dtoList;
     }
 
     NovelTagListDto convertTagToListDto(Tag tag) {

@@ -1,5 +1,6 @@
 package com.ham.netnovel.novel;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,5 +33,17 @@ public interface NovelRepository extends JpaRepository<Novel, Long> {
             "where r.rating is not null)")
     List<Novel> findByNovelRating();
 
+
+    @Query("""
+            SELECT DISTINCT n FROM Novel n
+            JOIN FETCH n.episodes e
+            WHERE e.chapter = (
+                SELECT MAX(es.chapter)
+                FROM Episode es
+                WHERE es.novel.id = n.id
+            )
+            ORDER BY e.createdAt DESC
+            """)
+    List<Novel> findByLatestEpisodesOrderByCreatedAt(Pageable pageable);
 
 }
