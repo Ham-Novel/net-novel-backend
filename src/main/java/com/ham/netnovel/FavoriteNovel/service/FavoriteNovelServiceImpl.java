@@ -33,7 +33,7 @@ public class FavoriteNovelServiceImpl implements FavoriteNovelService{
 
     @Override
     @Transactional
-    public FavoriteNovelId toggleFavoriteNovel(String providerId, Long novelId) {
+    public Boolean toggleFavoriteNovel(String providerId, Long novelId) {
         //유저, 작품 레코드 DB 검증
         Member member = memberService.getMember(providerId)
                 .orElseThrow(() -> new NoSuchElementException("toggleFavoriteNovel() Error : 존재하지 않는 Member 입니다."));
@@ -48,7 +48,7 @@ public class FavoriteNovelServiceImpl implements FavoriteNovelService{
             //이미 레코드가 있으면 삭제
             if (record.isPresent()) {
                 favoriteNovelRepository.delete(record.get());
-                return record.get().getId();
+                return true;
             }
             //레코드가 없으면 새로 생성
             else {
@@ -58,10 +58,27 @@ public class FavoriteNovelServiceImpl implements FavoriteNovelService{
                         .novel(novel)
                         .build();
                 FavoriteNovel save = favoriteNovelRepository.save(newRecord);
-                return save.getId();
+                return false;
             }
         } catch (Exception ex) {
             throw new ServiceMethodException("toggleFavoriteNovel() Error : "  + ex.getMessage());
+        }
+    }
+
+    @Override
+    public Boolean checkFavorite(String providerId, Long novelId) {
+        //유저, 작품 레코드 DB 검증
+        Member member = memberService.getMember(providerId)
+                .orElseThrow(() -> new NoSuchElementException("toggleFavoriteNovel() Error : 존재하지 않는 Member 입니다."));
+        Novel novel = novelService.getNovel(novelId)
+                .orElseThrow(() -> new NoSuchElementException("toggleFavoriteNovel() Error : 존재하지 않는 Novel 입니다."));
+
+        try {
+            FavoriteNovelId id = new FavoriteNovelId(member.getId(), novel.getId());
+            Optional<FavoriteNovel> record = favoriteNovelRepository.findById(id);
+            return record.isPresent();
+        } catch (Exception ex) {
+            throw new ServiceMethodException("checkFavorite() Error : "  + ex.getMessage());
         }
     }
 }

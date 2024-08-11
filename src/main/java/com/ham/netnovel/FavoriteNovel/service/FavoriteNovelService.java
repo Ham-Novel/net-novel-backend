@@ -10,5 +10,7 @@ public interface FavoriteNovelService {
      * @param novelId  작품 PK 값
      * @return FavoriteNovelId (생성한/삭제한) 레코드 PK 값
      */
-    FavoriteNovelId toggleFavoriteNovel(String providerId, Long novelId);
+    Boolean toggleFavoriteNovel(String providerId, Long novelId);
+
+    Boolean checkFavorite(String providerId, Long novelId);
 }
