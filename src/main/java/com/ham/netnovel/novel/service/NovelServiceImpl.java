@@ -216,18 +216,23 @@ public class NovelServiceImpl implements NovelService {
                         .novel(novel)
                         .averageRating(BigDecimal.valueOf(0))
                         .ratingCount(0)
-                        .build());
+                .build());
+
+        //작품의 태그들 가져오기
+        List<TagDataDto> dataDtoList = novel.getNovelTags().stream()
+                .map(novelTag -> novelTag.getTag().getData())
+                .toList();
 
         return NovelInfoDto.builder()
-                .novelId(novel.getId())
+                .id(novel.getId())
                 .title(novel.getTitle())
-                .description(novel.getDescription())
+                .desc(novel.getDescription())
                 .authorName(novel.getAuthor().getNickName())
                 .views(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
                 .averageRating(averageRating.getAverageRating())
                 .episodeCount(novel.getEpisodes().size())
-//                .tags(Collections.emptyList())
                 .favoriteCount(novel.getFavorites().size())
+                .tags(dataDtoList)
                 .build();
     }
 }

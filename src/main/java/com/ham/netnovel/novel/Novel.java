@@ -1,10 +1,12 @@
 package com.ham.netnovel.novel;
 
 import com.ham.netnovel.episode.Episode;
+import com.ham.netnovel.favoriteNovel.FavoriteNovel;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.novelAverageRating.NovelAverageRating;
+import com.ham.netnovel.novelTag.NovelTag;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,6 +46,14 @@ public class Novel {
     //작품 에피소드들
     @OneToMany(mappedBy = "novel")
     private List<Episode> episodes = new ArrayList<>();
+
+    //선호작 수
+    @OneToMany(mappedBy = "novel")
+    private List<FavoriteNovel> favorites;
+
+    //태그 목록
+    @OneToMany(mappedBy = "novel")
+    private List<NovelTag> novelTags;
 
     //평균 별점
     @OneToOne(mappedBy = "novel")

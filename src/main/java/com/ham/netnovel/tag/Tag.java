@@ -2,6 +2,7 @@ package com.ham.netnovel.tag;
 
 
 import com.ham.netnovel.novelTag.NovelTag;
+import com.ham.netnovel.tag.dto.TagDataDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -39,5 +40,13 @@ public class Tag {
 
     public void changeStatus(TagStatus status) {
         this.status = status;
+    }
+
+    public TagDataDto getData() {
+        return TagDataDto.builder()
+                .id(this.id)
+                .name(this.name)
+                .status(this.status)
+                .build();
     }
 }
