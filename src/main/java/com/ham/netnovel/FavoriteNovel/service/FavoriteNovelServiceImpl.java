@@ -48,7 +48,7 @@ public class FavoriteNovelServiceImpl implements FavoriteNovelService{
             //이미 레코드가 있으면 삭제
             if (record.isPresent()) {
                 favoriteNovelRepository.delete(record.get());
-                return true;
+                return false; // 이제 레코드 없음
             }
             //레코드가 없으면 새로 생성
             else {
@@ -58,7 +58,7 @@ public class FavoriteNovelServiceImpl implements FavoriteNovelService{
                         .novel(novel)
                         .build();
                 FavoriteNovel save = favoriteNovelRepository.save(newRecord);
-                return false;
+                return true; // 이제 레코드 있음
             }
         } catch (Exception ex) {
             throw new ServiceMethodException("toggleFavoriteNovel() Error : "  + ex.getMessage());

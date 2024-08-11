@@ -27,6 +27,7 @@ import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.service.NovelService;
+import com.ham.netnovel.novelAverageRating.NovelAverageRatingRepository;
 import com.ham.netnovel.novelRating.NovelRatingRepository;
 import com.ham.netnovel.novelRating.dto.NovelRatingSaveDto;
 import com.ham.netnovel.novelRating.service.NovelRatingService;
