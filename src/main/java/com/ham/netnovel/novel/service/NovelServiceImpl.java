@@ -226,9 +226,8 @@ public class NovelServiceImpl implements NovelService {
                 .views(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
                 .averageRating(averageRating.getAverageRating())
                 .episodeCount(novel.getEpisodes().size())
-                //Todo FavoriteNovel 도메인 완성되는 대로 작업
-                .favoriteCount(0)
 //                .tags(Collections.emptyList())
+                .favoriteCount(novel.getFavorites().size())
                 .build();
     }
 }

@@ -1,7 +1,7 @@
 package com.ham.netnovel.novel.dto;
 
 import com.ham.netnovel.novel.data.NovelType;
-import com.ham.netnovel.tag.Tag;
+import com.ham.netnovel.tag.dto.TagDataDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
