@@ -14,6 +14,7 @@ import com.ham.netnovel.novel.dto.NovelInfoDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novelAverageRating.NovelAverageRating;
 import com.ham.netnovel.novelRanking.service.NovelRankingService;
+import com.ham.netnovel.tag.dto.TagDataDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -153,8 +154,11 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Novel> getNovels(Pageable pageable) {
-        return null;
+    public List<NovelInfoDto> getNovelsRecent(Pageable pageable) {
+        List<Novel> recentNovels = novelRepository.findByLatestEpisodesOrderByCreatedAt(pageable);
+        return recentNovels.stream()
+                .map(this::convertEntityToInfoDto)
+                .toList();
     }
 
     //단순히 엔티티 List만 반환하는 메서드

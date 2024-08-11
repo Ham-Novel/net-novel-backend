@@ -58,7 +58,7 @@ public interface NovelService {
      * @param pageable page number, page size
      * @return
      */
-    List<Novel> getNovels(Pageable pageable);
+    List<NovelInfoDto> getNovelsRecent(Pageable pageable);
 
     /**
      * 유저의 선호작 Novel 리스트 반환.

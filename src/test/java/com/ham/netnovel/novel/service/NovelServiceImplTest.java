@@ -1,10 +1,7 @@
 package com.ham.netnovel.novel.service;
 
-import com.ham.netnovel.member.Member;
-import com.ham.netnovel.member.MemberRepository;
-import com.ham.netnovel.member.service.MemberService;
+import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.novel.Novel;
-import com.ham.netnovel.novel.NovelRepository;
 import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelDeleteDto;
@@ -15,7 +12,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -122,6 +119,16 @@ class NovelServiceImplTest {
 
 
 
+    }
+
+    @Test
+    void getBrowseNovels() {
+        Pageable pageable = PageableUtil.createPageable(1, 5);
+        List<NovelInfoDto> list = novelService.getNovelsRecent(pageable);
+        Assertions.assertThat(list.isEmpty()).isFalse();
+        list.forEach(novel -> {
+            log.info("id = {}, title = {}", novel.getId(), novel.getTitle());
+        });
     }
 
 
