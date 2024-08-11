@@ -47,7 +47,7 @@ public class MemberController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 유저 정보 담은 응답 객체
      */
-    @GetMapping("/members/mypage")
+    @GetMapping("/members/me/mypage")
     @ResponseBody
     public ResponseEntity<?> showMyPage(
             Authentication authentication
@@ -72,7 +72,7 @@ public class MemberController {
      * @return ResponseEntity 요청 결과를 담은 응답 객체
      */
     //Todo 송민규: Edit Profile 페이지를 구성하여 Nickname, Email, Gender을 일괄적으로 수정할 수 있도록 기능을 확장하는 건 어떨까요?
-    @PatchMapping("/members/nickname")
+    @PatchMapping("/members/me/nickname")
     public ResponseEntity<?> updateNickname(@Valid @RequestBody ChangeNickNameDto changeNickNameDto,
                                             BindingResult bindingResult,
                                             Authentication authentication) {
@@ -125,7 +125,7 @@ public class MemberController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 댓글과 대댓글의 정보 리스트를 담은 응답 객체
      */
-    @GetMapping("/members/comments")
+    @GetMapping("/members/me/comments")
     public ResponseEntity<?> getMemberCommentList(Authentication authentication,
                                                    @RequestParam(defaultValue = "0") int pageNumber,
                                                    @RequestParam(defaultValue = "10") int pageSize) {
@@ -151,7 +151,7 @@ public class MemberController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 유저가 좋아요를 누른 소설 리스트를 담은 응답 객체
      */
-    @GetMapping("/novel")
+    @GetMapping("/members/me/favorites")
     public ResponseEntity<?> getFavoriteNovels(Authentication authentication) {
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
@@ -172,7 +172,7 @@ public class MemberController {
      * @param authentication 유저의 인정 정보
      * @return ResponseEntity 데이터를 List에 담아 반환
      */
-    @GetMapping("/coin-use-history")
+    @GetMapping("/members/me/coin-use-history")
     public ResponseEntity<?> getMemberCoinUseHistory(Authentication authentication,
                                                       @RequestParam(defaultValue = "0") int pageNumber,
                                                       @RequestParam(defaultValue = "10") int pageSize) {
@@ -196,7 +196,7 @@ public class MemberController {
      * @param authentication 유저의 인정 정보
      * @return ResponseEntity 데이터를 List에 담아 반환
      */
-    @GetMapping("/coin-charge-history")
+    @GetMapping("/members/me/coin-charge-history")
     public ResponseEntity<List<MemberCoinChargeDto>> getMemberCoinChargeHistory(Authentication authentication,
                                                                                  @RequestParam(defaultValue = "0") int pageNumber,
                                                                                  @RequestParam(defaultValue = "10") int pageSize) {
@@ -218,7 +218,7 @@ public class MemberController {
      * @param pageSize
      * @return
      */
-    @GetMapping("/recent-read")
+    @GetMapping("/members/me/recent-read")
     public ResponseEntity<List<MemberRecentReadDto>> getMemberRecentRead(Authentication authentication,
                                                   @RequestParam(defaultValue = "0") int pageNumber,
                                                   @RequestParam(defaultValue = "10") int pageSize){
