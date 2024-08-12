@@ -26,15 +26,25 @@ public interface NovelRankingService {
      * 해당 날짜의 조회수를 기반으로 새로운 랭킹 데이터를 생성하거나
      * 기존 랭킹 데이터를 업데이트
      */
-    void updateDailyRankings();
+    void updateDailyRankings(LocalDate localDate);
+
 
     /**
      * 소설의 주간 랭킹을 업데이트하는 메서드
-     * 이 메서드는 지정된 기간(어제 기준 7일 전까지)의 조회수를 기반으로
-     * 주간 랭킹 데이터를 생성하거나 업데이트
+     * 실행일 기준 7일 전부터 1일 전까지의 조회수를 합산하여 랭킹을 산출
+     *
+     * 이미 DB에 랭킹이 있는 경우: 조회수와 랭킹을 업데이트.
+     * 랭킹이 없는 경우: 새로운 엔티티를 생성해 DB에 저장
      */
     void updateWeeklyRankings();
 
+    /**
+     * 소설의 주간 랭킹을 업데이트하는 메서드
+     * 실행일 기준 30일 전부터 1일 전까지의 조회수를 합산하여 랭킹을 산출
+     *
+     * 이미 DB에 랭킹이 있는 경우: 조회수와 랭킹을 업데이트.
+     * 랭킹이 없는 경우: 새로운 엔티티를 생성해 DB에 저장
+     */
     void updateMonthlyRankings();
 
 
