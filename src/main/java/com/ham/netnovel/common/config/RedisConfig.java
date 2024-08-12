@@ -22,25 +22,28 @@ public class RedisConfig {
     @Value("${spring.data.redis.password}")
     private String password;
 
+    //Redis 연결을 위한 설정
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(host);
         redisStandaloneConfiguration.setPort(port);
         redisStandaloneConfiguration.setPassword(password);
+
+        //설정된 정보로 RedisConnectionFactory 생성
         LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration);
         return lettuceConnectionFactory;
     }
 
+    //Redis와 상호작용할때 사용되는 RedisTemplate Bean 객체 생성
     @Bean
     public RedisTemplate<String, String> redisTemplate() {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-
+        // RedisConnectionFactory를 RedisTemplate에 설정
         redisTemplate.setConnectionFactory(redisConnectionFactory());
-        // spring-redis간 데이터 직렬화를 위해 설정, 설정하지 않아도 동작에 문제는 없음.
+        // Key와 Value에 대해 StringRedisSerializer를 사용하여 직렬화/역직렬화를 설정
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new StringRedisSerializer());
-
         return redisTemplate;
     }
 }

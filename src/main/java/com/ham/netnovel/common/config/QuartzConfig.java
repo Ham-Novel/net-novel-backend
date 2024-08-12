@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class QuartzConfig {
-    // JobDetail을 정의하는 메서드
+
+
+    //소설의 평균 별점 갱신 JobDetail 설정
     @Bean
     public JobDetail novelAverageRatingJobDetail() {
         return JobBuilder.newJob(NovelAverageRatingJob.class)
@@ -18,7 +20,7 @@ public class QuartzConfig {
                 .build();
     }
 
-    // 트리거를 정의하는 메서드
+    //주간 Novel 조회수 랭킹 갱신 Trigger 설정, 1분마다 실행
     @Bean
     public Trigger novelAverageRatingTrigger() {
         return TriggerBuilder.newTrigger()
