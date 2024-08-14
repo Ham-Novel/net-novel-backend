@@ -47,5 +47,17 @@ public class TypeValidationUtil {
         }
     }
 
+    //에피소드 조회수 파라미터 검증 로직
+    public static void validateViewCount(Integer viewCount){
+        if (viewCount==null){
+            throw new IllegalArgumentException("validateViewCount 에러: 조회수가 null 입니다");
+        }
+        if (viewCount >= Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("validateViewCount 에러: 조회수가 Integer의 최대값을 초과했습니다");
+        }
+
+
+    }
+
 
 }

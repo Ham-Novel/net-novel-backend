@@ -95,4 +95,13 @@ public class Episode {
     public void changeStatus(EpisodeStatus status) {
         this.status = status;
     }
+
+    //Episode 엔티티 view 필드값을 업데이트 하는 메서드
+    public void updateTotalView(Integer views){
+        if (views==null ||views ==0){
+            return;//메서드 종료
+        }
+        this.view = this.view+views;
+
+    }
 }
