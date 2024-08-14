@@ -8,6 +8,7 @@ import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.EpisodeStatus;
 import com.ham.netnovel.episode.dto.*;
+import com.ham.netnovel.episodeViewCount.service.EpisodeViewCountService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.service.NovelService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -30,8 +32,7 @@ public class EpisodeServiceImpl implements EpisodeService {
     private final EpisodeRepository episodeRepository;
     private final NovelService novelService;
     private final CoinCostPolicyService costPolicyService;
-
-    public EpisodeServiceImpl(EpisodeRepository episodeRepository, NovelService novelService, CoinCostPolicyService costPolicyService) {
+    public EpisodeServiceImpl(EpisodeRepository episodeRepository, NovelService novelService, CoinCostPolicyService costPolicyService ) {
         this.episodeRepository = episodeRepository;
         this.novelService = novelService;
         this.costPolicyService = costPolicyService;
@@ -41,6 +42,11 @@ public class EpisodeServiceImpl implements EpisodeService {
     @Transactional(readOnly = true)//읽기전용
     public Optional<Episode> getEpisode(Long episodeId) {
         return episodeRepository.findById(episodeId);
+    }
+
+    @Override
+    public List<Episode> getEpisodeList(List<Long> episodeIds) {
+       return episodeRepository.findAllById(episodeIds);
     }
 
     @Override

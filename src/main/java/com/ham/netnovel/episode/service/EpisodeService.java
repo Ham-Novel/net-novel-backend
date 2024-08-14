@@ -16,6 +16,14 @@ public interface EpisodeService {
     Optional<Episode> getEpisode(Long episodeId);
 
     /**
+     * episodeId List로 DB에서 엔티티 List를 가져오는 메서드
+     * 사용시 null 체크 필수
+     * @param episodeIds episodeId 리스트
+     * @return List<Episode>
+     */
+    List<Episode> getEpisodeList(List<Long> episodeIds);
+
+    /**
      * Episode를 DB에 생성하는 메서드
      */
     void createEpisode(EpisodeCreateDto episodeCreateDto);
