@@ -1,6 +1,6 @@
 package com.ham.netnovel.novelRanking.service;
 
-import com.ham.netnovel.episodeViewCount.EpisodeViewCountService;
+import com.ham.netnovel.episodeViewCount.service.EpisodeViewCountService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novelRanking.NovelRakingRepository;
 import com.ham.netnovel.novelRanking.NovelRanking;
@@ -50,7 +50,7 @@ public class NovelRankingServiceImpl implements NovelRankingService {
 
 
         //오늘 날짜로 소설 조회수 랭킹 데이터 가져옴
-        List<NovelRankingUpdateDto> todayRanking = episodeViewCountService.getDaliyRanking(todayDate);
+        List<NovelRankingUpdateDto> todayRanking = episodeViewCountService.getDailyRanking(todayDate);
         //DB에 저장할 사용할 List 객체 생성
         List<NovelRanking> rankingsToSave = new ArrayList<>();
 
