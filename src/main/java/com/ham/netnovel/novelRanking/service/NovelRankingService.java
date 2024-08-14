@@ -50,7 +50,7 @@ public interface NovelRankingService {
 
     void saveRankingToRedis(RankingPeriod rankingPeriod);
 
-    List<Map<String, Object>> getRankingFromRedis(String period);
+    List<Map<String, Object>> getRankingFromRedis(String period,Integer startIndex, Integer endIndex);
 
 
 }

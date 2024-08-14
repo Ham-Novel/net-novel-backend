@@ -189,20 +189,30 @@ public class NovelServiceImpl implements NovelService {
     }
 
     @Override
-    @Transactional
-    public List<NovelInfoDto> getNovelsByRanking(String period) {
+    @Transactional(readOnly = true)
+    public List<NovelInfoDto> getNovelsByRanking(String period, Pageable pageable) {
         try {
-            //랭킹 주기 에 맞춰, 소설 랭킹과 소설 id 값을 List로 받아옴
-            //period 값 : daily, weekly, monthly
-            //key 값: "novelId", "ranking"
-            List<Map<String, Object>> rankingFromRedis = novelRankingService.getRankingFromRedis(period);
-            // List에 담겨있는 novelId를 순서와 함께 추출
-            List<Long> novelIds = rankingFromRedis.stream()
-                    .sorted(Comparator.comparing(ranking -> (Integer) ranking.get("ranking"))) // ranking 순으로 정렬
-                    .map(ranking -> (Long) ranking.get("novelId"))
-                    .toList();
+            // 페이지 번호와 페이지 크기를 사용해 데이터의 시작 인덱스를 계산
+            int startIndex = pageable.getPageNumber() * pageable.getPageSize();
+            // 데이터의 끝 인덱스를 계산 (시작 인덱스 + 페이지 크기 - 1)
+            int endIndex = startIndex + pageable.getPageSize() -1;
 
-            // novel 정보를 NovelInfoDto로 변환하여 반환 (랭킹 순서로 반환)
+            // Redis에서 주어진 기간(period)에 해당하는 소설 랭킹 데이터를 가져옴
+            // 기간은 daily, weekly, monthly 중 하나로 전달
+            // startIndex와 endIndex를 사용해 Redis에서 가져올 데이터 범위를 설정
+            // 리턴되는 리스트는 각 소설의 ID와 랭킹 정보를 포함하는 맵(Map)의 리스트임
+            List<Map<String, Object>> rankingFromRedis = novelRankingService.getRankingFromRedis(period,startIndex,endIndex);
+
+
+            // 현재 페이지에 해당하는 소설 ID를 추출
+            List<Long> novelIds = new ArrayList<>();
+            for (Map<String, Object> rankingDatas : rankingFromRedis) {
+                // 랭킹 데이터에서 "novelId" 값을 추출하여 novelIds 리스트에 추가
+                novelIds.add((Long) rankingDatas.get("novelId"));
+            }
+
+            // 소설 엔티티를 조회한 후, 랭킹 순서대로 정렬하고 DTO로 변환하여 반환
+            // JPA는 기본적으로 ID 순으로 정렬하므로, 랭킹 순서대로 정렬
             return novelRepository.findAllById(novelIds)
                     .stream()
                     .sorted(Comparator.comparing(novel -> novelIds.indexOf(novel.getId()))) // 랭킹 순서로 정렬(JPA는 엔티티 id 순서로 정렬함)
@@ -210,7 +220,8 @@ public class NovelServiceImpl implements NovelService {
                     .collect(Collectors.toList());
 
         } catch (Exception ex) {
-            throw new ServiceMethodException("getRankedNovels 메서드 에러 발생" + ex.getMessage());
+            throw new ServiceMethodException("getNovelsByRanking 메서드 에러 발생", ex);
+
         }
 
     }

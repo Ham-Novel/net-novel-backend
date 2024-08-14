@@ -16,7 +16,7 @@ public class PageableUtil {
         if (pageNumber == null || pageSize == null) {
             throw new IllegalArgumentException("createPageable 에러: 파라미터가 null 입니다.");
         } else if (pageNumber <0 || pageSize <0) {
-            throw new IllegalArgumentException("createPageable 에러: 파라미터가 음수입니다. 입니다.");
+            throw new IllegalArgumentException("createPageable 에러: 파라미터가 음수입니다.");
         }
 
         return PageRequest.of(pageNumber, pageSize);

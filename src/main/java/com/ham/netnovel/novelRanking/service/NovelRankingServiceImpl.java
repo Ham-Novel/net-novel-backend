@@ -48,7 +48,6 @@ public class NovelRankingServiceImpl implements NovelRankingService {
     @Transactional
     public void updateDailyRankings(LocalDate todayDate) {
 
-
         //오늘 날짜로 소설 조회수 랭킹 데이터 가져옴
         List<NovelRankingUpdateDto> todayRanking = episodeViewCountService.getDailyRanking(todayDate);
         //DB에 저장할 사용할 List 객체 생성
@@ -224,7 +223,7 @@ public class NovelRankingServiceImpl implements NovelRankingService {
     }
 
     @Override
-    public List<Map<String, Object>> getRankingFromRedis(String period) {
+    public List<Map<String, Object>> getRankingFromRedis(String period,Integer startIndex, Integer endIndex) {
         // 오늘 날짜로 Redis 키 생성 (예: "daily_rankings:20240810")
         String periodForKey = switch (period) {
             case "daily" -> "daily";
@@ -236,11 +235,11 @@ public class NovelRankingServiceImpl implements NovelRankingService {
         String key = periodForKey + "_rankings:" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
 
-        // Redis에서 Sorted Set의 모든 데이터를 값과 점수와 함께 가져오기
-        Set<ZSetOperations.TypedTuple<String>> rankingSet = redisTemplate.opsForZSet().rangeWithScores(key, 0, -1);
+        // Redis에서 Sorted Set의 값과 점수를 가져옴, endIndex 가 Redis 데이터 size 를 벗어나면 index 끝번호까지의 데이터 가져옴
+        Set<ZSetOperations.TypedTuple<String>> rankingSet = redisTemplate.opsForZSet().rangeWithScores(key, startIndex, endIndex);
 
-        // 결과를 저장할 리스트 초기화
-        List<Map<String, Object>> result = new ArrayList<>();
+        // 반환할  List 객체 생성
+        List<Map<String, Object>> rankingData = new ArrayList<>();
 
         // 결과가 null이 아닌 경우 처리
         if (rankingSet != null) {
@@ -249,12 +248,12 @@ public class NovelRankingServiceImpl implements NovelRankingService {
                 Map<String, Object> entry = new HashMap<>();//List에 저장할 Map 객체 생성
                 entry.put("novelId", Long.parseLong(Objects.requireNonNull(item.getValue()))); // novelId는 Long 으로 저장
                 entry.put("ranking", Objects.requireNonNull(item.getScore()).intValue()); // ranking은 int로 저장
-                result.add(entry);
+                rankingData.add(entry);
             }
         }
 
         //결과 반환
-        return result;
+        return rankingData;
 
     }
 

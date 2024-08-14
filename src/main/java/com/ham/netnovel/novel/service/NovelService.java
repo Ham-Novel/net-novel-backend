@@ -75,11 +75,12 @@ public interface NovelService {
 
 
     /**
-     *랭킹에 따른 소설 상세정보를 전달하는 메서드
+     * 랭킹 주기(일간,주간,월간) 과 페이지네이션 정보로 소설 정보를 전달하는 메서드
      * @param period 랭킹주기(daily,weekly,monthly,all-time 디폴트값은 daily)
+     * @param pageable 페지이네이션 정보
      * @return List<NovelInfoDto>
      */
-    List<NovelInfoDto> getNovelsByRanking(String period);
+    List<NovelInfoDto> getNovelsByRanking(String period,Pageable pageable);
 
 
 
