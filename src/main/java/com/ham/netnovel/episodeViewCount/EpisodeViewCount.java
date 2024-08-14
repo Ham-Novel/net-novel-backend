@@ -44,12 +44,12 @@ public class EpisodeViewCount {
         this.viewCount = viewCount;
     }
 
-    public EpisodeViewCount increaseViewCount() {
+    public EpisodeViewCount increaseViewCount(Integer viewCount) {
         if (this.viewCount==null){
             this.viewCount = 1;
         }
         else {
-            this.viewCount = this.getViewCount() + 1;
+            this.viewCount = this.getViewCount() + viewCount;
         }
 
         return this;
