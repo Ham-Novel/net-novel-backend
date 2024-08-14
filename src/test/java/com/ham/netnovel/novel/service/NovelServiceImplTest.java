@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -127,7 +128,7 @@ class NovelServiceImplTest {
         List<NovelInfoDto> list = novelService.getNovelsRecent(pageable);
         Assertions.assertThat(list.isEmpty()).isFalse();
         list.forEach(novel -> {
-            log.info("id = {}, title = {}", novel.getId(), novel.getTitle());
+//            log.info("id = {}, title = {}", novel.getId(), novel.getTitle());
         });
     }
 
@@ -146,9 +147,22 @@ class NovelServiceImplTest {
     @Test
     public void getRankedNovels(){
 
-        String period = "daily";
-        List<NovelInfoDto> rankedNovels = novelService.getNovelsByRanking(period);
+//        String period = "daily";//테스트 성공
+        String period = "weekly";//테스트 성공
+//        String period = "monthly";//테스트 성공
+
+        //페이지네이션 테스트 성공
+        Pageable pageable = PageRequest.of(0, 3);
+        List<NovelInfoDto> rankedNovels = novelService.getNovelsByRanking(period,pageable);
+
+        if (rankedNovels.isEmpty()){
+            System.out.println("비었음");
+            return;
+        }
+
+        System.out.println("가져온 소설수 = "+rankedNovels.size());
         for (NovelInfoDto rankedNovel : rankedNovels) {
+            System.out.println("********** 소설정보 **********");
             System.out.println(rankedNovel.toString());
 
         }

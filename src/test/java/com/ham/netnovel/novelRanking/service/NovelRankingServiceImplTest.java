@@ -67,7 +67,10 @@ class NovelRankingServiceImplTest {
 //        String period = "daily";
         String period = "weekly";
 //        String period = "monthly";
-        List<Map<String, Object>> rankingFromRedis = novelRankingService.getRankingFromRedis(period);
+        Integer startIndex = 0;
+        Integer endIndex = 3;
+
+        List<Map<String, Object>> rankingFromRedis = novelRankingService.getRankingFromRedis(period,startIndex,endIndex);
         for (Map<String, Object> result : rankingFromRedis) {
             System.out.println("noelid= "+result.get("novelId"));
             System.out.println("랭킹= "+result.get("ranking"));
