@@ -41,8 +41,8 @@ public class NovelRanking {
     @Column(nullable = false)
     private RankingPeriod rankingPeriod;
 
-    //해당 기간의 전체 조회수
-    private Long totalViews;
+    //랭킹 점수
+    private Long score;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -51,19 +51,17 @@ public class NovelRanking {
     private LocalDateTime updatedAt;
 
     @Builder
-    public NovelRanking(Novel novel, Integer ranking, LocalDate rankingDate, RankingPeriod rankingPeriod, Long totalViews) {
+    public NovelRanking(Novel novel, Integer ranking, LocalDate rankingDate, RankingPeriod rankingPeriod, Long score) {
         this.novel = novel;
         this.ranking = ranking;
         this.rankingDate = rankingDate;
         this.rankingPeriod = rankingPeriod;
-        this.totalViews = totalViews;
+        this.score = score;
     }
 
-
- //NovelRanking 엔티티의 랭킹(순위)와 총 조회수를 수정하는 메서드
-    public void updateNovelRanking(Integer ranking, Long totalViews){
+    public void updateNovelRanking(Integer ranking, Long score){
         this.ranking = ranking;
-        this.totalViews = totalViews;
+        this.score = score;
 
 
     }

@@ -22,6 +22,7 @@ public interface NovelRakingRepository extends JpaRepository<NovelRanking, Long>
 
     /**
      * 랭킹 기록 날짜와, 랭킹 기간으로 엔티티 List를 찾는 메서드
+     *
      * @param rankingDate   랭킹이 기록된 날짜
      * @param rankingPeriod 랭킹 기간(일간 주간 월간 전체)
      * @return List<NovelRanking>
@@ -34,13 +35,15 @@ public interface NovelRakingRepository extends JpaRepository<NovelRanking, Long>
 
 
     @Query("select nr.novel, " +
-            "sum(nr.totalViews) as totalView " +
+            "sum(nr.score) as totalScore " +
             "from NovelRanking nr " +
             "where nr.rankingDate between :startDate and :endDate " +//날짜 범위 지정
             "and nr.rankingPeriod = :rankingPeriod " +
-            "group by nr.novel")
-    List<Object[]> findTotalViewsByDateAndRankingPeriod(@Param("endDate") LocalDate endDate,
-                                                        @Param("startDate") LocalDate startDate,
+            "group by nr.novel " +
+            "order by totalScore desc ")
+//점수로 내림차순 정렬
+    List<Object[]> findTotalScoreByDateAndRankingPeriod(@Param("startDate") LocalDate startDate,
+                                                        @Param("endDate") LocalDate endDate,
                                                         @Param("rankingPeriod") RankingPeriod rankingPeriod);
 
 
