@@ -3,6 +3,7 @@ package com.ham.netnovel.episodeViewCount;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.episodeViewCount.service.EpisodeViewCountService;
+import com.ham.netnovel.novelRanking.dto.NovelRankingUpdateDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,17 +28,15 @@ class EpisodeEpisodeViewCountServiceImplTest {
     void getTodayRanking(){
         LocalDate todayDate = LocalDate.now();
 
-        episodeViewCountService.getDailyRanking(todayDate);
+        List<NovelRankingUpdateDto> dailyRanking = episodeViewCountService.getDailyRanking(todayDate);
+        for (NovelRankingUpdateDto updateDto : dailyRanking) {
+            System.out.println("소설 id ="+updateDto.getNovel().getId());
+            System.out.println("DTO = "+updateDto);
+        }
 
     }
 
-    @Test
-    void getWeeklyRanking(){
-        LocalDate todayDate = LocalDate.now();
 
-        episodeViewCountService.getWeeklyRanking(todayDate);
-
-    }
 
     @Test
     void increaseViewCountRedis(){
