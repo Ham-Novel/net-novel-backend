@@ -213,14 +213,14 @@ public class NovelServiceImpl implements NovelService {
 
             // 소설 엔티티를 조회한 후, 랭킹 순서대로 정렬하고 DTO로 변환하여 반환
             // JPA는 기본적으로 ID 순으로 정렬하므로, 랭킹 순서대로 정렬
-            return novelRepository.findAllById(novelIds)
+          return  novelRepository.findByNovelIds(novelIds)
                     .stream()
                     .sorted(Comparator.comparing(novel -> novelIds.indexOf(novel.getId()))) // 랭킹 순서로 정렬(JPA는 엔티티 id 순서로 정렬함)
                     .map(this::convertEntityToInfoDto)//엔티티 DTO로 변환
                     .collect(Collectors.toList());
 
         } catch (Exception ex) {
-            throw new ServiceMethodException("getNovelsByRanking 메서드 에러 발생", ex);
+            throw new ServiceMethodException("getNovelsByRanking 메서드 에러 발생"+ ex.getMessage());
 
         }
 

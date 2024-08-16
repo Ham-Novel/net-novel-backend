@@ -46,4 +46,15 @@ public interface NovelRepository extends JpaRepository<Novel, Long> {
             """)
     List<Novel> findByLatestEpisodesOrderByCreatedAt(Pageable pageable);
 
+
+    /**
+     * Novel 엔티티의 ID 값들로, 엔티티를 찾아 List로 반환하는 메서드
+     * @param novelIds Novel 엔티티 ID 값을 담는 List 객체
+     * @return List<Novel>
+     */
+    @Query("select n from Novel n " +
+            "left join fetch n.novelAverageRating " +//novelAverageRating이 Novel과 관계가 없어도, Novel 엔티티 반환
+            "where n.id in :novelIds")
+    List<Novel> findByNovelIds(@Param("novelIds") List<Long> novelIds);
+
 }
