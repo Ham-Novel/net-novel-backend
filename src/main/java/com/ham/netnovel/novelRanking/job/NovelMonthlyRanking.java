@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class NovelRankingMonthlyJob implements Job {
+public class NovelMonthlyRanking implements Job {
     private final NovelRankingService novelRankingService;
 
-    public NovelRankingMonthlyJob(NovelRankingService novelRankingService) {
+    public NovelMonthlyRanking(NovelRankingService novelRankingService) {
         this.novelRankingService = novelRankingService;
     }
 
@@ -25,7 +25,7 @@ public class NovelRankingMonthlyJob implements Job {
         novelRankingService.updateMonthlyRankings();
 
         // 2. Redis에 랭킹 저장
-        novelRankingService.saveRankingToRedis(RankingPeriod.MONTHLY);
+        novelRankingService.saveNovelRankingToRedis(RankingPeriod.MONTHLY);
 
         log.info("월간 조회수 랭킹 업데이트 완료 및 Redis 저장 완료");
 

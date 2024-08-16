@@ -1,10 +1,7 @@
 package com.ham.netnovel.common.config;
 
 
-import com.ham.netnovel.novelRanking.job.NovelRankingMonthlyJob;
-import com.ham.netnovel.novelRanking.job.NovelRankingPreviousDayJob;
-import com.ham.netnovel.novelRanking.job.NovelRankingWeeklyJob;
-import com.ham.netnovel.novelRanking.job.NovelRankingDailyJob;
+import com.ham.netnovel.novelRanking.job.*;
 import org.quartz.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +15,8 @@ public class NovelRankingQuartzConfig {
     //일간 Novel 조회수 랭킹 갱신 JobDetail 설정
     @Bean
     public JobDetail novelDailyRankingJobDetail() {
-        return JobBuilder.newJob(NovelRankingDailyJob.class)
-                .withIdentity("novelDailyRankingJob")//식별자 설정
+        return JobBuilder.newJob(NovelDailyRankingJob.class)
+                .withIdentity("novelDailyRankingJobDetail")//식별자 설정
                 .withDescription("Update daily novel rankings.")//설명추가
                 .storeDurably()
                 .build();
@@ -28,7 +25,7 @@ public class NovelRankingQuartzConfig {
 
     //일간 Novel 조회수 랭킹 갱신 Trigger 설정, 10시 15시 20시에 갱신
     @Bean
-    public Trigger novelDailyRatingTrigger() {
+    public Trigger novelDailyRankingTrigger() {
         return TriggerBuilder.newTrigger()
                 .forJob(novelDailyRankingJobDetail())//트리거와 novelAverageRatingJobDetail 연결
                 .withIdentity("novelDailyRatingTrigger")//트리거 식별자 설정
@@ -39,9 +36,9 @@ public class NovelRankingQuartzConfig {
 
     //어제 일자 일간 Novel 조회수 랭킹 갱신 JobDetail 설정
     @Bean
-    public JobDetail novelRankingPreviousDayJobDetail() {
-        return JobBuilder.newJob(NovelRankingPreviousDayJob.class)
-                .withIdentity("novelRankingPreviousDayJob")//식별자 설정
+    public JobDetail novelPreviousDayRankingJobDetail() {
+        return JobBuilder.newJob(NovelPreviousDayRankingJob.class)
+                .withIdentity("novelPreviousDayRankingJobDetail")//식별자 설정
                 .withDescription("Update previous day daily novel rankings.")//설명추가
                 .storeDurably()
                 .build();
@@ -50,10 +47,10 @@ public class NovelRankingQuartzConfig {
 
     //어제 일자 일간 Novel 조회수 랭킹 갱신 Trigger 설정, 00시 1분에 실행
     @Bean
-    public Trigger novelRankingPreviousDayTrigger() {
+    public Trigger novelPreviousDayRankingTrigger() {
         return TriggerBuilder.newTrigger()
-                .forJob(novelRankingPreviousDayJobDetail())//트리거와 novelAverageRatingJobDetail 연결
-                .withIdentity("novelRankingPreviousDayTrigger")//트리거 식별자 설정
+                .forJob(novelPreviousDayRankingJobDetail())//트리거와 JobDetail 연결
+                .withIdentity("novelPreviousDayRankingTrigger")//트리거 식별자 설정
                 .withSchedule(CronScheduleBuilder.cronSchedule("1 0 0 * * ?")) // 매일 00시 1분에 실행
                 .build();
     }
@@ -61,9 +58,9 @@ public class NovelRankingQuartzConfig {
 
     //주간 Novel 조회수 랭킹 갱신 JobDetail 설정
     @Bean
-    public JobDetail novelRankingWeeklyJobDetail() {
-        return JobBuilder.newJob(NovelRankingWeeklyJob.class)
-                .withIdentity("novelRankingWeeklyJob")
+    public JobDetail novelWeeklyRankingJobDetail() {
+        return JobBuilder.newJob(NovelWeeklyRankingJob.class)
+                .withIdentity("novelWeeklyRankingJobDetail")
                 .withDescription("Update weekly novel rankings.")
                 .storeDurably()
                 .build();
@@ -72,22 +69,21 @@ public class NovelRankingQuartzConfig {
 
     //주간 Novel 조회수 랭킹 갱신 Trigger 설정, 매일 자정 00시 5분에 실행
     @Bean
-    public Trigger novelRankingWeeklyTrigger() {
+    public Trigger novelWeeklyRankingTrigger() {
         return TriggerBuilder.newTrigger()
-                .forJob(novelRankingWeeklyJobDetail())//트리거와 novelAverageRatingJobDetail 연결
-                .withIdentity("novelRankingWeeklyTrigger")//트리거 식별자 설정
+                .forJob(novelWeeklyRankingJobDetail())//트리거와 novelAverageRatingJobDetail 연결
+                .withIdentity("novelWeeklyRankingTrigger")//트리거 식별자 설정
                 .withSchedule(CronScheduleBuilder.cronSchedule("3 0 0 * * ?")) // 매일 00시 03분에 실행
                 .startNow()
                 .build();
     }
 
 
-
     //월간 Novel 조회수 랭킹 갱신 JobDetail 설정
     @Bean
-    public JobDetail novelRankingMonthlyJobDetail() {
-        return JobBuilder.newJob(NovelRankingMonthlyJob.class)
-                .withIdentity("novelRankingMonthlyJob")
+    public JobDetail novelMonthlyRankingJobDetail() {
+        return JobBuilder.newJob(NovelMonthlyRanking.class)
+                .withIdentity("novelMonthlyRankingJobDetail")
                 .withDescription("Update monthly novel rankings.")
                 .storeDurably()
                 .build();
@@ -95,45 +91,72 @@ public class NovelRankingQuartzConfig {
 
     //주간 Novel 조회수 랭킹 갱신 Trigger 설정, 매일 자정 00시 5분에 실행
     @Bean
-    public Trigger novelRankingMonthlyTrigger() {
+    public Trigger novelMonthlyRankingTrigger() {
         return TriggerBuilder.newTrigger()
-                .forJob(novelRankingMonthlyJobDetail())//트리거와 novelAverageRatingJobDetail 연결
-                .withIdentity("novelRankingMonthlyTrigger")//트리거 식별자 설정
+                .forJob(novelMonthlyRankingJobDetail())//트리거와 novelAverageRatingJobDetail 연결
+                .withIdentity("novelMonthlyRankingTrigger")//트리거 식별자 설정
                 .withSchedule(CronScheduleBuilder.cronSchedule("5 0 0 * * ?")) // 매일 00시 05분에 실행
                 .build();
     }
 
+    //Redis에 모든 랭킹 정보를 삭제하는 JobDetail 설정
+    @Bean
+    public JobDetail deleteNovelRankingInRedisJobDetail() {
+        return JobBuilder.newJob(DeleteNovelRankingInRedisJob.class)
+                .withIdentity("deleteNovelRankingInRedisJobDetail")
+                .withDescription("Delete novel rankings in Redis.")
+                .storeDurably()
+                .build();
+    }
 
+    //Redis에 모든 랭킹 정보를 삭제하는 Trigger 설정
+    //애플리케이션 시작 시 Redis의 모든 랭킹 데이터 삭제
+
+    @Bean
+    public Trigger deleteNovelRankingInRedisTrigger() {
+       return createSingleRunTrigger("deleteNovelRankingInRedisTrigger",
+                deleteNovelRankingInRedisJobDetail(),
+                0);//애플리케이션 실행 즉시, Redis 랭킹 정보 초기화
+
+    }
 
 
     //애플리케이션 시작시 어제 일자 일간 Novel 조회수 랭킹 갱신  Trigger 설정
     //시작 시점부터 3초뒤 주간 Novel 랭킹 갱신
     @Bean
-    public Trigger novelRankingPreviousDayAtStartTime() {
-        return createSingleRunTrigger("novelRankingPreviousDayAtStartTime",
-                novelRankingPreviousDayJobDetail(),//실행시킬 JobDetail
+    public Trigger novelPreviousDayRankingAtStartTime() {
+        return createSingleRunTrigger("novelPreviousDayRankingAtStartTime",
+                novelPreviousDayRankingJobDetail(),//실행시킬 JobDetail
                 3);//딜레이 시간(초)
+    }
+
+
+    @Bean
+    public Trigger novelDailyRankingTriggerAtStartTime() {
+        return createSingleRunTrigger("novelDailyRankingTriggerAtStartTime",
+                novelDailyRankingJobDetail(),//실행시킬 JobDetail
+                5);//딜레이 시간(초)
+
+
     }
 
     //애플리케이션 시작시 주간 Novel 조회수 랭킹 갱신 Trigger 설정
     //시작 시점부터 10초뒤 주간 Novel 랭킹 갱신
     @Bean
-    public Trigger novelRankingWeeklyTriggerAtStartTime() {
-        return createSingleRunTrigger("novelRankingWeeklyTriggerAtStartTime",
-                novelRankingWeeklyJobDetail(),//실행시킬 JobDetail
+    public Trigger novelWeeklyRankingTriggerAtStartTime() {
+        return createSingleRunTrigger("novelWeeklyRankingTriggerAtStartTime",
+                novelWeeklyRankingJobDetail(),//실행시킬 JobDetail
                 10);//딜레이 시간(초)
     }
 
     //애플리케이션 시작시 주간 Novel 조회수 랭킹 갱신 Trigger 설정
     //시작 시점부터 10초뒤 주간 Novel 랭킹 갱신
     @Bean
-    public Trigger novelRankingMonthlyTriggerAtStartTime() {
-        return createSingleRunTrigger("novelRankingMonthlyTriggerAtStartTime",
-                novelRankingMonthlyJobDetail(),//실행시킬 JobDetail
+    public Trigger monthlyRankingTriggerAtStartTime() {
+        return createSingleRunTrigger("monthlyRankingTriggerAtStartTime",
+                novelMonthlyRankingJobDetail(),//실행시킬 JobDetail
                 15);//딜레이 시간(초)
     }
-
-
 
 
     /**
@@ -154,10 +177,6 @@ public class NovelRankingQuartzConfig {
                 .startAt(startTime) // 지정된 시간에 실행 시작
                 .build();
     }
-
-
-
-
 
 
 }

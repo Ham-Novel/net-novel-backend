@@ -9,25 +9,31 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 @Component
 @Slf4j
-public class NovelRankingWeeklyJob implements Job {
+public class NovelDailyRankingJob implements Job {//일간 조회수 랭킹을 갱신하는 Job
+
     private final NovelRankingService novelRankingService;
+
     @Autowired
-    public NovelRankingWeeklyJob(NovelRankingService novelRankingService) {
+    public NovelDailyRankingJob(NovelRankingService novelRankingService) {
         this.novelRankingService = novelRankingService;
     }
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        log.info("주간 조회수 랭킹 업데이트 시작");
-        // 1. 주간 랭킹 업데이트
-        novelRankingService.updateWeeklyRankings();
+        log.info("일간 조회수 랭킹 업데이트 시작");
+        //메서드 실행시점 연 월 일 객체에 저장
+        LocalDate todayDate = LocalDate.now();
+        // 1. 일간 랭킹 업데이트
+        novelRankingService.updateDailyRankings(todayDate);
 
         // 2. Redis에 랭킹 저장
-        novelRankingService.saveRankingToRedis(RankingPeriod.WEEKLY);
+        novelRankingService.saveNovelRankingToRedis(RankingPeriod.DAILY);
 
-        log.info("주간 조회수 랭킹 업데이트 완료 및 Redis 저장 완료");
+        log.info("일간 조회수 랭킹 업데이트 완료 및 Redis 저장 완료");
 
     }
 }

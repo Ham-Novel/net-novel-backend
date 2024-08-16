@@ -41,16 +41,27 @@ public interface NovelRankingService {
     /**
      * 소설의 주간 랭킹을 업데이트하는 메서드
      * 실행일 기준 30일 전부터 1일 전까지의 조회수를 합산하여 랭킹을 산출
-     *
      * 이미 DB에 랭킹이 있는 경우: 조회수와 랭킹을 업데이트.
      * 랭킹이 없는 경우: 새로운 엔티티를 생성해 DB에 저장
      */
     void updateMonthlyRankings();
 
 
-    void saveRankingToRedis(RankingPeriod rankingPeriod);
+    /**
+     * 오늘 날짜의 랭킹을 Redis에 저장하는 메서드
+     * @param rankingPeriod daily, weekly, monthly 중 하나의 기간을 파라미터로 받음
+     */
+    void saveNovelRankingToRedis(RankingPeriod rankingPeriod);
 
-    List<Map<String, Object>> getRankingFromRedis(String period,Integer startIndex, Integer endIndex);
+
+    /**
+     * 오늘 날짜의 랭킹을 Redis에서 삭제하는 메서드
+     * @param rankingPeriod daily, weekly, monthly 중 하나의 기간을 파라미터로 받음
+     */
+    void deleteNovelRankingInRedis(RankingPeriod rankingPeriod);
+
+
+    List<Map<String, Object>> getNovelRankingFromRedis(String period, Integer startIndex, Integer endIndex);
 
 
 }

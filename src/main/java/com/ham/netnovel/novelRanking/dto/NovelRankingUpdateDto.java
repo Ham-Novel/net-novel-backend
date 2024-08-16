@@ -17,9 +17,9 @@ public class NovelRankingUpdateDto {
 
     private Integer ranking;
 
+    private Long score;
 
 
-    private Long totalViews;
 
 
 }

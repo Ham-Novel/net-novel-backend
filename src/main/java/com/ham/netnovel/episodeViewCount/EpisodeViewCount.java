@@ -14,7 +14,10 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
-
+@Table(name = "episode_view_count",
+        uniqueConstraints = @UniqueConstraint(columnNames = {
+                "episode_id",
+                "view_date"        }))//에피소드 id 와 날짜로 composite key 생성(유니크 조건)
 //에피소드 조회수를 count하기 위한 엔티티
 public class EpisodeViewCount {
     @Id

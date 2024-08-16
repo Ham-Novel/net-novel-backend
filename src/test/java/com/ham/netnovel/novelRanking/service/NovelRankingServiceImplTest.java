@@ -5,14 +5,11 @@ import com.ham.netnovel.novelRanking.RankingPeriod;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class NovelRankingServiceImplTest {
@@ -58,7 +55,7 @@ class NovelRankingServiceImplTest {
 //        RankingPeriod period = RankingPeriod.DAILY;
 //        RankingPeriod period = RankingPeriod.WEEKLY;
         RankingPeriod period = RankingPeriod.MONTHLY;
-        novelRankingService.saveRankingToRedis(period);
+        novelRankingService.saveNovelRankingToRedis(period);
 
     }
     @Test
@@ -70,7 +67,7 @@ class NovelRankingServiceImplTest {
         Integer startIndex = 0;
         Integer endIndex = 3;
 
-        List<Map<String, Object>> rankingFromRedis = novelRankingService.getRankingFromRedis(period,startIndex,endIndex);
+        List<Map<String, Object>> rankingFromRedis = novelRankingService.getNovelRankingFromRedis(period,startIndex,endIndex);
         for (Map<String, Object> result : rankingFromRedis) {
             System.out.println("noelid= "+result.get("novelId"));
             System.out.println("랭킹= "+result.get("ranking"));

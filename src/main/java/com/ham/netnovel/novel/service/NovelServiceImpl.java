@@ -201,7 +201,7 @@ public class NovelServiceImpl implements NovelService {
             // 기간은 daily, weekly, monthly 중 하나로 전달
             // startIndex와 endIndex를 사용해 Redis에서 가져올 데이터 범위를 설정
             // 리턴되는 리스트는 각 소설의 ID와 랭킹 정보를 포함하는 맵(Map)의 리스트임
-            List<Map<String, Object>> rankingFromRedis = novelRankingService.getRankingFromRedis(period,startIndex,endIndex);
+            List<Map<String, Object>> rankingFromRedis = novelRankingService.getNovelRankingFromRedis(period,startIndex,endIndex);
 
 
             // 현재 페이지에 해당하는 소설 ID를 추출
