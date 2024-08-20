@@ -75,6 +75,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 
+    //AWS S3 SDK, versionCheck 2024-08-19
+    implementation 'software.amazon.awssdk:s3:2.27.7'
+
+    implementation 'software.amazon.awssdk:cloudfront:2.27.7'
+
+
 
 
 }
