@@ -45,7 +45,7 @@ public class S3ServiceImpl implements S3Service {
             PutObjectResponse response = s3Client.putObject(putObjectRequest,
                     RequestBody.fromBytes(file.getBytes()));
 
-            //업로드 결과 출력
+            //업로드 결과 출력, 업로드 실패시 예외로 던져짐
             log.info("S3 파일 업로드 결과 ={}",response.toString());
 
             return fileName;

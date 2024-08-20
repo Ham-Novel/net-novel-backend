@@ -5,18 +5,17 @@ import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.episode.service.EpisodeService;
-import com.ham.netnovel.novel.dto.NovelCreateDto;
-import com.ham.netnovel.novel.dto.NovelDeleteDto;
-import com.ham.netnovel.novel.dto.NovelInfoDto;
-import com.ham.netnovel.novel.dto.NovelUpdateDto;
+import com.ham.netnovel.novel.dto.*;
 import com.ham.netnovel.novel.service.NovelService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -55,13 +54,13 @@ public class NovelController {
      * @return ResponseEntity<List < NovelInfoDto>> 소설 정보를 담은 객체 반환.
      */
     @GetMapping("/novels/ranking")
-    public ResponseEntity<List<NovelInfoDto>> getNovelsByRanking(@RequestParam("period") String period,
+    public ResponseEntity<List<NovelListDto>> getNovelsByRanking(@RequestParam("period") String period,
                                                                  @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
                                                                  @RequestParam(name = "pageSize", defaultValue = "100") int pageSize) {
-       //페이지네이션 객체 생성
+        //페이지네이션 객체 생성
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //유저가 요청한 랭킹 기간에 따라, 소설 정보를 랭킹 순서대로 정렬하여 List에 담음
-        List<NovelInfoDto> rankedNovels = novelService.getNovelsByRanking(period,pageable);
+        List<NovelListDto> rankedNovels = novelService.getNovelsByRanking(period, pageable);
 
 
         return ResponseEntity.ok(rankedNovels);//소설 정보 전송
@@ -161,6 +160,48 @@ public class NovelController {
     ) {
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         return ResponseEntity.ok(novelService.getNovelsRecent(pageable));
+    }
+
+    /**
+     * 소설의 섬네일을 AWS S3에 업로드하고, 소설의 섬네일 파일명을 업데이트하는 API입니다.
+     *
+     * <p>클라이언트로부터 소설 ID와 섬네일 파일을 받아서 인증된 사용자의 정보를 기반으로 소설의 섬네일을 업데이트합니다.</p>
+     *
+     * <p>사용자는 인증이 필요하며, {@link Authentication} 객체를 통해 인증 정보를 확인합니다.
+     * 인증 정보가 일치하지 않으면 {@link AuthenticationCredentialsNotFoundException}이 발생합니다.</p>
+     *
+     * <p>인증된 사용자의 정보가 소설의 소유자와 일치하면, 소설의 섬네일 파일을 S3에 업로드하고,
+     * 소설 엔티티의 섬네일 파일명을 업데이트합니다.</p>
+     *
+     * <p>업데이트가 성공하면 HTTP 200 상태 코드와 "섬네일 변경 성공!" 메시지를 반환하며,
+     * 실패할 경우 HTTP 500 상태 코드와 "섬네일 변경 실패." 메시지를 반환합니다.</p>
+     *
+     * @param urlNovelId     섬네일을 업데이트할 소설의 ID입니다. {@code notNull}
+     * @param multipartFile  업로드할 섬네일 파일입니다. {@code notNull}
+     * @param authentication 현재 인증된 사용자의 인증 정보입니다. {@code notNull}
+     * @return 성공 시 HTTP 200과 "섬네일 변경 성공!" 메시지, 실패 시 HTTP 500과 "섬네일 변경 실패." 메시지를 반환합니다.
+     */
+    @PostMapping("/novels/{novelId}/thumbnail")
+    public ResponseEntity<?> uploadNovelThumbnail(@PathVariable("novelId") Long urlNovelId
+            , MultipartFile multipartFile//업로드할 섬네일 파일
+            , Authentication authentication) {
+        //유저 인증. 없으면 badRequest 응답. 있으면 CustomOAuth2User 타입캐스팅.
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
+        //섬네일 변경 후 결과를 넘겨받음
+        boolean result = novelService.updateNovelThumbnail(multipartFile, urlNovelId, principal.getName());
+
+        //결과가 true 일경우 성공 메시지 전송
+        if (result) {
+            return ResponseEntity.ok("섬네일 변경 성공!");
+
+
+        } else {
+            //결과가 true가 아닐경우 실패 메시지 전송
+            return ResponseEntity.internalServerError().body("섬네일 변경 실패.");
+        }
+
+
     }
 
 }
