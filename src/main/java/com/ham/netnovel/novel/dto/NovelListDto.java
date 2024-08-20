@@ -1,22 +1,20 @@
 package com.ham.netnovel.novel.dto;
 
-import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.tag.dto.TagDataDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
 @Setter
 @ToString
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NovelInfoDto {
+@Builder
+public class NovelListDto {//랭킹 등 리스트로 소설정보를 전달시 사용하는 DTO
 
     @NotNull
     private Long id; //소설 id
@@ -25,18 +23,8 @@ public class NovelInfoDto {
     @Size(max = 30)
     private String title; //소설 제목
 
-    @NotBlank
-    @Size(max = 300)
-    private String desc; //작품 소개
-
     @NotNull
     private String authorName; //작가 닉네임
-
-    @NotNull
-    private Integer views; //조회수
-
-    @NotNull
-    private BigDecimal averageRating; //평균 별점
 
     @NotNull
     private Integer favoriteCount; //선호작 수
@@ -44,13 +32,6 @@ public class NovelInfoDto {
     @NotNull
     private List<TagDataDto> tags; //작품 태그
 
-    @NotNull
-    private NovelType type; //소설 등급
-
-    @NotNull
-    private Integer episodeCount; //에피소드 총 화수
-
-    @NotNull
-    private String thumbnailUrl;//섬네일 AWS URL
+    private String thumbnailUrl;
 
 }

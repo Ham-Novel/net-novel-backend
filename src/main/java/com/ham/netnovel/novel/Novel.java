@@ -38,6 +38,9 @@ public class Novel {
     @Enumerated(EnumType.STRING)
     private NovelStatus status;
 
+    //섬네일 파일명
+    private String thumbnailFileName;
+
     //작가
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -82,6 +85,12 @@ public class Novel {
     }
     public void updateType(NovelType type){
         this.type = type;
+    }
+
+    //섬네일 파일명 변경
+    public void updateThumbnailFileName(String thumbnailFileName){
+        this.thumbnailFileName = thumbnailFileName;
+
     }
 
 }
