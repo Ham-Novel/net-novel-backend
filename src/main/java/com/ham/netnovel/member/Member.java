@@ -90,6 +90,7 @@ public class Member {
         this.role = role;
         this.nickName = nickName;
         this.gender = gender;
+        this.coinCount = coinCount;
     }
 
     public void changeNickName(String nickName) {
