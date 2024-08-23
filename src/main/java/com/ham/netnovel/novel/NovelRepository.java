@@ -33,18 +33,35 @@ public interface NovelRepository extends JpaRepository<Novel, Long> {
             "where r.rating is not null)")
     List<Novel> findByNovelRating();
 
+//    @Query("""
+//            SELECT DISTINCT n FROM Novel n
+//            JOIN FETCH n.episodes e
+//            WHERE e.chapter = (
+//                SELECT MAX(es.chapter)
+//                FROM Episode es
+//                WHERE es.novel.id = n.id
+//            )
+//            ORDER BY e.createdAt DESC
+//            """)
+//    List<Novel> findByLatestEpisodesOrderByCreatedAt(Pageable pageable);
 
-    @Query("""
-            SELECT DISTINCT n FROM Novel n
-            JOIN FETCH n.episodes e
-            WHERE e.chapter = (
-                SELECT MAX(es.chapter)
-                FROM Episode es
-                WHERE es.novel.id = n.id
-            )
-            ORDER BY e.createdAt DESC
-            """)
-    List<Novel> findByLatestEpisodesOrderByCreatedAt(Pageable pageable);
+
+    /**
+     * 최신 에피소드의 생성일을 기준으로 내림차순 정렬된 소설을 반환하는 메서드 입니다.
+     *
+     * @param pageable 페이지네이션 정보를 포함하는 객체
+     * @return 최신 에피소드가 포함된 소설 목록
+     */
+    @Query("select n " +
+            "from Novel n " +
+            "JOIN n.episodes e " + // Novel 엔티티와 Episode 엔티티를 조인합니다.
+            "WHERE e.createdAt = (" +
+            "   SELECT MAX(e2.createdAt) " + // 각 소설의 에피소드 중 가장 최근 생성된 시간 선택
+            "   FROM Episode e2" +
+            "   WHERE e2.novel = n" + // 현재 소설(n)와 연관된 에피소드들 중에서 선택
+            ") " +
+            "order by e.createdAt desc") // 최신 에피소드의 생성일로 내림차순 정렬
+    List<Novel> findByLatestEpisodes(Pageable pageable);
 
 
     /**
