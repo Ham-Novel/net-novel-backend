@@ -32,9 +32,10 @@ public interface S3Service {
      * {@link RuntimeException}이 발생합니다.</p>
      *
      * @param fileName CloudFront URL을 생성할 파일의 이름
+     * @param thumbnailType 미니 사이즈로 리사이징 된 이미지 사용시, mini 대입(랭킹 등 대량의 섬네일이 필요한 경우)
      * @return 생성된 CloudFront URL
      * @throws RuntimeException URL 생성 중 오류가 발생한 경우
      */
-   String generateCloudFrontUrl(String fileName);
+   String generateCloudFrontUrl(String fileName,String thumbnailType);
 
 }

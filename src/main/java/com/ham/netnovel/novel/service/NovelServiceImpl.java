@@ -260,6 +260,11 @@ public class NovelServiceImpl implements NovelService {
 
     }
 
+    /**
+     * 랭킹과 같이 대량의 소설정보를 전달시 사용하는 DTO로 변환하는 메서드 입니다.
+     * @param novel 소설 엔티티
+     * @return NovelListDto
+     */
     NovelListDto convertEntityToListDto(Novel novel){
         //작품의 태그들 가져오기
         List<TagDataDto> dataDtoList = novel.getNovelTags().stream()
@@ -267,7 +272,7 @@ public class NovelServiceImpl implements NovelService {
                 .toList();
 
         //AWS cloud front 섬네일 이미지 URL 객체 반환
-        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName());
+        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(),"mini");
 
         //DTO 반환
        return NovelListDto.builder()
@@ -295,7 +300,7 @@ public class NovelServiceImpl implements NovelService {
                 .toList();
 
         //AWS cloud front 섬네일 이미지 URL 객체 반환
-        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName());
+        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(),"original");
 
         //작품의 모든 에피소드 조회수 총합
         int viewsSum = novel.getEpisodes().stream().mapToInt(Episode::getView).sum();
