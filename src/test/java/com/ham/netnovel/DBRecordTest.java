@@ -1,5 +1,7 @@
 package com.ham.netnovel;
 
+import com.ham.netnovel.coinChargeHistory.dto.CoinChargeCreateDto;
+import com.ham.netnovel.coinChargeHistory.service.CoinChargeHistoryService;
 import com.ham.netnovel.coinCostPolicy.CoinCostPolicyRepository;
 import com.ham.netnovel.coinCostPolicy.dto.CostPolicyCreateDto;
 import com.ham.netnovel.coinCostPolicy.service.CoinCostPolicyService;
@@ -13,7 +15,10 @@ import com.ham.netnovel.commentLike.service.CommentLikeService;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.dto.EpisodeCreateDto;
+import com.ham.netnovel.episode.dto.EpisodeDetailDto;
+import com.ham.netnovel.episode.service.EpisodeManagementServiceImpl;
 import com.ham.netnovel.episode.service.EpisodeService;
+import com.ham.netnovel.episodeViewCount.EpisodeViewCountRepository;
 import com.ham.netnovel.favoriteNovel.FavoriteNovelRepository;
 import com.ham.netnovel.favoriteNovel.service.FavoriteNovelService;
 import com.ham.netnovel.member.Member;
@@ -70,6 +75,9 @@ public class DBRecordTest {
     EpisodeService episodeService;
 
     @Autowired
+    EpisodeManagementServiceImpl episodeManagementService;
+
+    @Autowired
     NovelAverageRatingRepository averageRatingRepository;
     @Autowired
     NovelRatingRepository novelRatingRepository;
@@ -112,11 +120,22 @@ public class DBRecordTest {
     FavoriteNovelService favoriteNovelService;
 
     @Autowired
+    EpisodeViewCountRepository episodeViewCountRepository;
+
+    @Autowired
+    CoinChargeHistoryService coinChargeHistoryService;
+
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
     //DB records 전부 삭제
     @Test
     void clear() {
+
+        recentReadRepository.deleteAll();
+        novelTagRepository.deleteAll();
+        favoriteNovelRepository.deleteAll();
+
         commentLikeRepository.deleteAll();
         commentRepository.deleteAll();
         episodeRepository.deleteAll();
@@ -124,10 +143,7 @@ public class DBRecordTest {
 
         averageRatingRepository.deleteAll();
         novelRatingRepository.deleteAll();
-        novelTagRepository.deleteAll();
         tagRepository.deleteAll();
-        favoriteNovelRepository.deleteAll();
-        recentReadRepository.deleteAll();
         novelRepository.deleteAll();
 
         memberRepository.deleteAll();
@@ -145,6 +161,11 @@ public class DBRecordTest {
 
     @Test
     void makeBasicItems() {
+        costPolicyService.createPolicy(CostPolicyCreateDto.builder()
+                .name("무료")
+                .coinCost(0)
+                .build());
+
         costPolicyService.createPolicy(CostPolicyCreateDto.builder()
                 .name("유료")
                 .coinCost(1)
@@ -190,11 +211,17 @@ public class DBRecordTest {
             novelRatingService.saveNovelRating(ratingSaveDto);
 
             //에피소드 생성
+            long policyId;
+            if (i <= 15) {
+                policyId = 1L;
+            } else {
+                policyId = 2L;
+            }
             EpisodeCreateDto episodeDto = EpisodeCreateDto.builder()
                     .novelId(1L)
                     .title("에피소드 제목" + i)
                     .content("Cillum consequat eiusmod consequat anim est.")
-                    .costPolicyId(1L)
+                    .costPolicyId(policyId)
                     .build();
             episodeService.createEpisode(episodeDto);
 
@@ -224,15 +251,13 @@ public class DBRecordTest {
 
 
     @Test
-    @Transactional
-    @Commit
     void makeEpisodeItems() {
 //        episodeRepository.deleteAll();
 //        jdbcTemplate.execute("ALTER TABLE episode ALTER COLUMN id RESTART WITH 1");
 
         Random random = new Random();
         IntStream.rangeClosed(1, 50).forEach(i->{
-            long next = random.nextLong(5, 10);
+            long next = random.nextLong(1, 10);
             episodeService.createEpisode(EpisodeCreateDto.builder()
                             .novelId(next)
                             .title("테스트 데이터"+i)
@@ -242,14 +267,29 @@ public class DBRecordTest {
         });
     }
 
+    //에피소드 더미 데이터에 테스트 조회수 넣기
+    @Test
+    @Transactional
+    @Commit
+    void getEpisodeDetail() {
+        Random random = new Random();
+        IntStream.rangeClosed(1, 100).forEach(i->{
+            long epi_id = random.nextLong(101, 110);
+            String user_id = "test" + random.nextLong(1, 10);
+            EpisodeDetailDto episodeDetail = episodeManagementService.getEpisodeDetail(user_id, epi_id);
+            System.out.println(episodeDetail.toString());
+
+        });
+        episodeManagementService.updateEpisodeViewCountFromRedis();
+    }
 
     @Test
     void makeTagItems() {
-        novelTagRepository.deleteAll();
-        tagRepository.deleteAll();
-
-        jdbcTemplate.execute("ALTER TABLE tag ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.execute("ALTER TABLE novel_tag ALTER COLUMN id RESTART WITH 1");
+//        novelTagRepository.deleteAll();
+//        tagRepository.deleteAll();
+//
+//        jdbcTemplate.execute("ALTER TABLE tag ALTER COLUMN id RESTART WITH 1");
+//        jdbcTemplate.execute("ALTER TABLE novel_tag ALTER COLUMN id RESTART WITH 1");
 
 
         Random random = new Random();
@@ -317,7 +357,7 @@ public class DBRecordTest {
 
         Member member = memberService.getMember("test1").get();
 
-        IntStream.rangeClosed(1, 4).forEach(i->{
+        IntStream.rangeClosed(6, 10).forEach(i->{
             Novel novel = novelService.getNovel((long) i).get();
             Episode episode = novel.getEpisodes().get(0);
             RecentReadId recentReadId = new RecentReadId(member.getId(), novel.getId());
@@ -339,5 +379,17 @@ public class DBRecordTest {
             long novel = random.nextLong(1, 10);
             favoriteNovelService.toggleFavoriteNovel("test"+user, novel);
         });
+    }
+
+    @Test
+    @Transactional
+    @Commit
+    void makeCoinChargeItems() {
+        CoinChargeCreateDto build = CoinChargeCreateDto.builder()
+                .providerId("test1")
+                .coinAmount(100)
+                .payment("5000.00")
+                .build();
+        coinChargeHistoryService.saveCoinChargeHistory(build);
     }
 }

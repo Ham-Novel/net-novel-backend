@@ -1,5 +1,7 @@
 package com.ham.netnovel.episode.service;
 
+import com.ham.netnovel.coinCostPolicy.CoinCostPolicy;
+import com.ham.netnovel.coinCostPolicy.dto.CostPolicyResponseDto;
 import com.ham.netnovel.coinUseHistory.service.CoinUseHistoryService;
 import com.ham.netnovel.common.exception.EpisodeNotPurchasedException;
 import com.ham.netnovel.common.exception.ServiceMethodException;
@@ -57,7 +59,8 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
             boolean result = coinUseHistoryService.hasMemberUsedCoinsForEpisode(providerId, episodeId);
             //결제 내역이 없을경우 EpisodeNotPurchasedException 로 던짐
             if (!result) {
-                throw new EpisodeNotPurchasedException("에피소드 결제 내역 없음, providerId = " + providerId + ", episodeId = " + episodeId);
+                //EpisodeNotPurchasedException 에 coinCost 정보도 함께 전달
+                throw new EpisodeNotPurchasedException("에피소드 결제 내역 없음, providerId = " + providerId + ", episodeId = " + episodeId, coinCost);
             }
         }
 

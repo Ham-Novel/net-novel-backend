@@ -281,6 +281,7 @@ public class NovelServiceImpl implements NovelService {
     }
 
     NovelInfoDto convertEntityToInfoDto(Novel novel) {
+        //평균 별점 레코드가 없으면 0점짜리 새로 생성
         NovelAverageRating averageRating = Optional.ofNullable(novel.getNovelAverageRating())
                 .orElse(NovelAverageRating.builder()
                         .novel(novel)
@@ -296,12 +297,15 @@ public class NovelServiceImpl implements NovelService {
         //AWS cloud front 섬네일 이미지 URL 객체 반환
         String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName());
 
+        //작품의 모든 에피소드 조회수 총합
+        int viewsSum = novel.getEpisodes().stream().mapToInt(Episode::getView).sum();
+
         return NovelInfoDto.builder()
                 .id(novel.getId())
                 .title(novel.getTitle())
                 .desc(novel.getDescription())
                 .authorName(novel.getAuthor().getNickName())
-                .views(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
+                .views(viewsSum)
                 .averageRating(averageRating.getAverageRating())
                 .episodeCount(novel.getEpisodes().size())
                 .favoriteCount(novel.getFavorites().size())
