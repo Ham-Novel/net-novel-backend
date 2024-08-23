@@ -12,9 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 public class CostPolicyResponseDto {
 
-    @NotNull
-    private Long id;
-
     @NotBlank
     private String name;
 
