@@ -9,8 +9,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("*")
-//                .allowedOrigins("http://localhost:5173")  // Vue.js 개발 서버 주소
-                .allowedMethods("GET", "POST", "PUT", "DELETE");
+                .allowedOrigins("http://localhost:5173")  // Vue.js 개발 서버 주소
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowCredentials(true); // Credentials (쿠키 등)을 포함한 요청 허용
     }
 }
