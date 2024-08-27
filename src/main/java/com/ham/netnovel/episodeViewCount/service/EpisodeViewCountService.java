@@ -18,12 +18,7 @@ public interface EpisodeViewCountService {
     void updateEpisodeViewCountEntity(Map<Long, Episode> episodes, List<ViewCountIncreaseDto> viewCountIncreaseDtos);
 
 
-    /**
-     * 특정 날짜의 소설 조회수로 랭킹을 계산해 반환하는 메서드
-     * @param todayDate 계산할 날짜
-     * @return List Novel 엔티티와 totalViews(총조회수) 를 DTO에 담아 List 형태로 반환
-     */
-    List<NovelRankingUpdateDto> getDailyRanking(LocalDate todayDate);
+    List<Object[]> getNovelAndNovelTotalViewsByDate(LocalDate startDate, LocalDate endDate);
 
     /**
      * 특정 에피소드의 조회수를 1 올리는 메서드, 데이터는 Redis 에 저장

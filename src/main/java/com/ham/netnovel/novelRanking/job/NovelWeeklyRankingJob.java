@@ -22,7 +22,7 @@ public class NovelWeeklyRankingJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         log.info("주간 조회수 랭킹 업데이트 시작");
         // 1. 주간 랭킹 업데이트
-        novelRankingService.updateWeeklyRankings();
+        novelRankingService.updateWeeklyNovelRankings();
 
         // 2. Redis에 랭킹 저장
         novelRankingService.saveNovelRankingToRedis(RankingPeriod.WEEKLY);

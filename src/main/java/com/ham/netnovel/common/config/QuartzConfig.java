@@ -21,7 +21,6 @@ public class QuartzConfig {
                 .build();
     }
 
-    //주간 Novel 조회수 랭킹 갱신 Trigger 설정, 1분마다 실행
     @Bean
     public Trigger novelAverageRatingTrigger() {
         return TriggerBuilder.newTrigger()

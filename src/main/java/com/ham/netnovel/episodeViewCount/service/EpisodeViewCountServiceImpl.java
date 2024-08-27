@@ -6,8 +6,6 @@ import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episodeViewCount.EpisodeViewCount;
 import com.ham.netnovel.episodeViewCount.EpisodeViewCountRepository;
 import com.ham.netnovel.episodeViewCount.ViewCountIncreaseDto;
-import com.ham.netnovel.novel.Novel;
-import com.ham.netnovel.novelRanking.dto.NovelRankingUpdateDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -22,11 +20,6 @@ import java.util.stream.Collectors;
 public class EpisodeViewCountServiceImpl implements EpisodeViewCountService {
 
     private static final String VIEW_HASH_KEY = "episode:views";
-
-    // 가중치 상수 정의
-    private static final int TODAY_VIEW_WEIGHT = 3;
-    private static final int YESTERDAY_VIEW_WEIGHT = 2;
-
 
     private final EpisodeViewCountRepository episodeViewCountRepository;
     private final RedisTemplate<String, String> redisTemplate;
@@ -83,57 +76,20 @@ public class EpisodeViewCountServiceImpl implements EpisodeViewCountService {
         }
     }
 
-    //ToDo 소설별점, 댓글 가중치 추가하여 알고리즘 완성
-    @Override
+
     @Transactional
-    public List<NovelRankingUpdateDto> getDailyRanking(LocalDate todayDate) {
+    @Override
+    public List<Object[]> getNovelAndNovelTotalViewsByDate(LocalDate startDate, LocalDate endDate){
 
         try {
-            LocalDate yesterdayDate = todayDate.minusDays(1);
+            //주어진 기간 사이에 소설의 일간 총조회수를 반환
+            return episodeViewCountRepository.findNovelTotalViews(startDate, endDate);
+
+        }catch (Exception ex){
+            throw new ServiceMethodException("getNovelAndNovelTotalViewsByDate 메서드 에러, 에러내용 ="+ex+ex.getMessage());
+        }
 
 
-            /*
-            DB에서 어제, 오늘 소설 조회수 정보 받아옴
-            인덱스 0번은 Novel 엔티티, 1번은 조회수, 2번은 기록된 날짜
-             */
-            List<Object[]> novelTotalViews = episodeViewCountRepository.findNovelTotalViews(yesterdayDate, todayDate);
-            //자료를 저장할 Map 객체 생성
-            Map<Novel, Long> scoresOfNovel = new HashMap<>();
-
-            //반복문을 돌려 scoresOfNovel 객체에 Novel 엔티티와 점수 저장
-            for (Object[] novelTotalView : novelTotalViews) {
-                Novel novel = (Novel) novelTotalView[0];//인덱스 0번은 Novel 엔티티
-                Long views = (((Number) novelTotalView[1]).longValue()); // 총 조회수 (Long으로 처리)
-                LocalDate viewDate = (LocalDate) novelTotalView[2];//인덱스 2번은 저장날짜
-
-                //날짜 가중치 객체 생성, 오늘은 3 어제는 2 가중치를 가짐
-                int weight = viewDate.equals(todayDate) ? TODAY_VIEW_WEIGHT : YESTERDAY_VIEW_WEIGHT;
-                //가중치와 조회수를 곱하여 점수 계산
-                long score = views * weight;
-                // Map 자료형에 할당, Novel 값이 있는 경우 기존 value에 score를 더하여 저장
-                scoresOfNovel.merge(novel, score, Long::sum);
-            }
-
-            //List 자료형으로 변환
-            List<Map.Entry<Novel, Long>> entryList = new ArrayList<>(scoresOfNovel.entrySet());
-            //점수 순서대로 내림차순 정렬
-            entryList.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-            //DTO로 변환하여 List 객체에 담음
-            List<NovelRankingUpdateDto> rankingUpdateDtos = entryList.stream()
-                    .map(entry -> NovelRankingUpdateDto.builder()
-                            .novel(entry.getKey())//0번인덱스 Novel 엔티티
-                            .score(entry.getValue())//1번 인덱스 총 조회수
-                            .build()).toList();
-
-            //점수 순서대로 정렬된 DTO에 랭킹 정보 추가
-            for (int i = 0; i < rankingUpdateDtos.size(); i++) {
-                rankingUpdateDtos.get(i).setRanking(i + 1);
-            }
-            //반환
-            return rankingUpdateDtos;
-
-        } catch (Exception ex) {
-            throw new ServiceMethodException("getDailyRanking 메서드 에러 발생: " + ex.getMessage(), ex);        }
 
     }
 
