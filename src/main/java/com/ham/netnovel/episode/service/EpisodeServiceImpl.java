@@ -4,11 +4,11 @@ package com.ham.netnovel.episode.service;
 import com.ham.netnovel.coinCostPolicy.CoinCostPolicy;
 import com.ham.netnovel.coinCostPolicy.service.CoinCostPolicyService;
 import com.ham.netnovel.common.exception.ServiceMethodException;
+import com.ham.netnovel.common.message.RedisMessagePublisher;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.EpisodeStatus;
 import com.ham.netnovel.episode.dto.*;
-import com.ham.netnovel.episodeViewCount.service.EpisodeViewCountService;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.service.NovelService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -32,10 +31,14 @@ public class EpisodeServiceImpl implements EpisodeService {
     private final EpisodeRepository episodeRepository;
     private final NovelService novelService;
     private final CoinCostPolicyService costPolicyService;
-    public EpisodeServiceImpl(EpisodeRepository episodeRepository, NovelService novelService, CoinCostPolicyService costPolicyService ) {
+
+    private final RedisMessagePublisher redisMessagePublisher;
+
+    public EpisodeServiceImpl(EpisodeRepository episodeRepository, NovelService novelService, CoinCostPolicyService costPolicyService, RedisMessagePublisher redisMessagePublisher) {
         this.episodeRepository = episodeRepository;
         this.novelService = novelService;
         this.costPolicyService = costPolicyService;
+        this.redisMessagePublisher = redisMessagePublisher;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     @Override
     public List<Episode> getEpisodeList(List<Long> episodeIds) {
-       return episodeRepository.findAllById(episodeIds);
+        return episodeRepository.findAllById(episodeIds);
     }
 
     @Override
@@ -64,13 +67,48 @@ public class EpisodeServiceImpl implements EpisodeService {
                     .content(episodeCreateDto.getContent())
                     .costPolicy(costPolicyProperty)
                     .novel(novelProperty)
-                    .chapter(novelProperty.getEpisodes().size()+1) //자동으로 넘버링 증가
+                    .chapter(novelProperty.getEpisodes().size() + 1) //자동으로 넘버링 증가
                     .build();
-            episodeRepository.save(targetRecord);
+            Episode save = episodeRepository.save(targetRecord);
+
+            //Redis로 Novel이 업데이트 되었다는 메시지를 송부
+            publishUpdateMessage(
+                    novelProperty.getId(),
+                    save.getId(),
+                    novelProperty.getTitle(),
+                    episodeCreateDto.getTitle(),
+                    novelProperty.getThumbnailFileName());
+
         } catch (Exception ex) {
             //나머지 Repository 작업 예외 처리
             throw new ServiceMethodException("createEpisode 메서드 에러 발생", ex.getCause());
         }
+    }
+
+    /*
+   Redis를 사용하여 소설 업데이트 메시지를 발송하는 메서드입니다.
+
+   이 메서드는 소설과 에피소드의 업데이트 정보를 Redis Pub/Sub 시스템을 통해 발송합니다. 메시지의 형식은 다음과 같습니다:
+
+   [novelId]:[episodeId]:[novelTitle]:[episodeTitle]:[thumbnailFileName]
+
+   - novelId: 소설의 고유 ID. 이 값은 사용자 검색 시 사용될 수 있습니다.
+   - episodeId: 에피소드의 고유 ID.
+   - novelTitle: 소설의 제목.
+   - episodeTitle: 에피소드의 제목.
+   - thumbnailFileName: 썸네일 이미지 파일 이름.
+
+   발송된 메시지는 Redis의 "novel-update-channel"이라는 채널을 통해 구독자에게 전달됩니다. 구독자는 이 채널을 통해 소설 업데이트 정보를 실시간으로 수신할 수 있습니다.
+   */
+    private void publishUpdateMessage(Long novelId, Long episodeId, String novelTitle, String episodeTitle, String thumbnailFileName) {
+        //메시지내용 : 앞에는 novelId로 유저 검색시 사용됨
+        String message = novelId + ":"
+                + episodeId + ":"
+                + novelTitle + ":"
+                + episodeTitle + ":"
+                + thumbnailFileName;
+        //Redis에 메시지 발송
+        redisMessagePublisher.publish("novel-update-channel", message);
     }
 
     @Override
@@ -167,7 +205,8 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     /**
-     *  Episode Entity => EpisodeListItemDto 변환 메서드
+     * Episode Entity => EpisodeListItemDto 변환 메서드
+     *
      * @param episode 에피소드 엔티티
      * @return EpisodeListItemDto
      */
