@@ -279,12 +279,22 @@ public class NovelRankingServiceImpl implements NovelRankingService {
 
 
     /**
-     * 소설 랭킹 엔티티 정보를 저장하거나 업데이트하는 메서드
+     * 소설 랭킹 엔티티 정보를 저장하거나 업데이트하는 메서드입니다.
+     * <p>
+     * 이 메서드는 주어진 날짜와 랭킹 주기에 따라 소설 랭킹 정보를 업데이트합니다.
+     * 전달된 DTO 리스트를 기반으로, 기존에 저장된 랭킹 엔티티를 조회하고, 해당 엔티티가 존재하지 않으면 새로 생성합니다.
+     * </p>
+     * <p>
+     * 존재하는 엔티티는 업데이트 후, 변경 사항을 데이터베이스에 저장합니다.
+     * </p>
      *
-     * @param todayDate              오늘 날짜, 즉 랭킹을 업데이트할 기준 날짜
-     * @param rankingPeriod          랭킹 주기 (일간, 주간, 월간 등)
-     * @param novelRankingUpdateDtos 업데이트할 소설 랭킹 정보가 담긴 DTO 리스트
-     * @param existingRankings       기존에 DB에 저장된 랭킹 엔티티가 담긴 Map 객체
+     *
+     *
+     * @param todayDate              오늘 날짜 {@link LocalDate }객체 입니다. 랭킹 정보를 업데이트할 기준 날짜로 사용됩니다.
+     * @param rankingPeriod          랭킹 주기입니다. 예를 들어, 일간, 주간, 월간 등의 주기를 설정하는 {@link RankingPeriod} 객체입니다.
+     * @param novelRankingUpdateDtos 업데이트할 소설 랭킹 정보가 담긴 DTO 리스트입니다. 각 DTO는 소설의 점수와 랭킹 정보를 포함합니다.
+     * @param existingRankings       기존에 데이터베이스에 저장된 랭킹 엔티티를 담고 있는 {@link Map} 객체입니다.
+     *                              이 맵의 키는 소설 ID이며, 값은 해당 소설의 랭킹 엔티티입니다.
      */
     private void saveOrUpdateNovelRankings(LocalDate todayDate,
                                            RankingPeriod rankingPeriod,

@@ -1,6 +1,7 @@
 package com.ham.netnovel.favoriteNovel.service;
 
 import com.ham.netnovel.common.exception.ServiceMethodException;
+import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.favoriteNovel.FavoriteNovel;
 import com.ham.netnovel.favoriteNovel.FavoriteNovelId;
 import com.ham.netnovel.favoriteNovel.FavoriteNovelRepository;
@@ -13,12 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
 @Slf4j
-public class FavoriteNovelServiceImpl implements FavoriteNovelService{
+public class FavoriteNovelServiceImpl implements FavoriteNovelService {
 
     private final FavoriteNovelRepository favoriteNovelRepository;
     private final MemberService memberService;
@@ -61,7 +63,7 @@ public class FavoriteNovelServiceImpl implements FavoriteNovelService{
                 return true; // 이제 레코드 있음
             }
         } catch (Exception ex) {
-            throw new ServiceMethodException("toggleFavoriteNovel() Error : "  + ex.getMessage());
+            throw new ServiceMethodException("toggleFavoriteNovel() Error : " + ex.getMessage());
         }
     }
 
@@ -78,7 +80,25 @@ public class FavoriteNovelServiceImpl implements FavoriteNovelService{
             Optional<FavoriteNovel> record = favoriteNovelRepository.findById(id);
             return record.isPresent();
         } catch (Exception ex) {
-            throw new ServiceMethodException("checkFavorite() Error : "  + ex.getMessage());
+            throw new ServiceMethodException("checkFavorite() Error : " + ex.getMessage());
         }
     }
+
+    @Override
+    public List<String> getSubscribedMemberProviderIds(Long novelId) {
+
+        //파라미터 null 체크
+        if (novelId == null) {
+            throw new IllegalArgumentException("Novel Id가 Null입니다.");
+        }
+        try {
+            //소설에 좋아요 누른 유저의 providerId 값을 리턴
+            return favoriteNovelRepository.findMemberProviderIdsByNovelId(novelId);
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getSubscribedMemberProviderIds 메서드 에러" + ex + ex.getMessage());
+        }
+
+    }
+
+
 }
