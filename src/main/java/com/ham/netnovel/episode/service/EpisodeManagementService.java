@@ -1,11 +1,13 @@
 package com.ham.netnovel.episode.service;
 
+import com.ham.netnovel.common.exception.EpisodeNotPurchasedException;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;
 import com.ham.netnovel.episodeViewCount.ViewCountIncreaseDto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 public interface EpisodeManagementService {
 
@@ -13,13 +15,22 @@ public interface EpisodeManagementService {
 
 
     /**
-     * 에피소드 상세 정보를 전송하는 메서드
+     * 지정된 에피소드의 상세 정보를 반환합니다.
      *
-     * 유저의 에피소드 결제 내역이 존재할경우 에피소드 전송
-     * 문제 없을경우, Redis에 에피소드 조회수 기록 1 증가시킴
-     * @param providerId 에피소드 조회를 요청한 유저
-     * @param episodeId 유저가 요청한 에피소드 ID
-     * @return EpisodeDetailDto 에피소드 상세정보
+     * <ul>
+     *     <li>에피소드가 존재하는지 확인하고, 존재하지 않으면 {@link NoSuchElementException}을 발생시킵니다.</li>
+     *     <li>코인 비용을 검증하고, 유효하지 않으면 {@link IllegalArgumentException}을 발생시킵니다.</li>
+     *     <li>유료 에피소드일 경우 사용자의 결제 내역을 확인하고, 결제 내역이 없으면 {@link EpisodeNotPurchasedException}을 발생시킵니다.</li>
+     *     <li>레디스에서 에피소드 조회수를 1 증가시킵니다.</li>
+     *     <li>{@link EpisodeDetailDto} 객체로 에피소드 정보를 반환합니다.</li>
+     * </ul>
+     *
+     * @param providerId 요청자의 ID
+     * @param episodeId 조회할 에피소드의 ID
+     * @return {@link EpisodeDetailDto} 에피소드 상세 정보
+     * @throws NoSuchElementException 에피소드가 존재하지 않는 경우
+     * @throws EpisodeNotPurchasedException 유료 에피소드에 대한 결제 내역이 없는 경우
+     * @throws IllegalArgumentException 코인 비용이 유효하지 않은 경우
      */
     EpisodeDetailDto getEpisodeDetail(String providerId,Long episodeId);
 
