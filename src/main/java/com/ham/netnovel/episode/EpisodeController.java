@@ -4,6 +4,7 @@ import com.ham.netnovel.OAuth.CustomOAuth2User;
 import com.ham.netnovel.common.exception.EpisodeNotPurchasedException;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.common.utils.PageableUtil;
+import com.ham.netnovel.episode.data.IndexDirection;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;
 import com.ham.netnovel.episode.dto.EpisodeListInfoDto;
 import com.ham.netnovel.episode.dto.EpisodeListItemDto;
@@ -43,14 +44,38 @@ public class EpisodeController {
             Authentication authentication,
             @PathVariable Long episodeId
     ) {
-        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        //유저 인증 정보가 없으면 401 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
         try {
-
             EpisodeDetailDto episodeDetail = episodeManagementService.getEpisodeDetail(principal.getName(), episodeId);
             return ResponseEntity.ok(episodeDetail);
         } catch (EpisodeNotPurchasedException e) {
+            //실패 시 해당하는 코인 정책 반환
+            HashMap<String, Integer> respBody = new HashMap<>() {{
+                put("coinCost", e.getCoinCost());
+            }};
+            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(respBody);
+        }
+    }
+
+    @GetMapping("/episodes/{episodeId}/beside")
+    public ResponseEntity<?> getEpisodeBeside(
+            Authentication authentication,
+            @PathVariable Long episodeId,
+            @RequestParam(defaultValue = "NEXT") IndexDirection direction
+    ) {
+        //유저 인증 정보가 없으면 401 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
+        try {
+            EpisodeDetailDto episodeDetail = episodeManagementService.getBesideEpisode(principal.getName(), episodeId, direction);
+            return ResponseEntity.ok(episodeDetail);
+        }
+        catch (IndexOutOfBoundsException ignored) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        catch (EpisodeNotPurchasedException e) {
             //실패 시 해당하는 코인 정책 반환
             HashMap<String, Integer> respBody = new HashMap<>() {{
                 put("coinCost", e.getCoinCost());

@@ -1,24 +1,21 @@
 package com.ham.netnovel.episode.service;
 
-import com.ham.netnovel.coinCostPolicy.CoinCostPolicy;
-import com.ham.netnovel.coinCostPolicy.dto.CostPolicyResponseDto;
 import com.ham.netnovel.coinUseHistory.service.CoinUseHistoryService;
 import com.ham.netnovel.common.exception.EpisodeNotPurchasedException;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
+import com.ham.netnovel.episode.data.IndexDirection;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;
 import com.ham.netnovel.episodeViewCount.ViewCountIncreaseDto;
 import com.ham.netnovel.episodeViewCount.service.EpisodeViewCountService;
+import com.ham.netnovel.novel.Novel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,6 +71,24 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
                 .title(episode.getTitle())
                 .build();
 
+    }
+
+    @Override
+    public EpisodeDetailDto getBesideEpisode(String providerId, Long episodeId, IndexDirection direction) {
+        //episode 엔티티 유무 확인, 없을경우 예외로 던짐
+        Episode episode = episodeService.getEpisode(episodeId)
+                .orElseThrow(() -> new NoSuchElementException("Episode 정보 없음"));
+
+        //조건에 따라서 대상 에피소드의 다음 챕터 또는 이전 챕터를 가져온다.
+        Integer besideChapter = episode.getChapter() + (direction == IndexDirection.NEXT ? 1 : -1);
+
+        log.info("id={}, next={}", episode.getChapter(), besideChapter);
+
+        Novel novel = episode.getNovel();
+        Episode besideEpisode = episodeRepository.findByNovelAndChapter(novel.getId(), besideChapter)
+                .orElseThrow(() -> new IndexOutOfBoundsException("이미 맨 앞, 맨 뒤의 챕터입니다."));
+
+        return getEpisodeDetail(providerId, besideEpisode.getId());
     }
 
     @Override

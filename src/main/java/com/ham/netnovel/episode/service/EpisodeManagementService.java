@@ -2,6 +2,7 @@ package com.ham.netnovel.episode.service;
 
 import com.ham.netnovel.common.exception.EpisodeNotPurchasedException;
 import com.ham.netnovel.episode.Episode;
+import com.ham.netnovel.episode.data.IndexDirection;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;
 import com.ham.netnovel.episodeViewCount.ViewCountIncreaseDto;
 
@@ -33,6 +34,13 @@ public interface EpisodeManagementService {
      * @throws IllegalArgumentException 코인 비용이 유효하지 않은 경우
      */
     EpisodeDetailDto getEpisodeDetail(String providerId,Long episodeId);
+
+    /**
+     * 해당 에피소드의 바로 다음 chapter인 에피소드 id를 반환하는 메서드
+     *
+     *
+     */
+    EpisodeDetailDto getBesideEpisode(String providerId, Long episodeId, IndexDirection direction);
 
     /**
      * Redis 에 저장된 에피소드 조회수 정보를 DB에 업데이트 하는 메서드,
