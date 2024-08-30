@@ -43,11 +43,11 @@ class NovelRepositoryTest {
     @Test
     void queryTest() {
         Pageable pageable = PageableUtil.createPageable(0, 5);
-        List<Novel> list = novelRepository.findByLatestEpisodesOrderByCreatedAt(pageable);
+        List<Novel> list = novelRepository.findByLatestEpisodes(pageable);
         Assertions.assertThat(list.isEmpty()).isFalse();
-        list.forEach(novel -> {
-            log.info("id = {}, title = {}", novel.getId(), novel.getTitle());
-        });
+//        list.forEach(novel -> {
+//            log.info("id = {}, title = {}", novel.getId(), novel.getTitle());
+//        });
     }
 
 }

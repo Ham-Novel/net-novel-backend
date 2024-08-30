@@ -157,7 +157,7 @@ public class NovelServiceImpl implements NovelService {
     @Override
     @Transactional(readOnly = true)
     public List<NovelInfoDto> getNovelsRecent(Pageable pageable) {
-        List<Novel> recentNovels = novelRepository.findByLatestEpisodesOrderByCreatedAt(pageable);
+        List<Novel> recentNovels = novelRepository.findByLatestEpisodes(pageable);
         return recentNovels.stream()
                 .map(this::convertEntityToInfoDto)
                 .toList();
