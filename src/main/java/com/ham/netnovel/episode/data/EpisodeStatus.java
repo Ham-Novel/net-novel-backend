@@ -1,4 +1,4 @@
-package com.ham.netnovel.episode;
+package com.ham.netnovel.episode.data;
 
 public enum EpisodeStatus {
     ACTIVE, // 활성 상태 (기본 상태)
