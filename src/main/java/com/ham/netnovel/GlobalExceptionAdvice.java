@@ -50,7 +50,7 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
     public ResponseEntity<String> handleAuthenticationCredentialsNotFoundException(AuthenticationCredentialsNotFoundException ex) {
         log.error("errorMessage AuthenticationCredentialsNotFoundException: {} ",ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 정보가 없습니다.");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 정보가 없습니다.");
     }
 
 
