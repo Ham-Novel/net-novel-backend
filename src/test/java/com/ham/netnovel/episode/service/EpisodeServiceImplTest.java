@@ -2,7 +2,7 @@ package com.ham.netnovel.episode.service;
 
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
-import com.ham.netnovel.episode.EpisodeStatus;
+import com.ham.netnovel.episode.data.EpisodeStatus;
 import com.ham.netnovel.episode.dto.EpisodeCreateDto;
 import com.ham.netnovel.episode.dto.EpisodeDeleteDto;
 import com.ham.netnovel.episode.dto.EpisodeUpdateDto;
@@ -14,8 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 
 @SpringBootTest

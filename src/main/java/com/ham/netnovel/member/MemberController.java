@@ -52,12 +52,12 @@ public class MemberController {
     public ResponseEntity<?> showMyPage(
             Authentication authentication
     ) {
+        log.info(authentication.getCredentials().toString());
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
-//        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
         //유저 정보 DB에서 찾아 반환, 닉네임, 코인갯수, 이메일 정보 포함
-//        MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo(principal.getName());
-        MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo("test1");
+        MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo(principal.getName());
 
         //유저 정보 전
         return ResponseEntity.ok(memberMyPageInfo);

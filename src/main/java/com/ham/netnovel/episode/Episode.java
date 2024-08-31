@@ -4,6 +4,7 @@ package com.ham.netnovel.episode;
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.coinUseHistory.CoinUseHistory;
 import com.ham.netnovel.coinCostPolicy.CoinCostPolicy;
+import com.ham.netnovel.episode.data.EpisodeStatus;
 import com.ham.netnovel.novel.Novel;
 import jakarta.persistence.*;
 import lombok.Builder;

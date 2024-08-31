@@ -3,10 +3,7 @@ package com.ham.netnovel.novel.service;
 import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.data.NovelStatus;
-import com.ham.netnovel.novel.dto.NovelCreateDto;
-import com.ham.netnovel.novel.dto.NovelDeleteDto;
-import com.ham.netnovel.novel.dto.NovelInfoDto;
-import com.ham.netnovel.novel.dto.NovelUpdateDto;
+import com.ham.netnovel.novel.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -153,7 +150,7 @@ class NovelServiceImplTest {
 
         //페이지네이션 테스트 성공
         Pageable pageable = PageRequest.of(0, 3);
-        List<NovelInfoDto> rankedNovels = novelService.getNovelsByRanking(period,pageable);
+        List<NovelListDto> rankedNovels = novelService.getNovelsByRanking(period,pageable);
 
         if (rankedNovels.isEmpty()){
             System.out.println("비었음");
@@ -161,7 +158,7 @@ class NovelServiceImplTest {
         }
 
         System.out.println("가져온 소설수 = "+rankedNovels.size());
-        for (NovelInfoDto rankedNovel : rankedNovels) {
+        for (NovelListDto rankedNovel : rankedNovels) {
             System.out.println("********** 소설정보 **********");
             System.out.println(rankedNovel.toString());
 
