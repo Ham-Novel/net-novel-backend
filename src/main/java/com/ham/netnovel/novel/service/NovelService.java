@@ -6,7 +6,9 @@ import com.ham.netnovel.novel.dto.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface NovelService {
@@ -101,8 +103,8 @@ public interface NovelService {
      *
      * <p>업로드와 저장이 성공하면 {@code true}를 반환합니다. 과정 중 오류가 발생하면 {@link ServiceMethodException}이 발생합니다.</p>
      *
-     * @param file 소설의 섬네일로 업로드할 파일. {@code null}이 될 수 없습니다.
-     * @param novelId 섬네일을 업데이트할 소설의 ID. {@code null}이 될 수 없습니다.
+     * @param file 소설의 섬네일로 업로드할 {@link MultipartFile} 타입 객체입니다.. {@code null}이 될 수 없습니다.
+     * @param novelId 섬네일을 업데이트할 소설의 ID입니다. {@code null}이 될 수 없습니다.
      * @param providerId 섬네일 변경 요청자의 사용자 ID. {@code null}이 될 수 없습니다.
      * @return 섬네일 변경 성공 시 {@code true}. 실패 시 {@link ServiceMethodException}이 발생합니다.
      * @throws IllegalArgumentException 소설을 찾을 수 없거나 요청자와 소설 작가가 일치하지 않을 때 발생합니다.
@@ -110,6 +112,50 @@ public interface NovelService {
      */
     boolean updateNovelThumbnail(MultipartFile file, Long novelId, String providerId);
 
+
+    /**
+     * 지정된 페이지 범위 내에서 소설의 총 조회수를 반환하는 메서드입니다.
+     *
+     * <p>
+     * 데이터베이스에서 소설의 ID와 해당 소설의 총 조회수를 조회한 후,
+     * 이를 Map 형태로 반환합니다. Map의 키는 소설 ID(Long)이고, 값은 총 조회수(Long)입니다.
+     * </p>
+     *
+     * @param pageable 페이징 정보를 담고 있는 {@link Pageable} 객체
+     * @return 소설 ID({@link Long})를 키로, 총 조회수({@link Long})를 값으로 가지는 {@link Map} 객체
+     * @throws ServiceMethodException 데이터 조회 중 예외 발생 시 해당 예외를 래핑하여 던집니다.
+     */
+
+    Map<Long,Long> getNovelWithTotalViews(Pageable pageable);
+
+    /**
+     * 지정된 페이지 범위 내에서 소설의 총 좋아요수를  반환하는 메서드입니다.
+     *
+     * <p>
+     * 데이터베이스에서 소설의 ID와 해당 소설의 총 좋아요수를 조회한 후,
+     * 이를 Map 형태로 반환합니다. Map의 키는 소설 ID(Long)이고, 값은 총 좋아요수(Integer)입니다.
+     * </p>
+     *
+     * @param pageable 페이징 정보를 담고 있는 {@link Pageable} 객체
+     * @return 소설 ID({@link Long})를 키로, 총 좋아요수를 ({@link Integer})를 값으로 가지는 {@link Map} 객체
+     * @throws ServiceMethodException 데이터 조회 중 예외 발생 시 해당 예외를 래핑하여 던집니다.
+     */
+    Map<Long,Integer> getNovelWithTotalFavorites(Pageable pageable);
+
+
+    /**
+     * 지정된 페이지 범위 내에서 소설의 최근 업데이트 날짜를 반환하는 메서드입니다.
+     *
+     * <p>
+     * 데이터베이스에서 소설의 ID와 해당 소설의 최근 업데이트 날짜를 조회한 후,
+     * 이를 Map 형태로 반환합니다. Map의 키는 소설 ID(Long)이고, 값은최근 업데이트 날짜(LocalDateTime)입니다.
+     * </p>
+     *
+     * @param pageable 페이징 정보를 담고 있는 {@link Pageable} 객체
+     * @return 소설 ID ({@link Long})를 키로, 최근 업데이트 날짜 ({@link LocalDateTime})를 값으로 가지는 {@link Map} 객체
+     * @throws ServiceMethodException 데이터 조회 중 예외 발생 시 해당 예외를 래핑하여 던집니다.
+     */
+    Map<Long, LocalDateTime> getNovelWithLatestEpisodeCreateTime(Pageable pageable);
 
 
 }

@@ -1,5 +1,6 @@
 package com.ham.netnovel.novel;
 
+import com.ham.netnovel.novelMetaData.NovelMetaData;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.favoriteNovel.FavoriteNovel;
 import com.ham.netnovel.member.Member;
@@ -61,6 +62,9 @@ public class Novel {
     //평균 별점
     @OneToOne(mappedBy = "novel")
     private NovelAverageRating novelAverageRating;
+
+    @OneToOne(mappedBy = "novel")
+    private NovelMetaData novelMetaData;
 
     @Builder
     public Novel(String title, String description, Member author, NovelType type, NovelStatus status) {
