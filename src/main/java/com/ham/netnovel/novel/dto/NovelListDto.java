@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -27,11 +28,21 @@ public class NovelListDto {//랭킹 등 리스트로 소설정보를 전달시 �
     private String authorName; //작가 닉네임
 
     @NotNull
-    private Integer favoriteCount; //선호작 수
-
-    @NotNull
     private List<TagDataDto> tags; //작품 태그
 
-    private String thumbnailUrl;
+
+    @NotNull
+    private Integer totalFavorites; //총좋아요수
+
+
+    private Long totalView;    //총조회수
+
+    private LocalDateTime latestUpdateAt;//최근업데이트시간
+
+
+    private String thumbnailUrl;//섬네일 URL
+
+
+
 
 }

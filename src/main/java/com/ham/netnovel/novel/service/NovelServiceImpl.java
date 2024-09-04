@@ -5,10 +5,12 @@ import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
-import com.ham.netnovel.novel.NovelRepository;
+import com.ham.netnovel.novel.data.NovelSortOrder;
+import com.ham.netnovel.novel.repository.NovelRepository;
 import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.novel.dto.*;
+import com.ham.netnovel.novel.repository.NovelSearchRepository;
 import com.ham.netnovel.novelAverageRating.NovelAverageRating;
 import com.ham.netnovel.novelRanking.service.NovelRankingService;
 import com.ham.netnovel.s3.S3Service;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,12 +39,15 @@ public class NovelServiceImpl implements NovelService {
 
     private final S3Service s3Service;
 
+    private final NovelSearchRepository novelSearchRepository;
+
     @Autowired
-    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService, NovelRankingService novelRankingService, S3Service s3Service) {
+    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService, NovelRankingService novelRankingService, S3Service s3Service, NovelSearchRepository novelSearchRepository) {
         this.novelRepository = novelRepository;
         this.memberService = memberService;
         this.novelRankingService = novelRankingService;
         this.s3Service = s3Service;
+        this.novelSearchRepository = novelSearchRepository;
     }
 
 
@@ -52,7 +58,7 @@ public class NovelServiceImpl implements NovelService {
     }
 
     @Override
-    public List<Novel> getNovelsByAuthor(String providerId) {
+    public List<Novel> getNovelsByAuthor(java.lang.String providerId) {
         return novelRepository.findNovelsByMember(providerId);
     }
 
@@ -167,7 +173,7 @@ public class NovelServiceImpl implements NovelService {
     //Null체크, DTO 변환은 MemberMyPageService에서 진행
     @Override
     @Transactional(readOnly = true)
-    public List<Novel> getFavoriteNovels(String providerId) {
+    public List<Novel> getFavoriteNovels(java.lang.String providerId) {
         try {
             return novelRepository.findFavoriteNovelsByMember(providerId);
         } catch (Exception ex) {//예외 발생시 처리
@@ -192,7 +198,7 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<NovelListDto> getNovelsByRanking(String period, Pageable pageable) {
+    public List<NovelListDto> getNovelsByRanking(java.lang.String period, Pageable pageable) {
         try {
             // 페이지 번호와 페이지 크기를 사용해 데이터의 시작 인덱스를 계산
             int startIndex = pageable.getPageNumber() * pageable.getPageSize();
@@ -203,12 +209,12 @@ public class NovelServiceImpl implements NovelService {
             // 기간은 daily, weekly, monthly 중 하나로 전달
             // startIndex와 endIndex를 사용해 Redis에서 가져올 데이터 범위를 설정
             // 리턴되는 리스트는 각 소설의 ID와 랭킹 정보를 포함하는 맵(Map)의 리스트임
-            List<Map<String, Object>> rankingFromRedis = novelRankingService.getNovelRankingFromRedis(period, startIndex, endIndex);
+            List<Map<java.lang.String, Object>> rankingFromRedis = novelRankingService.getNovelRankingFromRedis(period, startIndex, endIndex);
 
 
             // 현재 페이지에 해당하는 소설 ID를 추출
             List<Long> novelIds = new ArrayList<>();
-            for (Map<String, Object> rankingDatas : rankingFromRedis) {
+            for (Map<java.lang.String, Object> rankingDatas : rankingFromRedis) {
                 // 랭킹 데이터에서 "novelId" 값을 추출하여 novelIds 리스트에 추가
                 novelIds.add((Long) rankingDatas.get("novelId"));
             }
@@ -230,9 +236,9 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     @Transactional
-    public boolean updateNovelThumbnail(MultipartFile file, Long novelId, String providerId) {
+    public boolean updateNovelThumbnail(MultipartFile file, Long novelId, java.lang.String providerId) {
         //파라미터 null 체크
-        if (file.isEmpty()||novelId==null||providerId==null){
+        if (file.isEmpty() || novelId == null || providerId == null) {
             throw new IllegalArgumentException("saveNovelThumbnail 메서드 에러, 파라미터가 null 입니다.");
         }
 
@@ -260,30 +266,113 @@ public class NovelServiceImpl implements NovelService {
 
     }
 
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Long> getNovelWithTotalViews(Pageable pageable) {
+        try {
+            return novelRepository.findNovelTotalViews(pageable)
+                    .stream()
+                    .collect(Collectors.toMap(
+                            object -> (Long) object[0],//NovelId key로 바인딩
+                            object -> (Long) object[1])//totalViews value로 바인딩
+                    );
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getNovelWithTotalViews 메서드 에러" + ex + ex.getMessage());
+        }
+    }
+
+    @Override
+    public Map<Long, Integer> getNovelWithTotalFavorites(Pageable pageable) {
+
+        try {
+            return novelRepository.findNovelTotalFavorite(pageable)
+                    .stream()
+                    .collect(Collectors.toMap(
+                                    object -> (Long) object[0],
+                                    object -> ((Number) object[1]).intValue()
+                            )
+                    );
+
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getNovelWithTotalFavorites 메서드 에러" + ex + ex.getMessage());
+        }
+
+
+    }
+
+    @Override
+    public Map<Long, LocalDateTime> getNovelWithLatestEpisodeCreateTime(Pageable pageable) {
+
+        try {
+            return novelRepository.findNovelLatestUpdatedEpisode(pageable)
+                    .stream()
+                    .collect(Collectors.toMap(
+                                    object -> (Long) object[0],//NovelId key로 바인딩
+                                    object -> (LocalDateTime) object[1]//가장 최근에 업로드된 에피소드의 LocalDateTime 값
+                            )
+                    );
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getNovelWithLatestEpisodeCreateTime 메서드 에러" + ex + ex.getMessage());
+        }
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NovelListDto> getNovelsBySearchCondition(String sortOrder,
+                                                         Pageable pageable,
+                                                         List<Long> tagIds) {
+        //정렬 디폴드값은 조회수
+        NovelSortOrder novelSortOrder = NovelSortOrder.VIEWCOUNT;
+        //파라미터에 따라 정렬 방법 변경
+        switch (sortOrder) {
+            case "favorites" -> novelSortOrder = NovelSortOrder.FAVORITES;
+            case "latest" -> novelSortOrder = NovelSortOrder.LATEST;
+        }
+
+        try {
+            return novelSearchRepository.findNovelsBySearchConditions(novelSortOrder, pageable, tagIds)
+                .stream()
+                .peek(novelListDto -> {
+                    String cloudFrontUrl = s3Service.
+                            generateCloudFrontUrl(novelListDto.getThumbnailUrl(),
+                                    "mini");//소설 섬네일 URL 생성
+                    novelListDto.setThumbnailUrl(cloudFrontUrl);//DTO에 섬네일 URL 할당
+                }).collect(Collectors.toList());
+
+        }catch (Exception ex){
+            throw new ServiceMethodException("getNovelsBySearchCondition 메서드 에러" + ex + ex.getMessage());
+
+        }
+    }
+
+
     /**
      * 랭킹과 같이 대량의 소설정보를 전달시 사용하는 DTO로 변환하는 메서드 입니다.
+     *
      * @param novel 소설 엔티티
      * @return NovelListDto
      */
-    NovelListDto convertEntityToListDto(Novel novel){
+    NovelListDto convertEntityToListDto(Novel novel) {
         //작품의 태그들 가져오기
         List<TagDataDto> dataDtoList = novel.getNovelTags().stream()
                 .map(novelTag -> novelTag.getTag().getData())
                 .toList();
 
         //AWS cloud front 섬네일 이미지 URL 객체 반환
-        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(),"mini");
+        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(), "mini");
 
         //DTO 반환
-       return NovelListDto.builder()
+        return NovelListDto.builder()
                 .thumbnailUrl(String.valueOf(thumbnailUrl))
                 .title(novel.getTitle())
                 .authorName(novel.getAuthor().getNickName())
                 .id(novel.getId())
-                .favoriteCount(novel.getFavorites().size())
+                .totalFavorites(novel.getFavorites().size())
                 .tags(dataDtoList).build();
-
     }
+
 
     NovelInfoDto convertEntityToInfoDto(Novel novel) {
         //평균 별점 레코드가 없으면 0점짜리 새로 생성
@@ -300,7 +389,7 @@ public class NovelServiceImpl implements NovelService {
                 .toList();
 
         //AWS cloud front 섬네일 이미지 URL 객체 반환
-        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(),"original");
+        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(), "original");
 
         //작품의 모든 에피소드 조회수 총합
         int viewsSum = novel.getEpisodes().stream().mapToInt(Episode::getView).sum();
@@ -318,7 +407,6 @@ public class NovelServiceImpl implements NovelService {
                 .thumbnailUrl(thumbnailUrl)//섬네일
                 .build();
     }
-
 
 
 }
