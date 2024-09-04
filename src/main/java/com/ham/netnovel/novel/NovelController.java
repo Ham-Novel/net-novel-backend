@@ -4,7 +4,6 @@ import com.ham.netnovel.OAuth.CustomOAuth2User;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
-import com.ham.netnovel.episode.service.EpisodeService;
 import com.ham.netnovel.novel.dto.*;
 import com.ham.netnovel.novel.service.NovelService;
 import jakarta.validation.Valid;
@@ -17,6 +16,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -26,7 +27,7 @@ public class NovelController {
     private final NovelService novelService;
     private final Authenticator authenticator;
 
-    public NovelController(NovelService novelService, EpisodeService episodeService, Authenticator authenticator) {
+    public NovelController(NovelService novelService, Authenticator authenticator) {
         this.novelService = novelService;
         this.authenticator = authenticator;
     }
@@ -42,21 +43,81 @@ public class NovelController {
         return ResponseEntity.ok(novelService.getNovelInfo(novelId));
     }
 
-    @GetMapping
-    public ResponseEntity<List<NovelInfoDto>> getNovelList() {
-        return null;
+//    @GetMapping
+//    public ResponseEntity<List<NovelInfoDto>> getNovelList() {
+//        return null;
+//    }
+
+
+    /**
+     * 소설을 검색 조건에 따라 조회하는 API 엔드포인트입니다.
+     *
+     * <p>
+     * 이 메서드는 유저가 제공한 정렬 기준, 페이지 번호, 페이지 크기에 따라 소설 목록을 반환합니다.
+     * 페이지 네이션을 위해 Pageable 객체를 생성하여, 서비스 계층에서 소설 정보를 DTO 리스트로 받아 이를 HTTP 응답으로 전송합니다.
+     * </p>
+     *
+     * @param sortBy     정렬 기준을 나타내는 {@link String} 객체입니다.. 기본값은 "view"입니다. (예: "view","favorites" 등)
+     * @param pageNumber 조회할 페이지 번호 {@link Integer} 객체 입니다. 기본값은 0입니다.
+     * @param pageSize   한 페이지에 포함될 항목의 수 {@link Integer} 객체  입니다. 기본값은 100입니다.
+     * @return {@link ResponseEntity<>} 소설 정보가 포함된 리스트를 HTTP 200 응답으로 반환합니다.
+     * 응답 본문에는 소설 정보 리스트가 담겨 있습니다.
+     */
+    @GetMapping("/novels/search")
+    public ResponseEntity<List<NovelListDto>> getNovelsBySearchCondition(
+            @RequestParam(name = "sortBy", defaultValue = "view") String sortBy,
+            @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
+            @RequestParam(name = "tagId",required = false) String ids) {
+
+        List<Long> idList=new ArrayList<>();
+        //"," 로 구분된 tag 들을 분리하여 List 객체에 담음
+        if (!(ids ==null)){idList= Arrays.stream(ids.split(","))
+                    .map(Long::valueOf)
+                    .toList();
+        }
+        //페이지 사이즈 수 제한
+        if (pageSize>200){
+            pageSize =200;
+        }
+
+        //페이지 네이션을 위한 Pageable 객체 생성
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+        //조건을 메서드에 전달하여, 소설 정보 List를 받아옴
+        List<NovelListDto> novels = novelService.getNovelsBySearchCondition(sortBy, pageable,idList);
+        return ResponseEntity.ok(novels);//소설 정보 전송
+
+
     }
 
     /**
-     * 주어진 랭킹 기간에 따라 소설 랭킹 정보를 조회하고 반환하는 API
+     * 소설 랭킹을 기간에 따라 조회하는 API 엔드포인트입니다.
+     * <p>
+     * 사용자가 제공한 기간과 페이지 정보를 바탕으로 소설 목록을 랭킹 순서대로 정렬하여 반환합니다.
+     * </p>
+     * <p>
+     * 페이지 네이션을 위해 Pageable 객체를 생성하고, 소설 서비스에서 요청된 랭킹 기간에 해당하는 소설 정보를 가져와
+     * HTTP 응답으로 전송합니다.
+     * </p>
      *
-     * @param period 쿼리 파라미터로 랭킹 기간을 받음, (daily, weekly, monthly, all-time 중 하나)
-     * @return ResponseEntity<List < NovelInfoDto>> 소설 정보를 담은 객체 반환.
+     * @param period     소설 랭킹을 조회할 기간을 나타내는 {@link String} 객체입니다.. (예: "weekly", "monthly" 등)
+     * @param pageNumber 조회할 페이지 번호입니다. 기본값은 0입니다.
+     * @param pageSize   한 페이지에 포함될 항목의 수입니다. 기본값은 100입니다.
+     * @return {@link ResponseEntity<> } 소설 정보가 포함된 랭킹 순서의 리스트를 HTTP 200 응답으로 반환합니다.
+     * 응답 본문에는 랭킹이 반영된 소설 목록이 담겨 있습니다.
      */
     @GetMapping("/novels/ranking")
-    public ResponseEntity<List<NovelListDto>> getNovelsByRanking(@RequestParam("period") String period,
-                                                                 @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-                                                                 @RequestParam(name = "pageSize", defaultValue = "100") int pageSize) {
+    public ResponseEntity<List<NovelListDto>> getNovelsByRanking(
+            @RequestParam("period") String period,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "100") int pageSize) {
+
+
+        //페이지 사이즈 수 제한
+        if (pageSize>200){
+            pageSize =200;
+        }
+
         //페이지네이션 객체 생성
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //유저가 요청한 랭킹 기간에 따라, 소설 정보를 랭킹 순서대로 정렬하여 List에 담음
@@ -154,10 +215,8 @@ public class NovelController {
     }
 
     @GetMapping("/novels")
-    public ResponseEntity<List<NovelInfoDto>> getNovelsBySorted(
-            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-    ) {
+    public ResponseEntity<List<NovelInfoDto>> getNovelsBySorted(@RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         return ResponseEntity.ok(novelService.getNovelsRecent(pageable));
     }

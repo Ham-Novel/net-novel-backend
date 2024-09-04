@@ -53,6 +53,7 @@ public interface NovelService {
      */
     NovelInfoDto getNovelInfo(Long novelId);
 
+    //ToDo 메서드 기능 통합 후 삭제
     /**
      * DB의 저장된 모든 Novel 리스트를 최신순으로 가져오는 메서드.
      * 페이지 단위로 일부 리스트만 가져온다.
@@ -110,7 +111,7 @@ public interface NovelService {
      * @throws IllegalArgumentException 소설을 찾을 수 없거나 요청자와 소설 작가가 일치하지 않을 때 발생합니다.
      * @throws ServiceMethodException 파일 업로드나 소설 엔티티 저장 중 오류 발생 시 발생합니다.
      */
-    boolean updateNovelThumbnail(MultipartFile file, Long novelId, String providerId);
+    boolean updateNovelThumbnail(MultipartFile file, Long novelId, java.lang.String providerId);
 
 
     /**
@@ -148,7 +149,10 @@ public interface NovelService {
      *
      * <p>
      * 데이터베이스에서 소설의 ID와 해당 소설의 최근 업데이트 날짜를 조회한 후,
-     * 이를 Map 형태로 반환합니다. Map의 키는 소설 ID(Long)이고, 값은최근 업데이트 날짜(LocalDateTime)입니다.
+     * 이를 Map 형태로 반환합니다.
+     * </p>
+     * <p>
+     * Map의 키는 소설 ID(Long)이고, 값은최근 업데이트 날짜(LocalDateTime)입니다.
      * </p>
      *
      * @param pageable 페이징 정보를 담고 있는 {@link Pageable} 객체
@@ -157,5 +161,24 @@ public interface NovelService {
      */
     Map<Long, LocalDateTime> getNovelWithLatestEpisodeCreateTime(Pageable pageable);
 
+
+    /**
+     * 주어진 정렬 기준과 페이지 정보를 바탕으로 소설 목록을 조회하는 메서드입니다.
+     *
+     * <p>
+     * 이 메서드는 기본적으로 소설 목록을 조회수 기준으로 정렬합니다.
+     * </p>
+     * <p>
+     * 사용자가 제공한 정렬 기준에 따라, 소설 목록을 좋아요 순 또는 최신순으로 정렬할 수 있습니다.
+     * 조회된 소설 목록의 썸네일 URL은 S3 서비스의 CloudFront URL로 변환됩니다.
+     * </p>
+     * @param sortOrder 소설 목록의 정렬 기준을 나타내는 문자열입니다.
+     *                  "favorites"는 좋아요 순, "latest"는 최신순, 기본값은 "view"로 조회수 순입니다.
+     * @param pageable 페이지 정보 및 페이징 조건을 포함하는 {@link Pageable} 객체입니다.
+     *
+     * @return List<NovelListDto> 소설 목록을 포함한 DTO 리스트를 반환합니다.
+     *         각 소설의 썸네일 URL은 CloudFront URL로 변환되어 반환됩니다.
+     */
+    List<NovelListDto> getNovelsBySearchCondition(String sortOrder, Pageable pageable, List<Long> tagIds);
 
 }
