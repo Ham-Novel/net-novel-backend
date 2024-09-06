@@ -6,6 +6,7 @@ import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
+import com.ham.netnovel.episode.data.EpisodeStatus;
 import com.ham.netnovel.episode.data.IndexDirection;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;
 import com.ham.netnovel.episode.dto.EpisodePaymentDto;
@@ -80,6 +81,7 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EpisodeDetailDto getBesideEpisode(String providerId, Long episodeId, IndexDirection direction) {
         //episode 엔티티 유무 확인, 없을경우 예외로 던짐
         Episode episode = episodeService.getEpisode(episodeId)
@@ -89,12 +91,19 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
         Integer besideChapter = episode.getChapter() + (direction == IndexDirection.NEXT ? 1 : -1);
 
         log.info("id={}, next={}", episode.getChapter(), besideChapter);
-
         Novel novel = episode.getNovel();
-        Episode besideEpisode = episodeRepository.findByNovelAndChapter(novel.getId(), besideChapter)
-                .orElseThrow(() -> new IndexOutOfBoundsException("이미 맨 앞, 맨 뒤의 챕터입니다."));
 
-        return getEpisodeDetail(providerId, besideEpisode.getId());
+        do {
+            Episode besideEpisode = episodeRepository.findByNovelAndChapter(novel.getId(), besideChapter)
+                    .orElseThrow(() -> new IndexOutOfBoundsException("이미 맨 앞, 맨 뒤의 챕터입니다."));
+
+            //DB에서 찾아온 에피소드가 ACTIVE 상태일경우 에피소드 반환.
+            if (besideEpisode.getStatus().equals(EpisodeStatus.ACTIVE)) {
+                return getEpisodeDetail(providerId, besideEpisode.getId());
+            }
+            besideChapter++;
+        } while (true);
+
     }
 
     @Override
@@ -131,7 +140,7 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
                 log.warn("조회수 갱신에 실패했습니다.");
             }
         } catch (Exception ex) {
-            throw new ServiceMethodException("updateEpisodeViewCountFromRedis 메서드 조회수 갱신 실패",ex);
+            throw new ServiceMethodException("updateEpisodeViewCountFromRedis 메서드 조회수 갱신 실패", ex);
         }
 
 

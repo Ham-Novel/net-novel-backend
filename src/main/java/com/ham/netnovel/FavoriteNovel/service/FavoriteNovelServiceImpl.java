@@ -38,9 +38,9 @@ public class FavoriteNovelServiceImpl implements FavoriteNovelService {
     public Boolean toggleFavoriteNovel(String providerId, Long novelId) {
         //유저, 작품 레코드 DB 검증
         Member member = memberService.getMember(providerId)
-                .orElseThrow(() -> new NoSuchElementException("toggleFavoriteNovel() Error : 존재하지 않는 Member 입니다."));
+                .orElseThrow(() -> new NoSuchElementException("toggleFavoriteNovel() Error : 존재하지 않는 Member 입니다."+providerId));
         Novel novel = novelService.getNovel(novelId)
-                .orElseThrow(() -> new NoSuchElementException("toggleFavoriteNovel() Error : 존재하지 않는 Novel 입니다."));
+                .orElseThrow(() -> new NoSuchElementException("toggleFavoriteNovel() Error : 존재하지 않는 Novel 입니다."+novelId));
 
         try {
             FavoriteNovelId id = new FavoriteNovelId(member.getId(), novel.getId());
@@ -99,6 +99,7 @@ public class FavoriteNovelServiceImpl implements FavoriteNovelService {
         }
 
     }
+
 
 
 }
