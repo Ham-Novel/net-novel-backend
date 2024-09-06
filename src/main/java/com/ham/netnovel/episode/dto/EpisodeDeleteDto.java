@@ -15,4 +15,6 @@ public class EpisodeDeleteDto {
     @NotNull
     private Long episodeId;
 
+    private String providerId;
+
 }

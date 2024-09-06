@@ -10,6 +10,7 @@ import com.ham.netnovel.episode.dto.EpisodeCreateDto;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;
 import com.ham.netnovel.episode.dto.EpisodeListInfoDto;
 import com.ham.netnovel.episode.dto.EpisodeListItemDto;
+import com.ham.netnovel.episode.dto.*;
 import com.ham.netnovel.episode.service.EpisodeManagementService;
 import com.ham.netnovel.episode.service.EpisodeService;
 import jakarta.validation.Valid;
@@ -40,7 +41,6 @@ public class EpisodeController {
         this.episodeManagementService = episodeManagementService;
         this.authenticator = authenticator;
     }
-
 
 
     @GetMapping("/episodes/{episodeId}")
@@ -91,17 +91,12 @@ public class EpisodeController {
 
         //Pageable 객체 생성. null or 음수이면 예외 발생
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+        //정렬 조건, 페이지네이션 정보로 에피소드 정보를 받아옴
+        List<EpisodeListItemDto> novelByFilter = episodeService.getEpisodesByConditions(sortBy, novelId, pageable);
+        //에피소드 정보 전송
+        return ResponseEntity.ok(novelByFilter);
 
-        if (sortBy.equals("recent")) {
-            return ResponseEntity.ok(episodeService.getNovelEpisodesByRecent(novelId, pageable));
-        } else if (sortBy.equals("initial")) {
-            return ResponseEntity.ok(episodeService.getNovelEpisodesByInitial(novelId, pageable));
-        } else {
-            //정렬 값이 없으면 예외 발생
-            throw new IllegalArgumentException("getEpisodesByNovel: invalid sortBy option");
-        }
     }
-
 
 
     @GetMapping("/novels/{novelId}/episodes/info")
@@ -109,5 +104,116 @@ public class EpisodeController {
             @PathVariable(name = "novelId") Long novelId
     ) {
         return ResponseEntity.ok(episodeService.getNovelEpisodesInfo(novelId));
+    }
+
+    /**
+     * 새로운 에피소드를 생성하는 API 입니다.
+     *
+     * <p>주어진 소설 ID와 에피소드 생성 정보를 바탕으로 새로운 에피소드를 생성합니다.
+     * 에피소드 생성 요청이 유효한지 검증하고, 유효하지 않은 경우에는
+     * BadRequest 응답을 반환합니다. 인증된 사용자의 정보는 {@link EpisodeCreateDto}에
+     * 설정됩니다. 에피소드 생성이 성공하면  OK 응답을 반환합니다.</p>
+     *
+     * @param novelId          소설의  ID
+     * @param episodeCreateDto 에피소드 생성 정보를 담고 있는 {@link EpisodeCreateDto}객체
+     * @param bindingResult    검증 오류 정보를 담고 있는 {@link BindingResult}객체
+     * @param authentication   현재 사용자의 인증 상태를 포함하는 인증 객체.
+     * @return {@code ResponseEntity<String>} 에피소드 업데이트 결과를 담고 있는 응답 객체 반환
+     */
+    @PostMapping("/novels/{novelId}/episodes")
+    public ResponseEntity<String> createEpisode(
+            @PathVariable(name = "novelId") Long novelId,
+            @Valid @RequestBody EpisodeCreateDto episodeCreateDto,
+            BindingResult bindingResult,
+            Authentication authentication
+    ) {
+        //EpisodeCreateDto Validation 에러가 있을경우 badRequest 전송
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrorMessages(
+                    bindingResult,
+                    "createEpisode");
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
+        }
+
+        //유저인증정보 체크
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
+        episodeCreateDto.setProviderId(principal.getName());//DTO에 유저 정보 할당
+        episodeCreateDto.setNovelId(novelId);//DTO에 novelId 정보 할당
+
+        //에피소드 생성
+        episodeService.createEpisode(episodeCreateDto);
+        //문제가 없을경우 OK 전송
+        return ResponseEntity.ok("ok");
+    }
+
+
+    /**
+     * 주어진 요청 본문에 포함된 세부 정보를 사용하여 기존 에피소드를 업데이트 하는 API 입니다.
+     *
+     * <p>이 메서드는 URL의 {@code episodeId} 경로 변수로 지정된 에피소드를 업데이트하는 요청을 처리합니다.
+     * 먼저 인증 정보를 확인하여 요청자가 유효한지 검증합니다.
+     * 요청 본문은 {@link EpisodeUpdateDto}를 사용하여 검증되며 문제가 있으면 BadRequest 응답을 반환합니다. </p>
+     * <p>요청에 문제가 없을경우 에피소드을 업데이트 한 후  OK 응답을 반환합니다.</p>
+     *
+     * @param episodeId        업데이트할 에피소드의 ID.
+     * @param episodeUpdateDto 에피소드의 새로운 세부 정보를 포함하는 {@link EpisodeUpdateDto} 객체
+     * @param authentication   현재 사용자의 인증 상태를 포함하는 인증 객체.
+     * @return {@code ResponseEntity<String>} 에피소드 업데이트 결과를 담고 있는 응답 객체 반환
+     */
+
+    @PostMapping("/episodes/{episodeId}")
+    public ResponseEntity<String> updateEpisode(
+            @PathVariable(name = "episodeId") Long episodeId,
+            @Valid @RequestBody EpisodeUpdateDto episodeUpdateDto,
+            Authentication authentication
+    ) {
+
+        //유저인증정보 체크
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
+        episodeUpdateDto.setEpisodeId(episodeId);//DTO에 novelId 정보 할당
+        episodeUpdateDto.setProviderId(principal.getName());//DTO에 유저 정보 할당.
+
+        //에피소드 업데이트
+        episodeService.updateEpisode(episodeUpdateDto);
+
+        return ResponseEntity.ok("ok");
+    }
+
+
+    /**
+     * 에피소드를 삭제상태로 바꾸는 API 입니다.
+     *
+     * <p>주어진 에피소드 ID를 사용하여 에피소드를 삭제 상태로 변경합니다.
+     * 먼저, 인증 정보를 확인하여 요청자가 유효한지 검증합니다.
+     * 이후, {@link  EpisodeDeleteDto} 객체를 생성하여 에피소드 ID와
+     * 인증된 사용자의 정보를 설정한 후, 에피소드 삭제 서비스 메서드를 호출합니다. </p>
+     * <p>삭제가 성공하면 OK 응답을 반환합니다.</p>
+     *
+     * @param episodeId      삭제할 에피소드의 ID
+     * @param authentication 현재 사용자의 인증 상태를 포함하는 인증 객체.
+     * @return {@code ResponseEntity<String>} 에피소드 업데이트 결과를 담고 있는 응답 객체 반환
+     */
+    @DeleteMapping("/episodes/{episodeId}")
+    public ResponseEntity<String> deleteEpisode(
+            @PathVariable(name = "episodeId") Long episodeId,
+            Authentication authentication
+    ) {
+
+        //유저인증정보 체크
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
+
+        //에피소드 ID 와 유저정보로 DTO 생성
+        EpisodeDeleteDto dto = EpisodeDeleteDto.builder()
+                .episodeId(episodeId)
+                .providerId(principal.getName())
+                .build();
+
+        //에피소드를 삭제 상태로 변경
+        episodeService.deleteEpisode(dto);
+
+        return ResponseEntity.ok("ok");
     }
 }
