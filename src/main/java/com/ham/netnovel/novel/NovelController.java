@@ -136,8 +136,8 @@ public class NovelController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
      */
-    @PostMapping
-    public ResponseEntity<String> createNovel(@Valid @RequestBody NovelCreateDto reqBody,
+    @PostMapping("/novels")
+    public ResponseEntity<?> createNovel(@Valid @RequestBody NovelCreateDto reqBody,
                                               BindingResult bindingResult,
                                               Authentication authentication) {
         //NovelCreateDto Validation 예외 처리
@@ -153,7 +153,9 @@ public class NovelController {
         //DTO에 유저 정보(providerId) 값 저장
         reqBody.setAccessorProviderId(principal.getName());
 
-        return ResponseEntity.ok("작품 생성 완료.");
+        Long createdId = novelService.createNovel(reqBody);
+
+        return ResponseEntity.ok(createdId);
     }
 
     /**

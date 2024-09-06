@@ -64,7 +64,7 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     @Transactional
-    public void createNovel(NovelCreateDto novelCreateDto) {
+    public Long createNovel(NovelCreateDto novelCreateDto) {
         log.info("Novel 생성 = {}", novelCreateDto.toString());
 
         //Member Entity 조회 -> Author 검증
@@ -80,12 +80,12 @@ public class NovelServiceImpl implements NovelService {
                     .type(NovelType.ONGOING)
                     .status(NovelStatus.ACTIVE)
                     .build();
-            novelRepository.save(targetNovel);
+            Novel saved = novelRepository.save(targetNovel);
+            return saved.getId();
         } catch (Exception ex) {
             //나머지 예외처리
             throw new ServiceMethodException("createNovel 메서드 에러 발생", ex.getCause());
         }
-
     }
 
     @Override
