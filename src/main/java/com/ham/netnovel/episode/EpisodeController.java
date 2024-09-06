@@ -4,18 +4,22 @@ import com.ham.netnovel.OAuth.CustomOAuth2User;
 import com.ham.netnovel.common.exception.EpisodeNotPurchasedException;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.common.utils.PageableUtil;
+import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.episode.data.IndexDirection;
+import com.ham.netnovel.episode.dto.EpisodeCreateDto;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;
 import com.ham.netnovel.episode.dto.EpisodeListInfoDto;
 import com.ham.netnovel.episode.dto.EpisodeListItemDto;
 import com.ham.netnovel.episode.service.EpisodeManagementService;
 import com.ham.netnovel.episode.service.EpisodeService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -51,11 +55,7 @@ public class EpisodeController {
             EpisodeDetailDto episodeDetail = episodeManagementService.getEpisodeDetail(principal.getName(), episodeId);
             return ResponseEntity.ok(episodeDetail);
         } catch (EpisodeNotPurchasedException e) {
-            //실패 시 해당하는 코인 정책 반환
-            HashMap<String, Integer> respBody = new HashMap<>() {{
-                put("coinCost", e.getCoinCost());
-            }};
-            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(respBody);
+            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(e.getPaymentInfo());
         }
     }
 
@@ -77,10 +77,7 @@ public class EpisodeController {
         }
         catch (EpisodeNotPurchasedException e) {
             //실패 시 해당하는 코인 정책 반환
-            HashMap<String, Integer> respBody = new HashMap<>() {{
-                put("coinCost", e.getCoinCost());
-            }};
-            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(respBody);
+            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(e.getPaymentInfo());
         }
     }
 

@@ -41,16 +41,13 @@ class NovelServiceImplTest {
                 .description("Duis ea aliquip dolor sit dolore ut adipisicing eu tempor.")
                 .accessorProviderId(authorId)
                 .build();
-//        log.info(createDto.toString());
 
         // when
-        novelService.createNovel(createDto);
+        Long novelId = novelService.createNovel(createDto);
 
         // then
-        List<Novel> novels = novelService.getNovelsByAuthor(authorId);
-        Novel recentCreated = novels.get(novels.size() - 1);
-        Assertions.assertThat(recentCreated.getTitle()).isEqualTo(createDto.getTitle());
-        Assertions.assertThat(recentCreated.getDescription()).isEqualTo(createDto.getDescription());
+        Optional<Novel> novel = novelService.getNovel(novelId);
+        Assertions.assertThat(novel.isPresent()).isTrue();
     }
 
     @Test

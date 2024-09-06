@@ -126,6 +126,24 @@ public class NovelController {
 
         return ResponseEntity.ok(rankedNovels);//소설 정보 전송
     }
+    /**
+     * 유저가 집핍하는 소설 리스트를 전송하는 API
+     *
+     * @param authentication 유저의 인증 정보
+     * @return ResponseEntity 유저가 소유한 소설 리스트를 담은 응답 객체
+     */
+    @GetMapping("/members/me/novels")
+    public ResponseEntity<?> getMyWorks(Authentication authentication) {
+
+        //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+
+        List<NovelInfoDto> novels = novelService.getNovelsByAuthor(principal.getName());
+
+        //정보 전송
+        return ResponseEntity.ok(novels);
+
+    }
 
 
     /**
@@ -136,8 +154,8 @@ public class NovelController {
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
      */
-    @PostMapping
-    public ResponseEntity<String> createNovel(@Valid @RequestBody NovelCreateDto reqBody,
+    @PostMapping("/novels")
+    public ResponseEntity<?> createNovel(@Valid @RequestBody NovelCreateDto reqBody,
                                               BindingResult bindingResult,
                                               Authentication authentication) {
         //NovelCreateDto Validation 예외 처리
@@ -153,7 +171,9 @@ public class NovelController {
         //DTO에 유저 정보(providerId) 값 저장
         reqBody.setAccessorProviderId(principal.getName());
 
-        return ResponseEntity.ok("작품 생성 완료.");
+        Long createdId = novelService.createNovel(reqBody);
+
+        return ResponseEntity.ok(createdId);
     }
 
     /**
@@ -241,9 +261,11 @@ public class NovelController {
      * @return 성공 시 HTTP 200과 "섬네일 변경 성공!" 메시지, 실패 시 HTTP 500과 "섬네일 변경 실패." 메시지를 반환합니다.
      */
     @PostMapping("/novels/{novelId}/thumbnail")
-    public ResponseEntity<?> uploadNovelThumbnail(@PathVariable("novelId") Long urlNovelId
-            , MultipartFile multipartFile//업로드할 섬네일 파일
-            , Authentication authentication) {
+    public ResponseEntity<?> uploadNovelThumbnail(
+            @PathVariable("novelId") Long urlNovelId,
+            @RequestParam("file") MultipartFile multipartFile, //업로드할 섬네일 파일
+            Authentication authentication
+    ) {
         //유저 인증. 없으면 badRequest 응답. 있으면 CustomOAuth2User 타입캐스팅.
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 

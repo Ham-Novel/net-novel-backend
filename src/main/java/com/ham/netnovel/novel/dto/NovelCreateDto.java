@@ -19,6 +19,5 @@ public class NovelCreateDto {
     @Size(max = 300)
     private String description;
 
-    @NotNull
     private String accessorProviderId; //실행자 유저 ID
 }
