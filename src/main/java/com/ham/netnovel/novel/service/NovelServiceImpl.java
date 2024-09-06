@@ -58,8 +58,14 @@ public class NovelServiceImpl implements NovelService {
     }
 
     @Override
-    public List<Novel> getNovelsByAuthor(java.lang.String providerId) {
-        return novelRepository.findNovelsByMember(providerId);
+    public List<NovelInfoDto> getNovelsByAuthor(String providerId) {
+        //Member Entity 조회 -> Author 검증
+        Member author = memberService.getMember(providerId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Member 입니다."));
+
+        return novelRepository.findNovelsByMember(author.getId()).stream()
+                .map(this::convertEntityToInfoDto)
+                .toList();
     }
 
     @Override

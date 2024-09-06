@@ -26,7 +26,7 @@ public interface NovelService {
      * @param providerId 유저 id
      * @return Optional<Novel>
      */
-    List<Novel> getNovelsByAuthor(String providerId);
+    List<NovelInfoDto> getNovelsByAuthor(String providerId);
 
     /**
      * 유저가 생성한 Novel을 DB 저장.
