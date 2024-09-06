@@ -8,6 +8,7 @@ import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.data.IndexDirection;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;
+import com.ham.netnovel.episode.dto.EpisodePaymentDto;
 import com.ham.netnovel.episodeViewCount.ViewCountIncreaseDto;
 import com.ham.netnovel.episodeViewCount.service.EpisodeViewCountService;
 import com.ham.netnovel.novel.Novel;
@@ -57,7 +58,12 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
             //결제 내역이 없을경우 EpisodeNotPurchasedException 로 던짐
             if (!result) {
                 //EpisodeNotPurchasedException 에 coinCost 정보도 함께 전달
-                throw new EpisodeNotPurchasedException("에피소드 결제 내역 없음, providerId = " + providerId + ", episodeId = " + episodeId, coinCost);
+                throw new EpisodeNotPurchasedException(
+                        "에피소드 결제 내역 없음, providerId = " + providerId + ", episodeId = " + episodeId,
+                        EpisodePaymentDto.builder().episodeId(episode.getId())
+                                .title(episode.getTitle())
+                                .coinCost(coinCost)
+                                .build());
             }
         }
 
