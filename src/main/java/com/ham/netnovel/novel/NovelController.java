@@ -261,9 +261,11 @@ public class NovelController {
      * @return 성공 시 HTTP 200과 "섬네일 변경 성공!" 메시지, 실패 시 HTTP 500과 "섬네일 변경 실패." 메시지를 반환합니다.
      */
     @PostMapping("/novels/{novelId}/thumbnail")
-    public ResponseEntity<?> uploadNovelThumbnail(@PathVariable("novelId") Long urlNovelId
-            , MultipartFile multipartFile//업로드할 섬네일 파일
-            , Authentication authentication) {
+    public ResponseEntity<?> uploadNovelThumbnail(
+            @PathVariable("novelId") Long urlNovelId,
+            @RequestParam("file") MultipartFile multipartFile, //업로드할 섬네일 파일
+            Authentication authentication
+    ) {
         //유저 인증. 없으면 badRequest 응답. 있으면 CustomOAuth2User 타입캐스팅.
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
