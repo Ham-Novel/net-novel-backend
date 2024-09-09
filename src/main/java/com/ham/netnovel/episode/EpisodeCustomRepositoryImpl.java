@@ -31,6 +31,7 @@ public class EpisodeCustomRepositoryImpl implements EpisodeCustomRepository {
                 .join(novel).on(episode.novel.id.eq(novel.id))
                 .where(episode.novel.id.eq(novelId))
                 .orderBy(getOrderSpecifier(sortBy))
+                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
     }
