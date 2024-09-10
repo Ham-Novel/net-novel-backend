@@ -11,6 +11,7 @@ import com.ham.netnovel.episode.data.EpisodeStatus;
 import com.ham.netnovel.episode.dto.*;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.service.NovelService;
+import com.ham.netnovel.novelMetaData.service.NovelMetaDataService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,11 +35,14 @@ public class EpisodeServiceImpl implements EpisodeService {
 
     private final RedisMessagePublisher redisMessagePublisher;
 
-    public EpisodeServiceImpl(EpisodeRepository episodeRepository, NovelService novelService, CoinCostPolicyService costPolicyService, RedisMessagePublisher redisMessagePublisher ) {
+    private final NovelMetaDataService novelMetaDataService;
+
+    public EpisodeServiceImpl(EpisodeRepository episodeRepository, NovelService novelService, CoinCostPolicyService costPolicyService, RedisMessagePublisher redisMessagePublisher, NovelMetaDataService novelMetaDataService) {
         this.episodeRepository = episodeRepository;
         this.novelService = novelService;
         this.costPolicyService = costPolicyService;
         this.redisMessagePublisher = redisMessagePublisher;
+        this.novelMetaDataService = novelMetaDataService;
     }
 
     @Override
@@ -87,6 +91,10 @@ public class EpisodeServiceImpl implements EpisodeService {
                     novelProperty.getTitle(),
                     episodeCreateDto.getTitle(),
                     novelProperty.getThumbnailFileName());
+
+            //NovelMetaData 최근 게시 날짜 업데이트
+            novelMetaDataService.updateNovelLatestEpisodeAt(novelProperty.getId(),save.getCreatedAt());
+
 
         } catch (Exception ex) {
             //나머지 Repository 작업 예외 처리

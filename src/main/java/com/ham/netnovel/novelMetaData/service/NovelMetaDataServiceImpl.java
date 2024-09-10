@@ -4,11 +4,13 @@ import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.service.NovelService;
 import com.ham.netnovel.novelMetaData.NovelMetaData;
+import com.ham.netnovel.novelMetaData.NovelMetaDataRepository;
 import com.ham.netnovel.novelMetaData.data.MetaDataType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -32,18 +34,50 @@ public class NovelMetaDataServiceImpl implements NovelMetaDataService {
 
 
     @Override
-    public void updateNovelTotalViews(Integer pageSize, Integer pageNumber) {
-        processMetaData(1000,0, novelService::getNovelWithTotalViews,MetaDataType.VIEW);
+    public void updateNovelTotalViewsByPage(Integer pageSize, Integer pageNumber) {
+        processMetaData(1000, 0, novelService::getNovelWithTotalViews, MetaDataType.VIEW);
     }
 
     @Override
-    public void updateNovelTotalFavorites(Integer pageSize, Integer pageNumber) {
-        processMetaData(1000,0, novelService::getNovelWithTotalFavorites, MetaDataType.FAVORITE);
+    public void updateNovelTotalFavoritesByPage(Integer pageSize, Integer pageNumber) {
+        processMetaData(1000, 0, novelService::getNovelWithTotalFavorites, MetaDataType.FAVORITE);
 
     }
+
     @Override
-    public void updateNovelLatestEpisodeAt(Integer pageSize, Integer pageNumber) {
-        processMetaData(1000,0, novelService::getNovelWithLatestEpisodeCreateTime, MetaDataType.DATE);
+    public void updateNovelLatestEpisodeAtByPage(Integer pageSize, Integer pageNumber) {
+        processMetaData(1000, 0, novelService::getNovelWithLatestEpisodeCreateTime, MetaDataType.DATE);
+    }
+
+    @Override
+    @Transactional
+    public void updateNovelLatestEpisodeAt(Long novelId, LocalDateTime latestDate) {
+
+        try {
+            //Novel ID 로 메타데이터 엔티티 찾아 최근 업데이트 시간 수정후 저장
+            novelMetaDataRepository.findByNovelId(novelId)
+                    .ifPresentOrElse(
+                            (novelMetaData) -> {
+                                //최근 업데이트 시간 필드값 수정
+                                novelMetaData.updatedLatestEpisodeAt(latestDate);
+                                //변경사항 DB에 저장
+                                novelMetaDataRepository.save(novelMetaData);
+                                log.info("소설 최근 업데이트 일자 갱신 완료, novelId={}", novelId);
+                            },
+                            //메타 데이터가 없을시 새로생성하여 저장
+                            () -> {
+                                novelService.getNovel(novelId)
+                                        .ifPresent(novel -> {
+                                            NovelMetaData novelMetaData = buildNovelMetaDataEntity(novel, 0L, 0, latestDate);
+                                            novelMetaDataRepository.save(novelMetaData);
+                                        });
+                                log.warn("소설 NovelMetaDate 엔티티 생성 완료, novelId={}", novelId);
+                            });
+
+        } catch (Exception ex) {
+            throw new ServiceMethodException("updateNovelLatestEpisodeAt 메서드 실행 에러" + ex + ex.getMessage());
+        }
+
     }
 
     /**
@@ -54,10 +88,10 @@ public class NovelMetaDataServiceImpl implements NovelMetaDataService {
      * 각 페이지에 대해 메타데이터를 업데이트하거나 새로 생성합니다.
      * </p>
      *
-     * @param pageSize 페이지 당 아이템 수 {@link Integer}객체
-     * @param pageNumber 현재 페이지 번호 {@link Integer}객체
+     * @param pageSize             페이지 당 아이템 수 {@link Integer}객체
+     * @param pageNumber           현재 페이지 번호 {@link Integer}객체
      * @param pageMetaDataProvider 메타데이터를 공급하는 함수{@link Function} 객체. 페이지 정보에 따라 메타데이터를 반환
-     * @param metaDataType 업데이트할 {@link MetaDataType} enum 객체 (예: 조회수, 즐겨찾기, 최신 에피소드 날짜)
+     * @param metaDataType         업데이트할 {@link MetaDataType} enum 객체 (예: 조회수, 즐겨찾기, 최신 에피소드 날짜)
      */
     private <V> void processMetaData(Integer pageSize,
                                      Integer pageNumber,
@@ -81,7 +115,7 @@ public class NovelMetaDataServiceImpl implements NovelMetaDataService {
             //novelId 로 메타데이터 엔티티를 불러옴, 엔티티 업데이트시 사용
             Map<Long, NovelMetaData> existingNovelMetaData = getExistingNovelMetaData(novelIds);
             // 메타데이터를 업데이트 또는 생성
-            updateOrCreateNovelMetaData(novelIds, existingNovelMetaData, novelWithMetaData,metaDataType);
+            updateOrCreateNovelMetaData(novelIds, existingNovelMetaData, novelWithMetaData, metaDataType);
             // 다음 페이지 반복문 실행
             pageNumber++;
         }
@@ -132,13 +166,15 @@ public class NovelMetaDataServiceImpl implements NovelMetaDataService {
                     log.warn("Novel 엔티티 조회 에러 , novelId ={}", novelId);
                     continue;
                 }
+
+                NovelMetaData createdNovelMetaData = buildNovelMetaDataEntity(novel.get(), totalViews, totalFavorites, latestDate);
                 // 새로운 NovelMetaData 엔티티 생성
-                NovelMetaData createdNovelMetaData = NovelMetaData.builder()
-                        .totalFavorites(totalFavorites)
-                        .novel(novel.get())
-                        .totalViews(totalViews)
-                        .latestEpisodeAt(latestDate)
-                        .build();
+//                NovelMetaData createdNovelMetaData = NovelMetaData.builder()
+//                        .totalFavorites(totalFavorites)
+//                        .novel(novel.get())
+//                        .totalViews(totalViews)
+//                        .latestEpisodeAt(latestDate)
+//                        .build();
 
                 //List에 엔티티 저장
                 novelMetaDataList.add(createdNovelMetaData);
@@ -180,12 +216,23 @@ public class NovelMetaDataServiceImpl implements NovelMetaDataService {
      * @return 소설 ID({@link Long})를 키, 해당 소설의 {@link NovelMetaData} 객체를 값으로 하는 {@link Map} 객체
      */
 
-    private Map<Long, NovelMetaData> getExistingNovelMetaData(Set<Long> novelIds) {
-        return novelMetaDataRepository.findByNovelId(novelIds)
+    @Override
+    public Map<Long, NovelMetaData> getExistingNovelMetaData(Set<Long> novelIds) {
+        return novelMetaDataRepository.findByNovelIds(novelIds)
                 .stream()
                 .collect(Collectors.toMap(
                         object -> object.getNovel().getId(),
                         object -> object));
+    }
+
+
+    private NovelMetaData buildNovelMetaDataEntity(Novel novel, Long totalViews, int totalFavorites, LocalDateTime latestDate) {
+        return NovelMetaData.builder()
+                .totalFavorites(totalFavorites)
+                .novel(novel)
+                .totalViews(totalViews)
+                .latestEpisodeAt(latestDate)
+                .build();
     }
 }
 
