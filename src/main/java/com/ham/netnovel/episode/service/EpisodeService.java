@@ -87,4 +87,17 @@ public interface EpisodeService {
      * @throws ServiceMethodException 메서드 실행 중 예외가 발생한 경우
      */
     List<EpisodeListItemDto> getEpisodesByConditions(String sortBy, Long novelId, Pageable pageable);
+
+
+
+    /**
+     * 주어진 에피소드 ID에 대한 가격이 0원(무료)인지 확인하는 메서드 입니다.
+     * <p> 에피소드가 무료일경우 {@code true}를 반환하며, 유료일경우 {@code false}를 반환합니다.</p>
+     *
+     * @param episodeId 에피소드의 ID
+     * @return 가격이 0원이면 {@code true}, 그렇지 않으면 {@code false} 반환
+     * @throws IllegalArgumentException 에피소드 정보가 존재하지 않을 경우
+     */
+    boolean isEpisodeFree(Long episodeId);
+
 }

@@ -5,6 +5,7 @@ import com.ham.netnovel.coinCostPolicy.CoinCostPolicy;
 import com.ham.netnovel.coinCostPolicy.service.CoinCostPolicyService;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.common.message.RedisMessagePublisher;
+import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.EpisodeRepository;
 import com.ham.netnovel.episode.data.EpisodeStatus;
@@ -63,7 +64,7 @@ public class EpisodeServiceImpl implements EpisodeService {
                 .filter(novel ->
                         //에피소드 생성 요청자와, 소설 작가가 일치하는지 확인
                         episodeCreateDto.getProviderId().equals(novel.getAuthor().getProviderId()))
-                        //에피소드 작성 요청자와 소설 작가가 다르거나, Novel 정보가 없는경우 예외로 던짐
+                //에피소드 작성 요청자와 소설 작가가 다르거나, Novel 정보가 없는경우 예외로 던짐
                 .orElseThrow(() ->
                         new IllegalArgumentException("유효하지 않은 Novel 정보이거나 유저 정보가 올바르지 않습니다. novelId= " + episodeCreateDto.getNovelId()));
 
@@ -93,12 +94,12 @@ public class EpisodeServiceImpl implements EpisodeService {
                     novelProperty.getThumbnailFileName());
 
             //NovelMetaData 최근 게시 날짜 업데이트
-            novelMetaDataService.updateNovelLatestEpisodeAt(novelProperty.getId(),save.getCreatedAt());
+            novelMetaDataService.updateNovelLatestEpisodeAt(novelProperty.getId(), save.getCreatedAt());
 
 
         } catch (Exception ex) {
             //나머지 Repository 작업 예외 처리
-            throw new ServiceMethodException("createEpisode 메서드 에러 발생"+ ex+ ex.getMessage());
+            throw new ServiceMethodException("createEpisode 메서드 에러 발생" + ex + ex.getMessage());
         }
     }
 
@@ -153,7 +154,7 @@ public class EpisodeServiceImpl implements EpisodeService {
             episodeRepository.save(episode);
         } catch (Exception ex) {
             //나머지 Repository 작업 예외 처리
-            throw new ServiceMethodException("updateEpisode 메서드 에러 발생"+ex+ ex.getCause());
+            throw new ServiceMethodException("updateEpisode 메서드 에러 발생" + ex + ex.getCause());
         }
     }
 
@@ -170,7 +171,7 @@ public class EpisodeServiceImpl implements EpisodeService {
             episodeRepository.save(episode);
         } catch (Exception ex) {
             //나머지 Repository 작업 예외 처리
-            throw new ServiceMethodException("deleteEpisode 메서드 에러 발생"+ex+ ex.getMessage());
+            throw new ServiceMethodException("deleteEpisode 메서드 에러 발생" + ex + ex.getMessage());
         }
     }
 
@@ -182,7 +183,7 @@ public class EpisodeServiceImpl implements EpisodeService {
      * 에피소드 정보가 존재하지 않는 경우, {@code NoSuchElementException} 예외가 발생합니다.
      * </p>
      *
-     * @param episodeId 에피소드의 ID
+     * @param episodeId  에피소드의 ID
      * @param providerId 요청자의 ID
      * @return 유효한 {@link  Episode} 엔티티 객체
      * @throws NoSuchElementException 에피소드 정보가 존재하지 않거나 요청자와 소설 작가가 일치하지 않는 경우
@@ -210,15 +211,35 @@ public class EpisodeServiceImpl implements EpisodeService {
     @Transactional(readOnly = true)
     public List<EpisodeListItemDto> getEpisodesByConditions(String sortBy, Long novelId, Pageable pageable) {
         try {
-            return episodeRepository.findEpisodesByConditions(sortBy,novelId, pageable)
+            return episodeRepository.findEpisodesByConditions(sortBy, novelId, pageable)
                     .stream()
                     .map(this::convertEntityToListDto) //Episode => EpisodeListItemDto 변환
                     .collect(Collectors.toList());
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             //나머지 Repository 작업 예외 처리
-            throw new ServiceMethodException("getNovelByFilter 메서드 에러 발생"+ex+ex.getMessage());
+            throw new ServiceMethodException("getNovelByFilter 메서드 에러 발생" + ex + ex.getMessage());
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isEpisodeFree(Long episodeId) {
+
+
+
+        //에피소드의 coinCost 객체로 생성
+        Integer coinCost = episodeRepository.findById(episodeId)
+                .map(episode -> episode.getCostPolicy().getCoinCost())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("getEpisodeCoinCost 에러, Episode 정보가 없습니다. EpisodeId = " + episodeId));
+
+        //coin cost가 음수면 예외로 던짐
+        TypeValidationUtil.validateCoinAmount(coinCost);
+
+        return coinCost == 0;//무료면 true 유료면 false 반환
+
+    }
+
 
     /**
      * Episode Entity => EpisodeListItemDto 변환 메서드
