@@ -1,4 +1,4 @@
-package com.ham.netnovel.common.config;
+package com.ham.netnovel.common.scheduler.config;
 
 
 import com.ham.netnovel.episode.job.EpisodeViewCountUpdateJob;
@@ -37,19 +37,19 @@ public class QuartzConfig {
     @Bean
     public JobDetail episodeViewCountUpdateJobDetail() {
         return JobBuilder.newJob(EpisodeViewCountUpdateJob.class)
-                .withIdentity("episodeViewCounUpdateJob")//식별자 설정
+                .withIdentity("episodeViewCountUpdateJob")//식별자 설정
                 .withDescription("Episode 조회수 업데이트,조회수가 있는 Episode 만 진행")//설명추가
                 .storeDurably()
                 .build();
     }
 
-//    에피소드 조회수 Redis 에서 DB로 갱신 Trigger 설정, 10분마다 갱신
+//    에피소드 조회수 Redis 에서 DB로 갱신 Trigger 설정, 매시간 10분 40분마다 갱신
     @Bean
     public Trigger episodeViewCountUpdateTrigger() {
         return TriggerBuilder.newTrigger()
                 .forJob(episodeViewCountUpdateJobDetail())//트리거와 novelAverageRatingJob 연결
                 .withIdentity("episodeViewCountUpdateTrigger")//트리거 식별자 설정
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/10 * * * ?")) // 매시 0분, 10분, 20분, 30분, 40분, 50분에 실행
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 10,40 * * * ?")) // 매시간 10분과 40분에 실행
                 .build();
     }
 

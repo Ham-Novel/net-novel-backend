@@ -1,4 +1,4 @@
-package com.ham.netnovel.common.config;
+package com.ham.netnovel.common.scheduler.config;
 
 
 import com.ham.netnovel.novelRanking.job.*;
@@ -23,13 +23,13 @@ public class NovelRankingQuartzConfig {
     }
 
 
-    //일간 Novel 조회수 랭킹 갱신 Trigger 설정, 10시 15시 20시에 갱신
+    //일간 Novel 조회수 랭킹 갱신 Trigger 설정, 03시 10시 14시 20시에 갱신
     @Bean
     public Trigger novelDailyRankingTrigger() {
         return TriggerBuilder.newTrigger()
                 .forJob(novelDailyRankingJobDetail())//트리거와 novelAverageRatingJobDetail 연결
                 .withIdentity("novelDailyRatingTrigger")//트리거 식별자 설정
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 10,15,20 * * ?")) // 매일 10시, 15시, 20시에 실행
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 3,10,14,20 * * ?")) // 매일 3시, 10시, 14시, 20시에 실행
                 .build();
     }
 
@@ -45,13 +45,13 @@ public class NovelRankingQuartzConfig {
 
     }
 
-    //어제 일자 일간 Novel 조회수 랭킹 갱신 Trigger 설정, 00시 1분에 실행
+    //어제 일자 일간 Novel 조회수 랭킹 갱신 Trigger 설정, 03시 05분에 실행
     @Bean
     public Trigger novelPreviousDayRankingTrigger() {
         return TriggerBuilder.newTrigger()
                 .forJob(novelPreviousDayRankingJobDetail())//트리거와 JobDetail 연결
                 .withIdentity("novelPreviousDayRankingTrigger")//트리거 식별자 설정
-                .withSchedule(CronScheduleBuilder.cronSchedule("1 0 0 * * ?")) // 매일 00시 1분에 실행
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 5 3 * * ?")) // 매일 03시 5분에 실행
                 .build();
     }
 
@@ -67,13 +67,13 @@ public class NovelRankingQuartzConfig {
 
     }
 
-    //주간 Novel 조회수 랭킹 갱신 Trigger 설정, 매일 자정 00시 5분에 실행
+    //주간 Novel 조회수 랭킹 갱신 Trigger 설정, 매일 03시 10분에 실행
     @Bean
     public Trigger novelWeeklyRankingTrigger() {
         return TriggerBuilder.newTrigger()
                 .forJob(novelWeeklyRankingJobDetail())//트리거와 novelAverageRatingJobDetail 연결
                 .withIdentity("novelWeeklyRankingTrigger")//트리거 식별자 설정
-                .withSchedule(CronScheduleBuilder.cronSchedule("3 0 0 * * ?")) // 매일 00시 03분에 실행
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 10 3 * * ?")) // 매일 03시 05분에 실행
                 .startNow()
                 .build();
     }
@@ -89,13 +89,13 @@ public class NovelRankingQuartzConfig {
                 .build();
     }
 
-    //주간 Novel 조회수 랭킹 갱신 Trigger 설정, 매일 자정 00시 5분에 실행
+    //주간 Novel 조회수 랭킹 갱신 Trigger 설정, 매일 자정 03시 15분에 실행
     @Bean
     public Trigger novelMonthlyRankingTrigger() {
         return TriggerBuilder.newTrigger()
                 .forJob(novelMonthlyRankingJobDetail())//트리거와 novelAverageRatingJobDetail 연결
                 .withIdentity("novelMonthlyRankingTrigger")//트리거 식별자 설정
-                .withSchedule(CronScheduleBuilder.cronSchedule("5 0 0 * * ?")) // 매일 00시 05분에 실행
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 15 3 * * ?")) // 매일 03시 15분에 실행
                 .build();
     }
 
