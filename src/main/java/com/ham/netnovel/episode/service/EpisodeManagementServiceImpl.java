@@ -82,6 +82,26 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
 
     @Override
     @Transactional(readOnly = true)
+    public EpisodeDetailDto getFreeEpisodeDetail(Long episodeId) {
+
+        //episode 엔티티 유무 확인, 없을경우 예외로 던짐
+        Episode episode = episodeService.getEpisode(episodeId)
+                .orElseThrow(() -> new NoSuchElementException("Episode 정보 없음"));
+
+        //레디스에 저장된 에피소드 조회수 1 증가
+        episodeViewCountService.incrementEpisodeViewCountInRedis(episodeId);
+
+        //에피소드 정보 DTO로 변환하여 반환
+        return EpisodeDetailDto.builder()
+                .episodeId(episodeId)
+                .content(episode.getContent())
+                .title(episode.getTitle())
+                .build();
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public EpisodeDetailDto getBesideEpisode(String providerId, Long episodeId, IndexDirection direction) {
         //episode 엔티티 유무 확인, 없을경우 예외로 던짐
         Episode episode = episodeService.getEpisode(episodeId)
@@ -110,7 +130,7 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
     @Transactional
     public void updateEpisodeViewCountFromRedis() {
         try {
-            //Redis 에 저장된 에피소드 조회수 정보를 List로 받아옴
+            //Redis 에 캐싱된 에피소드별 조회수 정보를 List로 받아옴
             List<ViewCountIncreaseDto> viewCountFromRedis = episodeViewCountService.getEpisodeViewCountFromRedis();
 
             // Redis에서 받아온 정보가 없을 경우 메서드 종료
