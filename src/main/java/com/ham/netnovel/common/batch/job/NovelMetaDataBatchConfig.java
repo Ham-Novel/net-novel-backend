@@ -6,7 +6,7 @@ import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.repository.NovelRepository;
 import com.ham.netnovel.novelMetaData.NovelMetaData;
 import com.ham.netnovel.novelMetaData.data.MetaDataType;
-import com.ham.netnovel.novelMetaData.service.NovelMetaDataRepository;
+import com.ham.netnovel.novelMetaData.NovelMetaDataRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
