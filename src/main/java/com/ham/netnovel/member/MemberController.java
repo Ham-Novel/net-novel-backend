@@ -7,7 +7,7 @@ import com.ham.netnovel.member.dto.*;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.common.utils.Authenticator;
-import com.ham.netnovel.novel.dto.NovelFavoriteDto;
+import com.ham.netnovel.member.dto.MemberFavoriteDto;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -158,7 +158,7 @@ public class MemberController {
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
         //유저가 좋아요 누른 소설 반환
-        List<NovelFavoriteDto> novels = memberMyPageService.getFavoriteNovelsByMember(principal.getName());
+        List<MemberFavoriteDto> novels = memberMyPageService.getFavoriteNovelsByMember(principal.getName());
 
         //정보 전송
         return ResponseEntity.ok(novels);

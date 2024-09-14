@@ -3,13 +3,14 @@ package com.ham.netnovel.member.service.impl;
 import com.ham.netnovel.coinChargeHistory.service.CoinChargeHistoryService;
 import com.ham.netnovel.coinUseHistory.service.CoinUseHistoryService;
 import com.ham.netnovel.comment.service.CommentService;
+import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.dto.MemberRecentReadDto;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
-import com.ham.netnovel.novel.dto.NovelFavoriteDto;
+import com.ham.netnovel.member.dto.MemberFavoriteDto;
 import com.ham.netnovel.novel.service.NovelService;
 import com.ham.netnovel.reComment.service.ReCommentService;
 import com.ham.netnovel.recentRead.service.RecentReadService;
@@ -78,16 +79,19 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
 
     //ToDo Author 엔티티 생성 후, 작가 정보도 DTO에 담아서 반환
     @Override
-    public List<NovelFavoriteDto> getFavoriteNovelsByMember(String providerId) {
+    public List<MemberFavoriteDto> getFavoriteNovelsByMember(String providerId) {
         //유저 providerId 유효성 검사
         validateProviderId(providerId, "getFavoriteNovelsByMember");
 
         return novelService.getFavoriteNovels(providerId)
                 .stream()
-                .map(novel -> NovelFavoriteDto.builder()
+                .map(novel -> MemberFavoriteDto.builder()
                         .novelId(novel.getId())
                         .title(novel.getTitle())
                         .status(novel.getType())
+                        .episodeCount(novel.getEpisodes().size())
+                        .favoriteCount(novel.getFavorites().size())
+                        .views(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
                         .build()
                 ).collect(Collectors.toList());
     }

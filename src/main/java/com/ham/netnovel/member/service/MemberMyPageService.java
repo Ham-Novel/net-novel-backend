@@ -5,7 +5,7 @@ import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.member.dto.MemberRecentReadDto;
-import com.ham.netnovel.novel.dto.NovelFavoriteDto;
+import com.ham.netnovel.member.dto.MemberFavoriteDto;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public interface MemberMyPageService {
 
     List<MemberCommentDto> getMemberCommentAndReCommentList(String providerId,Pageable pageable);
 
-    List<NovelFavoriteDto> getFavoriteNovelsByMember(String providerId);
+    List<MemberFavoriteDto> getFavoriteNovelsByMember(String providerId);
 
 //    List<FavoriteNovelListDto> getMemberFavoriteNovel
 
