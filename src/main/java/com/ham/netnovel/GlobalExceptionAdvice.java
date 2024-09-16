@@ -1,6 +1,7 @@
 package com.ham.netnovel;
 
 import com.ham.netnovel.common.exception.NotEnoughCoinsException;
+import com.ham.netnovel.common.exception.RepositoryMethodException;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -74,8 +75,20 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(ServiceMethodException.class)
     public ResponseEntity<String> handleServiceMethodException(ServiceMethodException serviceMethodException) {
         log.error("서비스 계층 작업 에러, ServiceMethodException: {} ",serviceMethodException.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("서버 에러입니다 관리자에게 문의해주세요.");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 에러입니다 관리자에게 문의해주세요.");
     }
+    /**
+     * 리포지토리 계층 예외처리
+     * @param repositoryMethodException 서비스계층에서 사용하는 custom exception
+     * @return
+     */
+
+    @ExceptionHandler(RepositoryMethodException.class)
+    public ResponseEntity<String> handleServiceMethodException(RepositoryMethodException repositoryMethodException) {
+        log.error("리포지토리 계층 작업 에러, ServiceMethodException: {} ",repositoryMethodException.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 에러입니다 관리자에게 문의해주세요.");
+    }
+
 
 
     /**

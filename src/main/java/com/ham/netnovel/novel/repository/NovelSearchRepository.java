@@ -23,5 +23,20 @@ public interface NovelSearchRepository {
                                                     List<Long> tagIds);
 
 
+    /**
+     * 검색어를 기반으로 소설 목록을 검색하여 반환합니다.
+     * <p>
+     * 검색된 소설 정보를 NovelListDto로 변환하여 페이징 처리된 결과를 반환합니다.
+     * 해당 메서드는 검색어에 대해 Full-Text 검색을 수행하고,
+     * 각 소설의 관련 정보를 DTO로 변환하여 반환합니다.
+     * </p>
+     *
+     * @param searchWord 검색어
+     * @param pageable       {@link Pageable} 페이지 정보를 포함하는 객체 (페이지 번호, 페이지 크기 등)
+     * @return {@link List<NovelListDto>} 정렬 기준과 페이지 정보에 따라 조회된 소설 목록을 포함하는 리스트
+     */
+    List<NovelListDto> findBySearchWord(String searchWord,Pageable pageable);
+
+
 
 }

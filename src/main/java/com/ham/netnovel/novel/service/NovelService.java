@@ -169,6 +169,7 @@ public interface NovelService {
      * <p>
      * 이 메서드는 기본적으로 소설 목록을 조회수 기준으로 정렬합니다.
      * </p>
+     *
      * <p>
      * 사용자가 제공한 정렬 기준에 따라, 소설 목록을 좋아요 순 또는 최신순으로 정렬할 수 있습니다.
      * 조회된 소설 목록의 썸네일 URL은 S3 서비스의 CloudFront URL로 변환됩니다.
@@ -179,7 +180,24 @@ public interface NovelService {
      *
      * @return List<NovelListDto> 소설 목록을 포함한 DTO 리스트를 반환합니다.
      *         각 소설의 썸네일 URL은 CloudFront URL로 변환되어 반환됩니다.
+     * @throws ServiceMethodException 검색 중 예외 발생 시 예외를 던집니다.
      */
     List<NovelListDto> getNovelsBySearchCondition(String sortOrder, Pageable pageable, List<Long> tagIds);
+
+    /**
+     * 검색어를 기반으로 소설 목록을 검색하여 반환합니다.
+     * <p>
+     * 검색된 소설 정보를 NovelListDto로 변환하여 페이징 처리된 결과를 반환합니다.
+     * 조회된 소설 목록의 썸네일 URL은 S3 서비스의 CloudFront URL로 변환됩니다.
+     * </p>
+     *
+     * @param searchWord 유저가 입력한  검색어 {@link String} 객체
+     * @param pageable 페이지 정보 및 페이징 조건을 포함하는 {@link Pageable} 객체입니다.
+     * @return List<NovelListDto> 소설 목록을 포함한 DTO 리스트를 반환합니다.
+     *         각 소설의 썸네일 URL은 CloudFront URL로 변환되어 반환됩니다.     *
+
+     * @throws ServiceMethodException 검색 중 예외 발생 시 예외를 던집니다.
+     */
+    List<NovelListDto> getNovelsBySearchWord(String searchWord, Pageable pageable);
 
 }
