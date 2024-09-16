@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface NovelRepository extends JpaRepository<Novel, Long> {
+public interface NovelRepository extends JpaRepository<Novel, Long>, NovelSearchRepository {
 
 
     @Query("select n from Novel n " +
