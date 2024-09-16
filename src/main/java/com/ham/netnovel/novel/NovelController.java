@@ -50,7 +50,7 @@ public class NovelController {
 
 
     /**
-     * 소설을 검색 조건에 따라 조회하는 API 엔드포인트입니다.
+     * 소설을 검색 조건에 따라 조회하는 API 입니다.
      *
      * <p>
      * 이 메서드는 유저가 제공한 정렬 기준, 페이지 번호, 페이지 크기에 따라 소설 목록을 반환합니다.
@@ -63,32 +63,65 @@ public class NovelController {
      * @return {@link ResponseEntity<>} 소설 정보가 포함된 리스트를 HTTP 200 응답으로 반환합니다.
      * 응답 본문에는 소설 정보 리스트가 담겨 있습니다.
      */
-    @GetMapping("/novels/search")
+    @GetMapping("/novels/browse")
     public ResponseEntity<List<NovelListDto>> getNovelsBySearchCondition(
             @RequestParam(name = "sortBy", defaultValue = "view") String sortBy,
             @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
-            @RequestParam(name = "tagId",required = false) String ids) {
+            @RequestParam(name = "tagId", required = false) String ids) {
 
-        List<Long> idList=new ArrayList<>();
+        List<Long> idList = new ArrayList<>();
         //"," 로 구분된 tag 들을 분리하여 List 객체에 담음
-        if (!(ids ==null)){idList= Arrays.stream(ids.split(","))
+        if (!(ids == null)) {
+            idList = Arrays.stream(ids.split(","))
                     .map(Long::valueOf)
                     .toList();
         }
         //페이지 사이즈 수 제한
-        if (pageSize>200){
-            pageSize =200;
+        if (pageSize > 200) {
+            pageSize = 200;
         }
 
         //페이지 네이션을 위한 Pageable 객체 생성
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //조건을 메서드에 전달하여, 소설 정보 List를 받아옴
-        List<NovelListDto> novels = novelService.getNovelsBySearchCondition(sortBy, pageable,idList);
+        List<NovelListDto> novels = novelService.getNovelsBySearchCondition(sortBy, pageable, idList);
+        return ResponseEntity.ok(novels);//소설 정보 전송
+    }
+
+    /**
+     * 검색어로 소설을 조회하는 API 입니다.
+     * <p>
+     * 이 메서드는 유저가 입력한 검색어에 따라 소설 목록을 반환합니다.
+     * 페이지 네이션을 위해 Pageable 객체를 생성하여, 서비스 계층에서 소설 정보를 DTO 리스트로 받아 이를 HTTP 응답으로 전송합니다.
+     * </p>
+     *
+     * @param searchWord 검색어 {@link String} 객체입니다.
+     * @param pageNumber 조회할 페이지 번호 {@link Integer} 객체 입니다. 기본값은 0입니다.
+     * @param pageSize   한 페이지에 포함될 항목의 수 {@link Integer} 객체  입니다. 기본값은 30입니다.
+     * @return {@link ResponseEntity<>} 소설 정보가 포함된 리스트를 HTTP 200 응답으로 반환합니다.
+     */
+
+    @GetMapping("/novels/search")
+    public ResponseEntity<List<NovelListDto>> getNovelsBySearchWord(
+            @RequestParam(name = "searchWord") String searchWord,
+            @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "30") Integer pageSize) {
+
+
+        //페이지 사이즈 수 제한
+        if (pageSize > 200) {
+            pageSize = 200;
+        }
+
+        //페이지 네이션을 위한 Pageable 객체 생성
+        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
+        //조건을 메서드에 전달하여, 소설 정보 List를 받아옴
+        List<NovelListDto> novels = novelService.getNovelsBySearchWord(searchWord, pageable);
         return ResponseEntity.ok(novels);//소설 정보 전송
 
-
     }
+
 
     /**
      * 소설 랭킹을 기간에 따라 조회하는 API 엔드포인트입니다.
@@ -114,8 +147,8 @@ public class NovelController {
 
 
         //페이지 사이즈 수 제한
-        if (pageSize>200){
-            pageSize =200;
+        if (pageSize > 200) {
+            pageSize = 200;
         }
 
         //페이지네이션 객체 생성
@@ -126,6 +159,7 @@ public class NovelController {
 
         return ResponseEntity.ok(rankedNovels);//소설 정보 전송
     }
+
     /**
      * 유저가 집핍하는 소설 리스트를 전송하는 API
      *
@@ -156,8 +190,8 @@ public class NovelController {
      */
     @PostMapping("/novels")
     public ResponseEntity<?> createNovel(@Valid @RequestBody NovelCreateDto reqBody,
-                                              BindingResult bindingResult,
-                                              Authentication authentication) {
+                                         BindingResult bindingResult,
+                                         Authentication authentication) {
         //NovelCreateDto Validation 예외 처리
         if (bindingResult.hasErrors()) {
             log.error("createNovel API Error = {}", bindingResult.getFieldError());

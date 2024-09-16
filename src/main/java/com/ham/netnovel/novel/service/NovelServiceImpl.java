@@ -39,15 +39,15 @@ public class NovelServiceImpl implements NovelService {
 
     private final S3Service s3Service;
 
-    private final NovelSearchRepository novelSearchRepository;
+//    private final NovelSearchRepository novelSearchRepository;
 
     @Autowired
-    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService, NovelRankingService novelRankingService, S3Service s3Service, NovelSearchRepository novelSearchRepository) {
+    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService, NovelRankingService novelRankingService, S3Service s3Service) {
         this.novelRepository = novelRepository;
         this.memberService = memberService;
         this.novelRankingService = novelRankingService;
         this.s3Service = s3Service;
-        this.novelSearchRepository = novelSearchRepository;
+//        this.novelSearchRepository = novelSearchRepository;
     }
 
 
@@ -338,18 +338,36 @@ public class NovelServiceImpl implements NovelService {
         }
 
         try {
-            return novelSearchRepository.findNovelsBySearchConditions(novelSortOrder, pageable, tagIds)
-                .stream()
-                .peek(novelListDto -> {
-                    String cloudFrontUrl = s3Service.
-                            generateCloudFrontUrl(novelListDto.getThumbnailUrl(),
-                                    "mini");//소설 섬네일 URL 생성
-                    novelListDto.setThumbnailUrl(cloudFrontUrl);//DTO에 섬네일 URL 할당
-                }).collect(Collectors.toList());
+            return novelRepository.findNovelsBySearchConditions(novelSortOrder, pageable, tagIds)
+                    .stream()
+                    .peek(novelListDto -> {
+                        String cloudFrontUrl = s3Service.
+                                generateCloudFrontUrl(novelListDto.getThumbnailUrl(),
+                                        "mini");//소설 섬네일 URL 생성
+                        novelListDto.setThumbnailUrl(cloudFrontUrl);//DTO에 섬네일 URL 할당
+                    }).collect(Collectors.toList());
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
             throw new ServiceMethodException("getNovelsBySearchCondition 메서드 에러" + ex + ex.getMessage());
 
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NovelListDto> getNovelsBySearchWord(String searchWord, Pageable pageable) {
+
+        try {
+            //검색어로 소설 정보를 검색, DTO로 받아 반환
+            return novelRepository.findBySearchWord(searchWord, pageable).stream()
+                    .peek(novelListDto -> {
+                        String cloudFrontUrl = s3Service.
+                                generateCloudFrontUrl(novelListDto.getThumbnailUrl(),
+                                        "mini");//소설 섬네일 URL 생성
+                        novelListDto.setThumbnailUrl(cloudFrontUrl);//DTO에 섬네일 URL 할당
+                    }).collect(Collectors.toList());
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getNovelsBySearchWord 메서드 에러" + ex + ex.getMessage());
         }
     }
 
