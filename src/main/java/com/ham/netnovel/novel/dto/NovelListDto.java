@@ -27,6 +27,9 @@ public class NovelListDto {//랭킹 등 리스트로 소설정보를 전달시 �
     @NotNull
     private String authorName; //작가 닉네임
 
+    @NotBlank
+    private String desc;
+
     @NotNull
     private String providerId;//작가 소셜로그인 ID
 
