@@ -2,6 +2,7 @@ package com.ham.netnovel.tag.service;
 
 import com.ham.netnovel.tag.Tag;
 import com.ham.netnovel.tag.dto.TagCreateDto;
+import com.ham.netnovel.tag.dto.TagDataDto;
 import com.ham.netnovel.tag.dto.TagDeleteDto;
 
 import java.util.Optional;
@@ -16,11 +17,26 @@ public interface TagService {
     Optional<Tag> getTag(Long tagId);
 
     /**
-     * pk 값으로 Tag 엔티티를 불러오는 메서드 (Null 체크 필수)
-     * @param tagName Tag PK id value
+     * name 값으로 Tag 엔티티를 불러오는 메서드 (Null 체크 필수)
+     * @param tagName Tag name property
      * @return Optional
      */
     Optional<Tag> getTagByName(String tagName);
+
+
+    /**
+     * pk id 값으로 Tag 데이터를 dto로 반환하는 메서드
+     * @param tagId Tag pk id property
+     * @return TagDataDto
+     */
+    TagDataDto readTagById(Long tagId);
+
+    /**
+     * name 값으로 Tag 데이터를 dto로 반환하는 메서드
+     * @param tagName Tag name property
+     * @return TagDataDto
+     */
+    TagDataDto readTagByName(String tagName);
 
 
     /**

@@ -5,6 +5,7 @@ import com.ham.netnovel.tag.Tag;
 import com.ham.netnovel.tag.TagRepository;
 import com.ham.netnovel.tag.TagStatus;
 import com.ham.netnovel.tag.dto.TagCreateDto;
+import com.ham.netnovel.tag.dto.TagDataDto;
 import com.ham.netnovel.tag.dto.TagDeleteDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,27 @@ public class TagServiceImpl implements TagService{
     @Transactional(readOnly = true)
     public Optional<Tag> getTagByName(String tagName) {
         return tagRepository.findByName(tagName);
+    }
+
+    @Override
+    public TagDataDto readTagById(Long tagId) {
+        return null;
+    }
+
+    @Override
+    public TagDataDto readTagByName(String tagName) {
+        Tag tagProperty = getTagByName(tagName)
+                .orElseThrow(() -> new NoSuchElementException("readTagByName() Error : Doesn't exist Tag."));
+
+        try {
+            return TagDataDto.builder()
+                    .id(tagProperty.getId())
+                    .name(tagProperty.getName())
+//                    .status(tagProperty.getStatus())
+                    .build();
+        } catch (Exception ex) {
+            throw new ServiceMethodException("readTagByName() Error : " + ex.getMessage());
+        }
     }
 
     @Override
