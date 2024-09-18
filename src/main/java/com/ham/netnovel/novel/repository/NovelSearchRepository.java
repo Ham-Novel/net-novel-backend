@@ -39,4 +39,17 @@ public interface NovelSearchRepository {
 
 
 
+    /**
+     * 작가명을 통해 소설 목록을 검색하여 반환합니다.
+     * <p>이 메서드는 주어진 작가 이름을 포함하는 작가(Member)를 서브쿼리로 검색하여,
+     * 해당 작가가 작성한 소설 목록을 반환합니다.</p>
+     * <p> 검색 조건에는 작가의 역할이 AUTHOR인지 확인하는 로직이 포함됩니다.</p>
+     *
+     * @param authorName 작가의 이름을 검색어로 사용
+     * @param pageable       {@link Pageable} 페이지 정보를 포함하는 객체 (페이지 번호, 페이지 크기 등)
+     * @return {@link List<NovelListDto>} 소설 목록을 포함하는 리스트
+     */
+    List<NovelListDto> findByAuthorName(String authorName, Pageable pageable);
+
+
 }

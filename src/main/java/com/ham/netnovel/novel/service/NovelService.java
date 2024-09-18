@@ -2,6 +2,7 @@ package com.ham.netnovel.novel.service;
 
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.novel.Novel;
+import com.ham.netnovel.novel.data.NovelSearchType;
 import com.ham.netnovel.novel.dto.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -198,6 +199,8 @@ public interface NovelService {
 
      * @throws ServiceMethodException 검색 중 예외 발생 시 예외를 던집니다.
      */
-    List<NovelListDto> getNovelsBySearchWord(String searchWord, Pageable pageable);
+    List<NovelListDto> getNovelsBySearchWord(String searchWord,
+                                             NovelSearchType novelSearchType,
+                                             Pageable pageable);
 
 }
