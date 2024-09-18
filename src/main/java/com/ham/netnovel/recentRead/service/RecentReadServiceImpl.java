@@ -104,8 +104,13 @@ public class RecentReadServiceImpl implements RecentReadService {
                         return MemberRecentReadDto.builder()//DTO로 변환하여 반환
                                 .novelId(novel.getId())
                                 .novelTitle(novel.getTitle())
+                                .novelDesc(novel.getDescription())
                                 .novelType(novel.getType())
                                 .authorName(novel.getAuthor().getNickName())
+                                .thumbnailUrl(novel.getThumbnailFileName())
+                                .tags(novel.getNovelTags().stream()
+                                        .map(novelTag -> novelTag.getTag().getData())
+                                        .toList())
                                 .episodeTitle(episode.getTitle())
                                 .episodeId(episode.getId())
                                 .updatedAt(recentRead.getUpdatedAt())

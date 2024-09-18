@@ -14,6 +14,7 @@ import com.ham.netnovel.member.dto.MemberFavoriteDto;
 import com.ham.netnovel.novel.service.NovelService;
 import com.ham.netnovel.reComment.service.ReCommentService;
 import com.ham.netnovel.recentRead.service.RecentReadService;
+import com.ham.netnovel.s3.S3Service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,8 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
 
     private final RecentReadService recentReadService;
 
+    private final S3Service s3Service;
+
 
     public MemberMyPageServiceImpl(CommentService commentService,
                                    ReCommentService reCommentService,
@@ -50,7 +53,7 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
                                    CoinUseHistoryService coinUseHistoryService,
                                    CoinChargeHistoryService coinChargeHistoryService,
                                    NovelService novelService,
-                                   RecentReadService recentReadService) {
+                                   RecentReadService recentReadService, S3Service s3Service) {
         this.commentService = commentService;
         this.reCommentService = reCommentService;
         this.memberRepository = memberRepository;
@@ -58,6 +61,7 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
         this.coinChargeHistoryService = coinChargeHistoryService;
         this.novelService = novelService;
         this.recentReadService = recentReadService;
+        this.s3Service = s3Service;
     }
 
 
@@ -92,6 +96,7 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
                         .episodeCount(novel.getEpisodes().size())
                         .favoriteCount(novel.getFavorites().size())
                         .views(novel.getEpisodes().stream().mapToInt(Episode::getView).sum())
+                        .thumbnailUrl(s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(), "original"))
                         .build()
                 ).collect(Collectors.toList());
     }

@@ -24,6 +24,8 @@ public class MemberFavoriteDto {
     @NotNull
     private String title;
 
+    private String thumbnailUrl;
+
     @NotNull
     private NovelType status;
 
