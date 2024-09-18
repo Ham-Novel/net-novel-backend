@@ -28,6 +28,9 @@ public class NovelListDto {//랭킹 등 리스트로 소설정보를 전달시 �
     private String authorName; //작가 닉네임
 
     @NotNull
+    private String providerId;//작가 소셜로그인 ID
+
+    @NotNull
     private List<TagDataDto> tags; //작품 태그
 
 

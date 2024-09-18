@@ -1,10 +1,13 @@
 package com.ham.netnovel.novel.service;
 
 import com.ham.netnovel.common.exception.ServiceMethodException;
+import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
+import com.ham.netnovel.member.data.MemberRole;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.novel.Novel;
+import com.ham.netnovel.novel.data.NovelSearchType;
 import com.ham.netnovel.novel.data.NovelSortOrder;
 import com.ham.netnovel.novel.repository.NovelRepository;
 import com.ham.netnovel.novel.data.NovelStatus;
@@ -86,7 +89,13 @@ public class NovelServiceImpl implements NovelService {
                     .type(NovelType.ONGOING)
                     .status(NovelStatus.ACTIVE)
                     .build();
+
+            //DB에 내용 저장
             Novel saved = novelRepository.save(targetNovel);
+            //작가가 READER ROLE을 갖고있으면 작가 상태로 변경
+            if (author.getRole().equals(MemberRole.READER)) {
+                memberService.changeMemberToAuthor(author);
+            }
             return saved.getId();
         } catch (Exception ex) {
             //나머지 예외처리
@@ -355,20 +364,37 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<NovelListDto> getNovelsBySearchWord(String searchWord, Pageable pageable) {
+    public List<NovelListDto> getNovelsBySearchWord(String searchWord, NovelSearchType novelSearchType, Pageable pageable) {
+
+
+        //SQL Injection 공격 방지, 주석문자 긴공백 제거
+        String validateWord = TypeValidationUtil.validateSearchWord(searchWord);
 
         try {
-            //검색어로 소설 정보를 검색, DTO로 받아 반환
-            return novelRepository.findBySearchWord(searchWord, pageable).stream()
-                    .peek(novelListDto -> {
-                        String cloudFrontUrl = s3Service.
-                                generateCloudFrontUrl(novelListDto.getThumbnailUrl(),
-                                        "mini");//소설 섬네일 URL 생성
-                        novelListDto.setThumbnailUrl(cloudFrontUrl);//DTO에 섬네일 URL 할당
-                    }).collect(Collectors.toList());
+            List<NovelListDto> novelListDtos;
+            // 검색 타입에 따른 검색 로직 처리
+            switch (novelSearchType) {
+                //작가이름 검색
+                case AUTHOR_NAME -> novelListDtos = novelRepository.findByAuthorName(validateWord, pageable);
+                //소설제목 검색
+                default -> novelListDtos = novelRepository.findBySearchWord(validateWord, pageable);
+            }
+            return generateThumbnailUrls(novelListDtos);
+
         } catch (Exception ex) {
-            throw new ServiceMethodException("getNovelsBySearchWord 메서드 에러" + ex + ex.getMessage());
+            throw new ServiceMethodException("getNovelsBySearchWord 메서드 에러" + ex.getMessage());
         }
+    }
+
+    //섬네일 파일 이미지 이름으로, CloudFront URL을 생성하는 메서드
+    private List<NovelListDto> generateThumbnailUrls(List<NovelListDto> novelListDtos) {
+
+        return novelListDtos.stream()
+                .peek(novelListDto -> {
+                    String cloudFrontUrl = s3Service.
+                            generateCloudFrontUrl(novelListDto.getThumbnailUrl(), "mini");//소설 섬네일 URL 생성
+                    novelListDto.setThumbnailUrl(cloudFrontUrl);//DTO에 섬네일 URL 할당
+                }).collect(Collectors.toList());
     }
 
 

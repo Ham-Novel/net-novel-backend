@@ -20,6 +20,9 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "member", indexes = @Index(
+        name = "idx_member_Name",
+        columnList = "nick_name"))
 public class Member {
 
     @Id
@@ -115,6 +118,12 @@ public class Member {
     public void increaseMemberCoins(int coinCount){
         Integer totalCoin = this.getCoinCount();
         this.coinCount = totalCoin + coinCount;
+    }
+
+    //Member 엔티티의 ROLE 을 AUTHOR 로 변경하는 메서드
+    public void changeRoleToAuthor(){
+        this.role = MemberRole.AUTHOR;
+
     }
 
 }

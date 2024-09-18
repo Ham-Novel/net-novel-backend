@@ -4,6 +4,7 @@ import com.ham.netnovel.OAuth.CustomOAuth2User;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
+import com.ham.netnovel.novel.data.NovelSearchType;
 import com.ham.netnovel.novel.dto.*;
 import com.ham.netnovel.novel.service.NovelService;
 import jakarta.validation.Valid;
@@ -91,35 +92,44 @@ public class NovelController {
 
     /**
      * 검색어로 소설을 조회하는 API 입니다.
-     * <p>
-     * 이 메서드는 유저가 입력한 검색어에 따라 소설 목록을 반환합니다.
-     * 페이지 네이션을 위해 Pageable 객체를 생성하여, 서비스 계층에서 소설 정보를 DTO 리스트로 받아 이를 HTTP 응답으로 전송합니다.
-     * </p>
+     * <p>이 메서드는 유저가 입력한 검색어에 따라 소설제목 또는 작가명으로 소설을 검색하여
+     * 소설 목록을 반환합니다.</p>
+     * <p>페이지 네이션을 위해 Pageable 객체를 생성하여,
+     * 서비스 계층에서 소설 정보를 DTO 리스트로 받아 이를 HTTP 응답으로 전송합니다.</p>
      *
      * @param searchWord 검색어 {@link String} 객체입니다.
+     * @param searchType 검색 타입 {@link String} 객체입니다. 기본값은 소설 제목 입니다.
      * @param pageNumber 조회할 페이지 번호 {@link Integer} 객체 입니다. 기본값은 0입니다.
      * @param pageSize   한 페이지에 포함될 항목의 수 {@link Integer} 객체  입니다. 기본값은 30입니다.
      * @return {@link ResponseEntity<>} 소설 정보가 포함된 리스트를 HTTP 200 응답으로 반환합니다.
      */
-
     @GetMapping("/novels/search")
-    public ResponseEntity<List<NovelListDto>> getNovelsBySearchWord(
+    public ResponseEntity<?> getNovelsBySearchWord(
             @RequestParam(name = "searchWord") String searchWord,
+            @RequestParam(name = "searchType",defaultValue = "title") String searchType,
             @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "30") Integer pageSize) {
-
-
+        String trimWord = searchWord.trim();
+        // 앞뒤 공백 제거 후 2글자 미만일 경우 BAD REQUEST 반환
+        if (trimWord.length() < 2) {
+            return ResponseEntity.badRequest().body("검색어는 2글자 이상 입력해주세요!");
+        }
         //페이지 사이즈 수 제한
         if (pageSize > 200) {
             pageSize = 200;
         }
 
+        // 클라이언트가 선택한 seachType을 enum 상수로 변환, 디폴트값은 소설제목 검색
+        NovelSearchType novelSearchType;
+        switch (searchType){
+            case "author" -> novelSearchType =NovelSearchType.AUTHOR_NAME;
+            default ->novelSearchType= NovelSearchType.NOVEL_TITLE ;
+        }
         //페이지 네이션을 위한 Pageable 객체 생성
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //조건을 메서드에 전달하여, 소설 정보 List를 받아옴
-        List<NovelListDto> novels = novelService.getNovelsBySearchWord(searchWord, pageable);
+        List<NovelListDto> novels = novelService.getNovelsBySearchWord(trimWord, novelSearchType,pageable);
         return ResponseEntity.ok(novels);//소설 정보 전송
-
     }
 
 

@@ -1,6 +1,8 @@
 package com.ham.netnovel.novel.repository;
 
 import com.ham.netnovel.common.exception.RepositoryMethodException;
+import com.ham.netnovel.member.QMember;
+import com.ham.netnovel.member.data.MemberRole;
 import com.ham.netnovel.novel.QNovel;
 import com.ham.netnovel.novel.data.NovelSortOrder;
 import com.ham.netnovel.novel.dto.NovelListDto;
@@ -11,6 +13,7 @@ import com.ham.netnovel.tag.dto.TagDataDto;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -26,7 +29,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-
 @Slf4j
 public class NovelSearchRepositoryImpl implements NovelSearchRepository {
 
@@ -50,6 +52,8 @@ public class NovelSearchRepositoryImpl implements NovelSearchRepository {
             QNovelMetaData novelMetaData = QNovelMetaData.novelMetaData;
             QNovel novel = QNovel.novel;
             QNovelTag novelTag = QNovelTag.novelTag;
+            QMember member = QMember.member;
+
             // 파라미터로 받은 조건으로 ORDER BY 조건 생성
             OrderSpecifier<?> orderSpecifier = getOrderSpecifier(novelSortOrder, novelMetaData);
 
@@ -57,12 +61,15 @@ public class NovelSearchRepositoryImpl implements NovelSearchRepository {
             var query = jpaQueryFactory.select(Projections.bean(NovelListDto.class,//DTO에 값을 넣어 반환
                             novel.id.as("id"),
                             novel.title.as("title"),
+                            member.providerId.as("providerId"),
+                            member.nickName.as("authorName"),
                             novelMetaData.totalFavorites.as("totalFavorites"),
                             novelMetaData.totalViews.as("totalView"),
                             novelMetaData.latestEpisodeAt.as("latestUpdateAt"),
                             novel.thumbnailFileName.as("thumbnailUrl")))
                     .from(novel)
-                    .join(novel.novelMetaData);//메타 데이터와 JOIN
+                    .join(novel.novelMetaData,novelMetaData)//메타 데이터와 JOIN
+                    .join(novel.author, member);//member 테이블과 Join
 
 
             // 유저가 선택한 Tag가 있을 경우, Tag 조건을 쿼리 검색 AND 조건으로 추가
@@ -87,32 +94,24 @@ public class NovelSearchRepositoryImpl implements NovelSearchRepository {
             //소설 DTO List 반환
             return novelListDtos;
 
-        }catch (Exception ex){
-            throw new RepositoryMethodException("findNovelsBySearchConditions 메서드 에러"+ex+ex.getMessage());
-
-
+        } catch (Exception ex) {
+            throw new RepositoryMethodException("findNovelsBySearchConditions 메서드 에러" + ex + ex.getMessage());
         }
 
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<NovelListDto> findBySearchWord(String searchWord,Pageable pageable) {
+    public List<NovelListDto> findBySearchWord(String searchWord, Pageable pageable) {
 
         //파라미터 null, 공백 체크
-        if (searchWord==null || searchWord.trim().isEmpty()){
+        if (searchWord == null || searchWord.trim().isEmpty()) {
             return Collections.emptyList();
         }
 
         int pageSize = pageable.getPageSize();// 한 페이지에 표시할 항목 수
         int pageNumber = pageable.getPageNumber();
         int offset = pageNumber * pageSize; // 오프셋 계산
-
-        //SQL Injection 방지, 특수문자 공백 제거
-        String sanitizedSearchWord  = searchWord.replaceAll("[\\s'\";()*-/]", "");
-
-//        log.info("검색단어 ={}", sanitizedSearchWord);
-
 
 
         //Native 쿼리문 생성, MySQL 문법 사용
@@ -122,9 +121,12 @@ public class NovelSearchRepositoryImpl implements NovelSearchRepository {
                         "n.thumbnail_file_name as fileName, " +
                         "nm.total_views as totalViews, " +
                         "nm.total_favorites as totalFavorites, " +
-                        "nm.latest_episode_at as latestAt " +  // 필요한 필드만 선택
+                        "nm.latest_episode_at as latestAt, " +
+                        "m.provider_id as providerId, " +
+                        "m.nick_name as nick_name " +  // 필요한 필드만 선택
                         "FROM novel n " +
                         "JOIN novel_meta_data nm ON n.id = nm.novel_id " +
+                        "JOIN member m ON m.id = n.member_id " +
                         "WHERE MATCH(n.title) AGAINST(:searchWord IN BOOLEAN MODE) " +//index 사용
                         "LIMIT :limit OFFSET :offset";//페이지네이션
 
@@ -133,15 +135,15 @@ public class NovelSearchRepositoryImpl implements NovelSearchRepository {
             Query query = entityManager.createNativeQuery(queryStr);
 
             //매개변수화된 쿼리, 쿼리문에 파라미터 할당
-            query.setParameter("searchWord", sanitizedSearchWord);
-            query.setParameter("offset",offset);
+            query.setParameter("searchWord", searchWord);
+            query.setParameter("offset", offset);
             query.setParameter("limit", pageSize);
 
             //쿼리문 실행후 반환된 결과 객체 생성
             List<Object[]> resultList = query.getResultList();
 
             //DB에서 찾은 결과 DTO로 변환하여 반환
-            return resultList.stream()
+            List<NovelListDto> novelListDtos = resultList.stream()
                     .map(objects -> NovelListDto.builder()
                             .id((Long) objects[0])
                             .title((String) objects[1])
@@ -149,11 +151,62 @@ public class NovelSearchRepositoryImpl implements NovelSearchRepository {
                             .totalView(objects[3] != null ? ((Number) objects[3]).longValue() : 0L) // null-safe 변환
                             .totalFavorites(objects[4] != null ? ((Number) objects[4]).intValue() : 0) // null-safe 변환
                             .latestUpdateAt(objects[5] != null ? ((Timestamp) objects[5]).toLocalDateTime() : null) // null-safe 변환
-                            .build()).collect(Collectors.toList());
-        }catch (Exception ex){
-            throw new RepositoryMethodException("findBySearchWord 메서드 에러"+ex+ex.getMessage());
+                            .providerId((String) objects[6])
+                            .authorName((String) objects[7])
+                            .build()).toList();
+
+
+            for (NovelListDto dto : novelListDtos) {
+                loadTagsForNovel(dto);
+            }
+            return novelListDtos;
+        } catch (Exception ex) {
+            throw new RepositoryMethodException("findBySearchWord 메서드 에러" + ex + ex.getMessage());
         }
 
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NovelListDto> findByAuthorName(String authorName, Pageable pageable) {
+
+
+        QNovelMetaData novelMetaData = QNovelMetaData.novelMetaData;
+        QNovel novel = QNovel.novel;
+        QMember member = QMember.member;
+
+        // 서브쿼리로 Member ID 필터링 (작가 이름이 검색 조건에 맞는 ID만 추출, JOIN 오버헤드 방지)
+        JPAQuery<Long> subQuery = jpaQueryFactory.select(member.id)
+                .from(member)
+                .where(member.nickName.contains(authorName)//검색어로 Member 엔티티를 찾음
+                        .and(member.role.eq(MemberRole.AUTHOR)));//Member ROLE이 AUTHOR 인 조건 추가
+
+        List<NovelListDto> novelListDtos = jpaQueryFactory.select(Projections.bean(NovelListDto.class,//DTO에 값을 넣어 반환
+                        novel.id.as("id"),
+                        novel.title.as("title"),
+                        member.providerId.as("providerId"),
+                        member.nickName.as("authorName"),
+                        novelMetaData.totalFavorites.as("totalFavorites"),
+                        novelMetaData.totalViews.as("totalView"),
+                        novelMetaData.latestEpisodeAt.as("latestUpdateAt"),
+                        novel.thumbnailFileName.as("thumbnailUrl")))
+
+                .from(novel)
+                .join(novel.novelMetaData)//메타 데이터와 JOIN
+                .join(novel.author, member)//멤버 테이블과 조인
+                .where(member.id.in(subQuery))  // 서브쿼리로 MemberId 필터링
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(novelMetaData.latestEpisodeAt.desc()) // 정렬 조건 추가
+                .fetch();
+
+        for (NovelListDto dto : novelListDtos) {
+            loadTagsForNovel(dto);
+        }
+
+        //소설 DTO List 반환
+        return novelListDtos;
 
     }
 

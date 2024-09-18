@@ -61,4 +61,13 @@ public interface MemberService {
     MemberMyPageDto getMemberMyPageInfo(String providerId);
 
 
+    /**
+     * 유저의 ROLE을 작가로 전환하는 메서드 입니다.
+     * 이 메소드는 유저 엔티티의 상태를 작가로 변경한 후, 변경된 유저 정보를 저장합니다.
+     *
+     * @param member 상태를 작가로 전환할 {@link Member} 엔티티
+     */
+    void changeMemberToAuthor(Member member);
+
+
 }

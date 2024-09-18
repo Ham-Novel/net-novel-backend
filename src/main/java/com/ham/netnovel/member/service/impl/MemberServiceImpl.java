@@ -5,11 +5,13 @@ import com.ham.netnovel.common.exception.NotEnoughCoinsException;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.MemberRepository;
+import com.ham.netnovel.member.data.MemberRole;
 import com.ham.netnovel.member.dto.MemberMyPageDto;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.ChangeNickNameDto;
 import com.ham.netnovel.member.dto.MemberCreateDto;
 import com.ham.netnovel.member.dto.MemberLoginDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@Slf4j
 class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
@@ -178,6 +181,29 @@ class MemberServiceImpl implements MemberService {
         }
 
 
+    }
+
+    @Override
+    @Transactional
+    public void changeMemberToAuthor(Member member) {
+        //파라미터 null체크
+        if (member==null){
+            throw new NoSuchElementException("changeMemberToAuthor 메서드 에러, 유저정보 없음");
+        }
+        try {
+            //유저 ROLE 이 이미 작가일경우 메서드 종료
+            if (member.getRole().equals(MemberRole.AUTHOR)){
+                log.info("유저 Role 이미 AUTHOR 입니다. 메서드 종료");
+                return;
+            }
+            member.changeRoleToAuthor();
+            //DB 에 내용 업데이트
+            memberRepository.save(member);
+            log.info("유저 {} ROLE AUTHOR 로 변경 완료.",member.getId());
+
+        }catch (Exception ex){
+            throw new ServiceMethodException("changeMemberToAuthor 메서드 에러, 예외내용 = "+ ex.getMessage());
+        }
     }
 
 
