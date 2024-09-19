@@ -38,24 +38,41 @@ public class TypeValidationUtil {
     }
 
     //코인수 유효성 검사, null 이거나 음수일수 없음
-    public static void validateCoinAmount(Integer coinAmount){
-        if (coinAmount == null){
+    public static void validateCoinAmount(Integer coinAmount) {
+        if (coinAmount == null) {
 
             throw new IllegalArgumentException("validateCoinUseAmount 에러: 사용한 코인 갯수가 null 입니다");
-        } else if (coinAmount <0 ) {
+        } else if (coinAmount < 0) {
             throw new IllegalArgumentException("validateCoinUseAmount 에러: 사용한 코인 갯수가 음수입니다.");
         }
     }
 
     //에피소드 조회수 파라미터 검증 로직
-    public static void validateViewCount(Integer viewCount){
-        if (viewCount==null){
+    public static void validateViewCount(Integer viewCount) {
+        if (viewCount == null) {
             throw new IllegalArgumentException("validateViewCount 에러: 조회수가 null 입니다");
         }
         if (viewCount >= Integer.MAX_VALUE) {
             throw new IllegalArgumentException("validateViewCount 에러: 조회수가 Integer의 최대값을 초과했습니다");
         }
 
+
+    }
+
+    //SQL Injection 방지 로직
+    public static String validateSearchWord(String searchWord) {
+        if (searchWord == null) {
+            return "";
+        }
+        //인젝션에 사용되는 특수문자 필터링
+        String sanitizedWord = searchWord
+                .replaceAll("--", "") // SQL 주석 제거
+                .replaceAll("/\\*.*?\\*/", "") // SQL 블록 주석 제거
+                .replaceAll("\\s+", " ");  // 여러 공백을 단일 공백으로 변환
+
+
+        // 앞뒤 공백 제거
+        return sanitizedWord.trim();
 
     }
 
