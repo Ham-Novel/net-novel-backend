@@ -6,7 +6,10 @@ import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.novel.data.NovelSearchType;
 import com.ham.netnovel.novel.dto.*;
+import com.ham.netnovel.novel.service.NovelCRUDService;
 import com.ham.netnovel.novel.service.NovelService;
+import com.ham.netnovel.novelTag.dto.NovelTagCreateDto;
+import com.ham.netnovel.novelTag.service.NovelTagService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +29,12 @@ import java.util.List;
 @RequestMapping("/api")
 public class NovelController {
     private final NovelService novelService;
+    private final NovelCRUDService novelCRUDService;
     private final Authenticator authenticator;
 
-    public NovelController(NovelService novelService, Authenticator authenticator) {
+    public NovelController(NovelService novelService, NovelCRUDService novelCRUDService, Authenticator authenticator) {
         this.novelService = novelService;
+        this.novelCRUDService = novelCRUDService;
         this.authenticator = authenticator;
     }
 
@@ -215,9 +220,7 @@ public class NovelController {
         //DTO에 유저 정보(providerId) 값 저장
         reqBody.setAccessorProviderId(principal.getName());
 
-        Long createdId = novelService.createNovel(reqBody);
-
-        return ResponseEntity.ok(createdId);
+        return ResponseEntity.ok(novelCRUDService.createNovel(reqBody));
     }
 
     /**

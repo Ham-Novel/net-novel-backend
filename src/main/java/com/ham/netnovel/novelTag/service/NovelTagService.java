@@ -28,7 +28,14 @@ public interface NovelTagService {
     List<NovelTagListDto> getTagsByNovel(Long novelId);
 
     /**
-     * Novel에 Tag를 항달하는 메서드
+     * Novel에 Tag를 할당을 배열로 하는 메서드
+     * @param createDtoList novel id, tag 이름으로 구성된 dto의 list
+     * @return NovelTagId
+     */
+    void createNovelTags(List<NovelTagCreateDto> createDtoList);
+
+    /**
+     * Novel에 Tag를 핟당하는 메서드
      * @param createDto novel id, tag 이름
      * @return NovelTagId
      */

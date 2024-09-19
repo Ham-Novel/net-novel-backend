@@ -16,8 +16,6 @@ import com.ham.netnovel.novel.dto.*;
 import com.ham.netnovel.novel.repository.NovelSearchRepository;
 import com.ham.netnovel.novelAverageRating.NovelAverageRating;
 import com.ham.netnovel.novelRanking.service.NovelRankingService;
-import com.ham.netnovel.novelTag.dto.NovelTagCreateDto;
-import com.ham.netnovel.novelTag.service.NovelTagService;
 import com.ham.netnovel.s3.S3Service;
 import com.ham.netnovel.tag.dto.TagDataDto;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +37,6 @@ import java.util.stream.Collectors;
 public class NovelServiceImpl implements NovelService {
     private final NovelRepository novelRepository;
     private final MemberService memberService;
-
-    private final NovelTagService novelTagService;
-
     private final NovelRankingService novelRankingService;
 
     private final S3Service s3Service;
@@ -49,10 +44,9 @@ public class NovelServiceImpl implements NovelService {
 //    private final NovelSearchRepository novelSearchRepository;
 
     @Autowired
-    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService, NovelTagService novelTagService, NovelRankingService novelRankingService, S3Service s3Service, NovelSearchRepository novelSearchRepository) {
+    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService, NovelRankingService novelRankingService, S3Service s3Service, NovelSearchRepository novelSearchRepository) {
         this.novelRepository = novelRepository;
         this.memberService = memberService;
-        this.novelTagService = novelTagService;
         this.novelRankingService = novelRankingService;
         this.s3Service = s3Service;
 //        this.novelSearchRepository = novelSearchRepository;
@@ -101,10 +95,6 @@ public class NovelServiceImpl implements NovelService {
             if (author.getRole().equals(MemberRole.READER)) {
                 memberService.changeMemberToAuthor(author);
             }
-
-            novelCreateDto.getTagNames().forEach(
-                    tag -> novelTagService.createNovelTag(new NovelTagCreateDto(saved.getId(), tag))
-            );
 
             return saved.getId();
         } catch (Exception ex) {

@@ -53,6 +53,11 @@ public class NovelTagServiceImpl implements NovelTagService {
                 .toList();
     }
 
+    @Override
+    public void createNovelTags(List<NovelTagCreateDto> createDtoList) {
+        createDtoList.forEach(this::createNovelTag);
+    }
+
     NovelTagListDto convertTagToListDto(Tag tag) {
         return NovelTagListDto.builder()
                 .tagId(tag.getId())
