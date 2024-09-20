@@ -13,7 +13,9 @@ import com.ham.netnovel.episode.dto.EpisodePaymentDto;
 import com.ham.netnovel.episodeViewCount.ViewCountIncreaseDto;
 import com.ham.netnovel.episodeViewCount.service.EpisodeViewCountService;
 import com.ham.netnovel.novel.Novel;
+import com.ham.netnovel.recentRead.service.RecentReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +32,15 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
 
     private final EpisodeRepository episodeRepository;
 
-    public EpisodeManagementServiceImpl(EpisodeService episodeService, CoinUseHistoryService coinUseHistoryService, EpisodeViewCountService episodeViewCountService, EpisodeRepository episodeRepository) {
+
+    private final RecentReadService recentReadService;
+
+    public EpisodeManagementServiceImpl(EpisodeService episodeService, CoinUseHistoryService coinUseHistoryService, EpisodeViewCountService episodeViewCountService, EpisodeRepository episodeRepository, RecentReadService recentReadService) {
         this.episodeService = episodeService;
         this.coinUseHistoryService = coinUseHistoryService;
         this.episodeViewCountService = episodeViewCountService;
         this.episodeRepository = episodeRepository;
+        this.recentReadService = recentReadService;
     }
 
 
@@ -52,52 +58,53 @@ public class EpisodeManagementServiceImpl implements EpisodeManagementService {
         //coinCost 검증, null 이거나 음수면 예외로 던짐
         TypeValidationUtil.validateCoinAmount(coinCost);
 
-        //에피소드가 유료일경우 처리 로직
-        if (coinCost > 0) {
-            //유저의 에피소드 결제 내역을 확인, 있을경우 true 없을경우 false 반환
-            boolean result = coinUseHistoryService.hasMemberUsedCoinsForEpisode(providerId, episodeId);
-            //결제 내역이 없을경우 EpisodeNotPurchasedException 로 던짐
-            if (!result) {
-                //EpisodeNotPurchasedException 에 coinCost 정보도 함께 전달
-                throw new EpisodeNotPurchasedException(
-                        "에피소드 결제 내역 없음, providerId = " + providerId + ", episodeId = " + episodeId,
-                        EpisodePaymentDto.builder().episodeId(episode.getId())
-                                .title(episode.getTitle())
-                                .coinCost(coinCost)
-                                .build());
+
+        //무료 에피소드일 경우 처리 로직
+        if (coinCost == 0) {
+            //유저 정보가 있으면, 최근 조회 목록 업데이트, 없을경우 에피소드 정보 반환
+            if (!providerId.equals("NON_LOGIN")) {
+                //유저의 최근 조회 기록 업데이트
+                recentReadService.updateRecentRead(providerId, episodeId);
             }
+
+            //유료 에피소드일 경우 처리 로직
+        } else {
+
+            //로그인 정보가 없을경우, 예외로 던짐
+            if (providerId.equals("NON_LOGIN")){
+               throw new AuthenticationCredentialsNotFoundException("User is not authenticated");
+            }
+            //유저의 결제 기록 확인, 결제 기록이 없으면 예외로 던지고 결제 유도 메시지 전송
+            validCoinPurchase(providerId,episode, coinCost);
+            //유저의 최근 조회 기록 업데이트
+            recentReadService.updateRecentRead(providerId, episodeId);
         }
 
         //레디스에 저장된 에피소드 조회수 1 증가
         episodeViewCountService.incrementEpisodeViewCountInRedis(episodeId);
-
         //에피소드 정보 DTO로 변환하여 반환
         return EpisodeDetailDto.builder()
                 .episodeId(episodeId)
                 .content(episode.getContent())
                 .title(episode.getTitle())
                 .build();
-
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public EpisodeDetailDto getFreeEpisodeDetail(Long episodeId) {
-
-        //episode 엔티티 유무 확인, 없을경우 예외로 던짐
-        Episode episode = episodeService.getEpisode(episodeId)
-                .orElseThrow(() -> new NoSuchElementException("Episode 정보 없음"));
-
-        //레디스에 저장된 에피소드 조회수 1 증가
-        episodeViewCountService.incrementEpisodeViewCountInRedis(episodeId);
-
-        //에피소드 정보 DTO로 변환하여 반환
-        return EpisodeDetailDto.builder()
-                .episodeId(episodeId)
-                .content(episode.getContent())
-                .title(episode.getTitle())
-                .build();
-
+    private void validCoinPurchase(String providerId,
+                                   Episode episode,
+                                   Integer coinCost) {
+        //유저의 에피소드 결제 내역을 확인, 있을경우 true 없을경우 false 반환
+        boolean result = coinUseHistoryService.hasMemberUsedCoinsForEpisode(providerId, episode.getId());
+        //결제 내역이 없을경우 EpisodeNotPurchasedException 로 던짐
+        if (!result) {
+            //EpisodeNotPurchasedException 에 coinCost 정보도 함께 전달
+            throw new EpisodeNotPurchasedException(
+                    "에피소드 결제 내역 없음, providerId = " + providerId + ", episodeId = " + episode.getId(),
+                    EpisodePaymentDto.builder().episodeId(episode.getId())
+                            .title(episode.getTitle())
+                            .coinCost(coinCost)
+                            .build());
+        }
     }
 
     @Override

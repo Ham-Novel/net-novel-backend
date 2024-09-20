@@ -5,6 +5,7 @@ import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.episode.data.IndexDirection;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;
 import com.ham.netnovel.episodeViewCount.ViewCountIncreaseDto;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 
 import java.util.List;
 import java.util.Map;
@@ -18,38 +19,23 @@ public interface EpisodeManagementService {
     /**
      * 지정된 에피소드의 상세 정보를 반환합니다.
      *
-     * <ul>
-     *     <li>에피소드가 존재하는지 확인하고, 존재하지 않으면 {@link NoSuchElementException}을 발생시킵니다.</li>
-     *     <li>코인 비용을 검증하고, 유효하지 않으면 {@link IllegalArgumentException}을 발생시킵니다.</li>
-     *     <li>유료 에피소드일 경우 사용자의 결제 내역을 확인하고, 결제 내역이 없으면 {@link EpisodeNotPurchasedException}을 발생시킵니다.</li>
-     *     <li>레디스에서 에피소드 조회수를 1 증가시킵니다.</li>
-     *     <li>{@link EpisodeDetailDto} 객체로 에피소드 정보를 반환합니다.</li>
-     * </ul>
+     * <p>에피소드가 존재하는지 확인하고, 존재하지 않으면 {@link NoSuchElementException}을 발생시킵니다.</p>
+     * <p>코인 비용을 검증하고, 유효하지 않으면 {@link IllegalArgumentException}을 발생시킵니다.</p>
+     * <p>무료 에피소딜 경우 유저 정보가 있을경우 최근 읽은 에피소드 목록을 갱신한 후 에피소드 정보를 반환합니다.</p>
+     * <p>유료 에피소드일 경우 유저의 결제 내역을 확인하고,
+     * 결제 내역이 없으면 {@link EpisodeNotPurchasedException}을 발생시킵니다.</p>
+     * <p>모든 작업이 끝나면 레디스에서 에피소드 조회수를 1 증가시킵니다.</p>
      *
-     * @param providerId 요청자의 ID
+
+     * @param providerId 요청자의 ID (비로그인 사용자는 "NON_LOGIN"으로 전달됨)
      * @param episodeId 조회할 에피소드의 ID
      * @return {@link EpisodeDetailDto} 에피소드 상세 정보
      * @throws NoSuchElementException 에피소드가 존재하지 않는 경우
-     * @throws EpisodeNotPurchasedException 유료 에피소드에 대한 결제 내역이 없는 경우
+     * @throws AuthenticationCredentialsNotFoundException 사용자가 인증되지 않은 경우
      * @throws IllegalArgumentException 코인 비용이 유효하지 않은 경우
      */
     EpisodeDetailDto getEpisodeDetail(String providerId,Long episodeId);
 
-
-
-    /**
-     * 무료 에피소드의 상세 정보를 반환합니다.
-     *
-     * <p>에피소드가 존재하는지 확인하고, 존재하지 않으면 {@link NoSuchElementException}을 발생시킵니다.</p>
-     * <p>에피소드가 존재하면 레디스에서 에피소드 조회수를 1 증가시킨 후
-     * {@link EpisodeDetailDto} 객체로 에피소드 정보를 반환합니다.</p>
-     *
-     * @param episodeId 조회할 에피소드의 ID
-     * @return {@link EpisodeDetailDto} 에피소드 상세 정보
-     * @throws NoSuchElementException 에피소드가 존재하지 않는 경우
-     * @throws IllegalArgumentException 코인 비용이 유효하지 않은 경우
-     */
-    EpisodeDetailDto getFreeEpisodeDetail(Long episodeId);
 
 
     /**

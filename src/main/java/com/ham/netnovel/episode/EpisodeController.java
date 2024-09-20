@@ -43,13 +43,13 @@ public class EpisodeController {
     }
 
     /**
-     * 특정 에피소드의 상세 정보를 반환하는 API 입니다.
+     * 특정 에피소드의 상세 정보를 반환하는 API입니다.
      *
-     * <p>에피소드가 무료인 경우, 에피소드 상세 정보가 직접 반환됩니다.</p>
-     * <p>유료인 경우, 사용자가 인증된 상태인지 확인하고 결제 내역을 검증한 후 에피소드 정보를 반환합니다.</p>
+     * <p>에피소드가 무료인 경우, 인증 여부와 상관없이 에피소드 상세 정보가 반환됩니다.</p>
+     * <p>유료인 경우, 사용자의 인증 정보를 확인하고 결제 내역을 검증한 후 에피소드 정보를 반환합니다.</p>
      *
      * @param authentication 현재 사용자의 인증 정보
-     * @param episodeId 조회할 에피소드의 ID
+     * @param episodeId      조회할 에피소드의 ID
      * @return 에피소드 상세 정보를 담은 {@link ResponseEntity} 객체
      * @throws EpisodeNotPurchasedException 유료 에피소드를 구매하지 않은 경우, {@code 402 PAYMENT REQUIRED} 응답과 결제 정보 반환
      * @response 200 OK 에피소드 상세 정보가 성공적으로 조회된 경우
@@ -62,29 +62,28 @@ public class EpisodeController {
             @PathVariable Long episodeId
     ) {
 
-        //에피소드가 무료인지 확인, 무료일경우 true 유료일경우 false 반환
-        boolean episodeFree = episodeService.isEpisodeFree(episodeId);
 
-        //에피소드가 무료일경우 에피소드 데이터 전송
-        if (episodeFree) {
-            EpisodeDetailDto freeEpisodeDetail = episodeManagementService.getFreeEpisodeDetail(episodeId);
-            return ResponseEntity.ok(freeEpisodeDetail);
-        } else {
-            //에피소드가 유료일경우, 로그인 정보 검증, 결제 내역 확인 후 에피소드 데이터 전송
-
-            //유저 인증 정보가 없으면 401 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
+        // authentication(유저 인증 정보)가 null일 경우, providerId에 "NON_LOGIN" 값을 할당
+        // (비로그인 사용자의 무료 에피소드 조회를 위한 값)
+        String providerId;
+        if (authentication == null) {
+            providerId = "NON_LOGIN";
+        }else {
             CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
-            try {
-                //유저 인증 정보가 있을경우, 에피소드 상세정보를 불러옴
-                EpisodeDetailDto episodeDetail = episodeManagementService.getEpisodeDetail(principal.getName(), episodeId);
-                //에피소드 정보 전송
-                return ResponseEntity.ok(episodeDetail);
-            } catch (EpisodeNotPurchasedException e) {
-                //유저의 에피소드 결제 내역이 없을때 PAYMENT_REQUIRED 전송
-                return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(e.getPaymentInfo());
-            }
+            providerId = principal.getName();
+        }
+
+        try {
+            // 유저 인증 정보가 있을 경우, 해당 에피소드의 상세 정보를 불러옴
+            EpisodeDetailDto episodeDetail = episodeManagementService.getEpisodeDetail(providerId, episodeId);
+            // 에피소드 상세 정보를 HTTP 응답으로 전송 (200 OK)
+            return ResponseEntity.ok(episodeDetail);
+        } catch (EpisodeNotPurchasedException e) {
+            // 유저가 유료 에피소드를 결제하지 않은 경우, 402 PAYMENT_REQUIRED 상태와 결제 정보를 함께 전송
+            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(e.getPaymentInfo());
         }
     }
+
 
     @GetMapping("/episodes/{episodeId}/beside")
     public ResponseEntity<?> getEpisodeBeside(
