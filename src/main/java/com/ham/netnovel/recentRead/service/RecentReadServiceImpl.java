@@ -10,6 +10,7 @@ import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.recentRead.RecentRead;
 import com.ham.netnovel.recentRead.RecentReadId;
 import com.ham.netnovel.recentRead.RecentReadRepository;
+import com.ham.netnovel.s3.S3Service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,11 +29,13 @@ public class RecentReadServiceImpl implements RecentReadService {
 
     private final MemberService memberService;
     private final EpisodeService episodeService;
+    private final S3Service s3Service;
 
-    public RecentReadServiceImpl(RecentReadRepository recentReadRepository, MemberService memberService, EpisodeService episodeService) {
+    public RecentReadServiceImpl(RecentReadRepository recentReadRepository, MemberService memberService, EpisodeService episodeService, S3Service s3Service) {
         this.recentReadRepository = recentReadRepository;
         this.memberService = memberService;
         this.episodeService = episodeService;
+        this.s3Service = s3Service;
     }
 
     @Override
@@ -107,16 +110,22 @@ public class RecentReadServiceImpl implements RecentReadService {
                                 .novelDesc(novel.getDescription())
                                 .novelType(novel.getType())
                                 .authorName(novel.getAuthor().getNickName())
-                                .thumbnailUrl(novel.getThumbnailFileName())
-                                .tags(novel.getNovelTags().stream()
+                                .thumbnailUrl(
+                                        s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(),"mini")
+                                )
+                                .tags(
+                                        novel.getNovelTags().stream()
                                         .map(novelTag -> novelTag.getTag().getData())
-                                        .toList())
+                                        .toList()
+                                )
                                 .episodeTitle(episode.getTitle())
                                 .episodeId(episode.getId())
                                 .updatedAt(recentRead.getUpdatedAt())
                                 .build();
                     })
                     .collect(Collectors.toList());//List로 collect
+
+
 
         } catch (Exception ex) {
             throw new ServiceMethodException("getMemberRecentReads 메서드 에러 발생" + ex.getMessage(), ex);
