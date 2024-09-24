@@ -238,43 +238,4 @@ public class MemberController {
         return ResponseEntity.ok(memberRecentReadInfo);
     }
 
-
-    //테스트 API
-    @GetMapping("/member/novel/test")
-    public String memberNovelTest() {
-
-        return "/member/novel-test";
-    }
-
-
-    @GetMapping("/members/comment/test")
-    public String memberCommentTest() {
-
-        return "/member/comment-test";
-    }
-
-    @GetMapping("/members/nickname/test")
-    public String nickNameChangeTest() {
-
-        return "/member/nickname-test";
-    }
-
-    @GetMapping("/members/session/test")
-    @ResponseBody
-    public String sessionTest(Authentication authentication) {
-        CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
-
-        log.info("로그인한 유저 정보");
-        log.info("로그인한 유저 providerId={}", principal.getName());
-        log.info("로그인한 유저 nickName={}", principal.getNickName());
-        log.info("로그인한 유저 role={}", principal.getRole());
-        log.info("로그인한 유저 gender={}", principal.getGender());
-        log.info("로그인한 유저 Attributes={}", principal.getAttributes());
-        log.info("로그인한 유저 Authorities={}", principal.getAuthorities());
-
-        return "ok";
-
-    }
-
-
 }
