@@ -29,6 +29,20 @@ public interface NovelService {
      */
     List<NovelInfoDto> getNovelsByAuthor(String providerId);
 
+
+ /**
+  * 유저가 작성한 소설의 ID 목록을 반환하는 메서드 입니다.
+  *
+  * <p>유효한 providerId가 제공되면, 해당 작가가
+  * 작성한 모든 소설의 ID를 포함하는 {@link List}를 반환합니다.</p>
+  *
+  * @param providerId 유저 정보
+  * @return 해당 작가가 작성한 소설의 ID {@link List} 객체
+  * @throws IllegalArgumentException providerId가 null이거나 비어 있는 경우
+  */
+   List<Long> getNovelIdsByAuthor(String providerId);
+
+
     /**
      * 유저가 생성한 Novel을 DB 저장.
      * @param novelCreateDto 생성 정보가 담긴 dto

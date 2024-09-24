@@ -3,6 +3,7 @@ package com.ham.netnovel.coinUseHistory.service;
 import com.ham.netnovel.coinUseHistory.CoinUseHistory;
 import com.ham.netnovel.coinUseHistory.CoinUseHistoryRepository;
 import com.ham.netnovel.coinUseHistory.dto.CoinUseCreateDto;
+import com.ham.netnovel.coinUseHistory.dto.NovelRevenueDto;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.episode.Episode;
@@ -14,7 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -110,9 +113,57 @@ public class CoinUseHistoryServiceImpl implements CoinUseHistoryService {
         } catch (Exception ex) {
             throw new ServiceMethodException("hasMemberUsedCoinsForEpisode 메서드 에러 발생" + ex.getMessage());
 
+        }
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NovelRevenueDto> getCoinUseHistoryByNovelAndDate(
+            List<Long> novelIds,
+            LocalDate startDate,
+            LocalDate endDate) {
+
+        //반환을 위한 NovelRevenueDto List 객체 생성
+        List<NovelRevenueDto> novelRevenueDtos = new ArrayList<>();
+
+        //startDate 00시00분으로 객체 생성
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+
+        //endDate 다음날 00시00분으로 객체 생성
+        LocalDateTime endDateTime = endDate.plusDays(1).atStartOfDay();
+
+        try {
+
+            //DB 에서 데이터 조회
+            List<Object[]> byNovelAndDateTime = coinUseHistoryRepository.findByNovelAndDateTime(novelIds, startDateTime, endDateTime);
+
+            for (Object[] result : byNovelAndDateTime) {
+
+                Long novelId = (Long) result[0];
+                String novelTitle = (String) result[1];
+                int totalEarnCoins = ((Number) result[2]).intValue();
+                String providerId = (String) result[3];
+
+                //조호된 레코드로 DTO 생성
+                NovelRevenueDto build = NovelRevenueDto.builder()
+                        .novelId(novelId)
+                        .novelTitle(novelTitle)
+                        .providerId(providerId)
+                        .totalCoins(totalEarnCoins)
+                        .settlementStartDate(startDate)
+                        .settlementEndDate(endDate)
+                        .build();
+
+                //반환용 List 객체에 DTO 추가
+                novelRevenueDtos.add(build);
+
+            }
+            return novelRevenueDtos;
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getCoinUseHistoryByNovelAndDate 메서드 에러" + ex + ex.getMessage());
 
         }
-
 
     }
 
