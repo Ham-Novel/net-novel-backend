@@ -3,6 +3,7 @@ package com.ham.netnovel.member.service.impl;
 
 import com.ham.netnovel.common.exception.NotEnoughCoinsException;
 import com.ham.netnovel.common.exception.ServiceMethodException;
+import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.member.data.MemberRole;
@@ -33,6 +34,12 @@ class MemberServiceImpl implements MemberService {
     //가져다 쓸경우 Null체크 필수!!
     @Override
     public Optional<Member> getMember(String providerId) {
+
+        //파라미터 Null, 비어있는지 체크
+        if ( TypeValidationUtil.isNullOrEmpty(providerId)) {
+            throw new IllegalArgumentException("getMember 메서드 에러 providerId 값이 Null 이거나 비었습니다.");
+        }
+
         return memberRepository.findByProviderId(providerId);
     }
 

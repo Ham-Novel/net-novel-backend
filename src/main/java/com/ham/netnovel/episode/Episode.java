@@ -5,7 +5,9 @@ import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.coinUseHistory.CoinUseHistory;
 import com.ham.netnovel.coinCostPolicy.CoinCostPolicy;
 import com.ham.netnovel.episode.data.EpisodeStatus;
+import com.ham.netnovel.episodeViewCount.EpisodeViewCount;
 import com.ham.netnovel.novel.Novel;
+import com.ham.netnovel.weeklyViewCount.WeeklyViewCount;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -76,6 +78,10 @@ public class Episode {
     //junction table 연결, 코인 사용 기록
     @OneToMany(mappedBy = "episode")
     private List<CoinUseHistory> coinUseHistories = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "episode")
+    private List<EpisodeViewCount> episodeViewCounts = new ArrayList<>();
 
     @Builder
     public Episode(Integer chapter, String title, String content, Novel novel, CoinCostPolicy costPolicy) {

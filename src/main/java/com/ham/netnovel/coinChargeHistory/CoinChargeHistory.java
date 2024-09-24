@@ -1,6 +1,7 @@
 package com.ham.netnovel.coinChargeHistory;
 
 
+import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +43,10 @@ public class CoinChargeHistory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "episode_id")
+    private Episode episode;
 
 
     @Builder
