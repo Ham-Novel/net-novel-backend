@@ -76,5 +76,10 @@ public class TypeValidationUtil {
 
     }
 
+    //문자열이 null 이거나 비어있으면 true 반환
+    public static boolean isNullOrEmpty(String string) {
+        return string == null || string.isEmpty();
+    }
+
 
 }
