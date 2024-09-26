@@ -15,4 +15,6 @@ public class NovelTagDeleteDto {
 
     @NotNull
     private Long tagId;
+
+    private String tagName;
 }

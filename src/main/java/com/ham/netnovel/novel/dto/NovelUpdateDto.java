@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
@@ -24,6 +26,8 @@ public class NovelUpdateDto {
 
     @Size(max = 300)
     private String description;
+
+    private List<String> tagNames;
 
     private NovelType type;
 }

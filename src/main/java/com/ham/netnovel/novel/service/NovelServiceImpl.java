@@ -13,7 +13,6 @@ import com.ham.netnovel.novel.repository.NovelRepository;
 import com.ham.netnovel.novel.data.NovelStatus;
 import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.novel.dto.*;
-import com.ham.netnovel.novel.repository.NovelSearchRepository;
 import com.ham.netnovel.novelAverageRating.NovelAverageRating;
 import com.ham.netnovel.novelRanking.service.NovelRankingService;
 import com.ham.netnovel.s3.S3Service;
@@ -36,21 +35,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NovelServiceImpl implements NovelService {
     private final NovelRepository novelRepository;
-    private final MemberService memberService;
 
     private final NovelRankingService novelRankingService;
 
     private final S3Service s3Service;
 
-//    private final NovelSearchRepository novelSearchRepository;
 
     @Autowired
-    public NovelServiceImpl(NovelRepository novelRepository, MemberService memberService, NovelRankingService novelRankingService, S3Service s3Service) {
+    public NovelServiceImpl(NovelRepository novelRepository, NovelRankingService novelRankingService, S3Service s3Service ) {
         this.novelRepository = novelRepository;
-        this.memberService = memberService;
         this.novelRankingService = novelRankingService;
         this.s3Service = s3Service;
-//        this.novelSearchRepository = novelSearchRepository;
     }
 
 
@@ -85,71 +80,6 @@ public class NovelServiceImpl implements NovelService {
                 .toList();
     }
 
-    @Override
-    @Transactional
-    public Long createNovel(NovelCreateDto novelCreateDto) {
-        log.info("Novel 생성 = {}", novelCreateDto.toString());
-
-        //Member Entity 조회 -> Author 검증
-        Member author = memberService.getMember(novelCreateDto.getAccessorProviderId())
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Member 입니다."));
-
-        try {
-            //Novel 생성
-            Novel targetNovel = Novel.builder()
-                    .title(novelCreateDto.getTitle())
-                    .description(novelCreateDto.getDescription())
-                    .author(author)
-                    .type(NovelType.ONGOING)
-                    .status(NovelStatus.ACTIVE)
-                    .build();
-
-            //DB에 내용 저장
-            Novel saved = novelRepository.save(targetNovel);
-            //작가가 READER ROLE을 갖고있으면 작가 상태로 변경
-            if (author.getRole().equals(MemberRole.READER)) {
-                memberService.changeMemberToAuthor(author);
-            }
-            return saved.getId();
-        } catch (Exception ex) {
-            //나머지 예외처리
-            throw new ServiceMethodException("createNovel 메서드 에러 발생", ex.getCause());
-        }
-    }
-
-    @Override
-    @Transactional
-    public void updateNovel(NovelUpdateDto novelUpdateDto) {
-        log.info("Novel 변경 = {}", novelUpdateDto.toString());
-
-        //Novel DB 데이터 검증
-        Novel targetNovel = novelRepository.findById(novelUpdateDto.getNovelId())
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 Novel 입니다."));
-
-        try {
-            //Novel 변경 권한 검증
-            boolean isAuthor = novelUpdateDto.getAccessorProviderId().equals(targetNovel.getAuthor().getProviderId());
-            if (!isAuthor) {
-                throw new AccessDeniedException("해당 Novel에 접근 권한이 없습니다.");
-            }
-
-            //updateDto에서 특정 property 값만 업데이트하는 로직.
-            //null 값과 빈 String은 제외시키고 update 작업을 수행.
-            if (novelUpdateDto.getTitle() != null && !novelUpdateDto.getTitle().isBlank()) {
-                targetNovel.updateTitle(novelUpdateDto.getTitle());
-            }
-            if (novelUpdateDto.getDescription() != null && !novelUpdateDto.getDescription().isBlank()) {
-                targetNovel.updateDesc(novelUpdateDto.getDescription());
-            }
-            if (novelUpdateDto.getType() != null) {
-                targetNovel.updateType(novelUpdateDto.getType());
-            }
-
-            novelRepository.save(targetNovel);
-        } catch (Exception ex) {
-            throw new ServiceMethodException("updateNovel 메서드 에러 발생", ex.getCause());
-        }
-    }
 
     @Override
     @Transactional

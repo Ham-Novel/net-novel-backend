@@ -6,6 +6,7 @@ import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.novel.data.NovelSearchType;
 import com.ham.netnovel.novel.dto.*;
+import com.ham.netnovel.novel.service.NovelEditingService;
 import com.ham.netnovel.novel.service.NovelService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +28,12 @@ import java.util.List;
 public class NovelController {
     private final NovelService novelService;
     private final Authenticator authenticator;
+    private final NovelEditingService novelEditingService;
 
-    public NovelController(NovelService novelService, Authenticator authenticator) {
+    public NovelController(NovelService novelService, Authenticator authenticator, NovelEditingService novelEditingService) {
         this.novelService = novelService;
         this.authenticator = authenticator;
+        this.novelEditingService = novelEditingService;
     }
 
     /**
@@ -215,7 +218,7 @@ public class NovelController {
         //DTO에 유저 정보(providerId) 값 저장
         reqBody.setAccessorProviderId(principal.getName());
 
-        Long createdId = novelService.createNovel(reqBody);
+        Long createdId = novelEditingService.createNovel(reqBody);
 
         return ResponseEntity.ok(createdId);
     }
@@ -278,12 +281,7 @@ public class NovelController {
         return ResponseEntity.ok("작품 삭제 완료.");
     }
 
-    @GetMapping("/novels")
-    public ResponseEntity<List<NovelInfoDto>> getNovelsBySorted(@RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-                                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
-        Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
-        return ResponseEntity.ok(novelService.getNovelsRecent(pageable));
-    }
+
 
     /**
      * 소설의 섬네일을 AWS S3에 업로드하고, 소설의 섬네일 파일명을 업데이트하는 API입니다.

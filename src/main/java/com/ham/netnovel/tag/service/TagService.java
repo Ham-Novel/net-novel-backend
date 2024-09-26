@@ -1,7 +1,7 @@
 package com.ham.netnovel.tag.service;
 
+import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.tag.Tag;
-import com.ham.netnovel.tag.dto.TagCreateDto;
 import com.ham.netnovel.tag.dto.TagDeleteDto;
 
 import java.util.Optional;
@@ -24,11 +24,29 @@ public interface TagService {
 
 
     /**
-     * 새 Tag 등록 메서드
-     * @param createDto Tag 콘텐츠가 들어 있음.
-     * @return Long 생성한 Tag 레코드의 PK 값
+     * 새로운 태그를 생성하는 메서드입니다.
+     *
+     * <p>태그명은 검증 후, 이미 존재하는 태그명이 아닐 경우 새롭게 태그를 생성하여 저장합니다.
+     * 태그는 한글, 숫자, 영문으로 구성된 10자 이하의 문자열이어야 하며, null 또는 빈 값일 수 없습니다.</p>
+     *
+     * @param tagName 생성할 태그명 (10자 이하의 한글/숫자/영문으로 구성)
+     * @return 생성된 {@link Tag} 엔티티 객체
+     * @throws ServiceMethodException 만약 태그명이 이미 존재하거나 예외가 발생할 경우
+     *
      */
-    Long createTag(TagCreateDto createDto);
+    Tag createTag(String tagName);
+
+     /**
+     * 주어진 태그명을 기준으로 태그를 조회하거나, 존재하지 않으면 새로 생성하는 메서드입니다.
+     *
+     * <p>태그명이 존재하면 해당 태그를 반환하고, 태그명이 없을 경우 새로운 태그를 생성하여 반환합니다.</p>
+     *
+     * @param tagName 조회 또는 생성할 태그명 (10자 이하의 한글/숫자/영문으로 구성)
+     * @return 기존 또는 새로 생성된 {@link Tag} 엔티티 객체
+     * @throws ServiceMethodException 태그 조회 또는 생성 과정에서 발생한 예외
+     *
+     */
+    Tag getOrCreateTag(String tagName);
 
     /**
      * 등록된 Tag 제거 메서드

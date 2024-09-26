@@ -43,18 +43,7 @@ public interface NovelService {
    List<Long> getNovelIdsByAuthor(String providerId);
 
 
-    /**
-     * 유저가 생성한 Novel을 DB 저장.
-     * @param novelCreateDto 생성 정보가 담긴 dto
-     * @return 생성한 episode id 값
-     */
-    Long createNovel(NovelCreateDto novelCreateDto);
 
-    /**
-     * DB에 저장된 Novel 데이터 변경.
-     * @param novelUpdateDto 업데이트 정보가 담긴 dto
-     */
-    void updateNovel(NovelUpdateDto novelUpdateDto);
 
     /**
      * DB에 저장된 Novel 삭제.
