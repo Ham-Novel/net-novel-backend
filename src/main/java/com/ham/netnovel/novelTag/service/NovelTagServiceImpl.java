@@ -10,7 +10,6 @@ import com.ham.netnovel.novelTag.dto.NovelTagCreateDto;
 import com.ham.netnovel.novelTag.dto.NovelTagDeleteDto;
 import com.ham.netnovel.novelTag.dto.NovelTagListDto;
 import com.ham.netnovel.tag.Tag;
-import com.ham.netnovel.tag.dto.TagDeleteDto;
 import com.ham.netnovel.tag.service.TagService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,7 @@ public class NovelTagServiceImpl implements NovelTagService {
     @Override
     @Transactional
     public Boolean createNovelTag(NovelTagCreateDto createDto) {
-        //작품 레코드 조회 검증하여 문제없을경우 객체 생성
+        //작품 레코드 조회, 검증하여 문제없을경우 객체 생성
         Novel novel = novelService.getNovel(createDto.getNovelId())
                 .orElseThrow(() -> new NoSuchElementException("createNovelTag() Error : Novel return value is null. novelId=" + createDto.getNovelId()));
 
@@ -76,11 +75,13 @@ public class NovelTagServiceImpl implements NovelTagService {
             //NovelTag 엔티티가 있을경우 false 반환, 없을경우 새로 생성후 true 반환
             return novelTagRepository.findById(novelTagId)
                     .map(novelTag -> {
-                        log.warn("이미 소설에 태그 정보가 등록되어 있습니다" +
-                                "novel id =" + novel.getId() + " tagId=" + tag.getId());
+                        log.warn("이미 소설에 태그 정보가 등록되어 있습니다. novel id={}, tagId={}",
+                                novel.getId(), tag.getId());
+                        //false 반환
                         return false;
                     })
                     .orElseGet(() -> {
+
                         novelTagRepository.save(NovelTag.builder()
                                 .id(novelTagId)
                                 .novel(novel)
@@ -91,34 +92,25 @@ public class NovelTagServiceImpl implements NovelTagService {
                     });
 
         } catch (Exception ex) {
-            throw new ServiceMethodException("createNovelTag메서드 에러 : " + ex + ex.getMessage());
+            throw new ServiceMethodException("createNovelTag 메서드 에러 : " + ex + ex.getMessage());
         }
     }
 
     @Override
     @Transactional
     public void deleteNovelTag(NovelTagDeleteDto deleteDto) {
-        //작품 레코드 조회 검증
-        Novel novel = novelService.getNovel(deleteDto.getNovelId())
-                .orElseThrow(() -> new NoSuchElementException("deleteNovelTag() Error : Novel return value is null. novelId=" + deleteDto.getNovelId()));
 
-        //태그 레코드 조회 검증
-        Tag tag = tagService.getTag(deleteDto.getTagId())
-                .orElseThrow(() -> new NoSuchElementException("deleteNovelTag() Error : Tag return value is null. tagId=" + deleteDto.getNovelId()));
+        Tag tagByName = tagService.getTagByName(deleteDto.getTagName())
+                .orElseThrow(() -> new NoSuchElementException("deleteNovelTag 메서드 에러, Tag 엔티티가 null 입니다. tagName = " + deleteDto.getTagName()));
 
         //NovelTag 레코드 조회 검증
-        NovelTagId novelTagId = new NovelTagId(novel.getId(), tag.getId());
+        NovelTagId novelTagId = new NovelTagId(deleteDto.getNovelId(), tagByName.getId());
         NovelTag novelTag = novelTagRepository.findById(novelTagId)
                 .orElseThrow(() -> new NoSuchElementException("deleteNovelTag() Error : NovelTag return value is null. novelTagId=" + novelTagId));
-
         try {
             //해당 NovelTag 삭제
             novelTagRepository.delete(novelTag);
 
-            //해당 Novel에서 삭제하려는 Tag가 어떤 Novel하고도 연결되있지 않다면 Tag 삭제.
-            if (tag.getNovelTags().isEmpty()) {
-                tagService.deleteTag(TagDeleteDto.builder().tagId(tag.getId()).build());
-            }
         } catch (Exception ex) {
             throw new ServiceMethodException("deleteNovelTag() Error : " + ex.getMessage());
         }

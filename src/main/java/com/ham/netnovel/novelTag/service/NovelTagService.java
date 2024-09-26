@@ -2,7 +2,6 @@ package com.ham.netnovel.novelTag.service;
 
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.novelTag.NovelTag;
-import com.ham.netnovel.novelTag.NovelTagId;
 import com.ham.netnovel.novelTag.dto.NovelTagCreateDto;
 import com.ham.netnovel.novelTag.dto.NovelTagDeleteDto;
 import com.ham.netnovel.novelTag.dto.NovelTagListDto;
@@ -42,11 +41,6 @@ public interface NovelTagService {
      */
     Boolean createNovelTag(NovelTagCreateDto createDto);
 
-//    NovelTagId createNovelTag(Long novelId, Long tagId);
 
-    /**
-     * Novel에서 Tag를 제거하는 메서드
-     * @param deleteDto novel id, tag id
-     */
     void deleteNovelTag(NovelTagDeleteDto deleteDto);
 }
