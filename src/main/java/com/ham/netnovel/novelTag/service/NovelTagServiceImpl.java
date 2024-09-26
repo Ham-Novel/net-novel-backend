@@ -10,20 +10,19 @@ import com.ham.netnovel.novelTag.dto.NovelTagCreateDto;
 import com.ham.netnovel.novelTag.dto.NovelTagDeleteDto;
 import com.ham.netnovel.novelTag.dto.NovelTagListDto;
 import com.ham.netnovel.tag.Tag;
-import com.ham.netnovel.tag.dto.TagCreateDto;
 import com.ham.netnovel.tag.dto.TagDeleteDto;
 import com.ham.netnovel.tag.service.TagService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class NovelTagServiceImpl implements NovelTagService {
 
     private final NovelTagRepository novelTagRepository;
@@ -62,40 +61,37 @@ public class NovelTagServiceImpl implements NovelTagService {
 
     @Override
     @Transactional
-    public NovelTagId createNovelTag(NovelTagCreateDto createDto) {
-        //작품 레코드 조회 검증
+    public Boolean createNovelTag(NovelTagCreateDto createDto) {
+        //작품 레코드 조회 검증하여 문제없을경우 객체 생성
         Novel novel = novelService.getNovel(createDto.getNovelId())
                 .orElseThrow(() -> new NoSuchElementException("createNovelTag() Error : Novel return value is null. novelId=" + createDto.getNovelId()));
-        try {
-            //같은 이름의 태그 레코드 존재하는지 조회
-            Tag tag = tagService.getTagByName(createDto.getTagName())
-                    .orElseGet(() -> {
-                        //존재하지 않는다면 새로 생성.
-                        Long newTagId = tagService.createTag(TagCreateDto.builder().name(createDto.getTagName()).build());
-                        return tagService.getTag(newTagId)
-                                .orElseThrow(() -> new NoSuchElementException("Error In Create New Tag"));
-                    });
 
+        //태그 엔티티 객체 생성, DB에 있을경우 가져오고 없을경우 생성해서 가져옴
+        Tag tag = tagService.getOrCreateTag(createDto.getTagName());
+
+        try {
             //NovelTag 생성에 사용할 NovelTagId 값 생성
             NovelTagId novelTagId = new NovelTagId(novel.getId(), tag.getId());
 
-            //NovelTag 레코드가 존재하는지 조회 검증
-            novelTagRepository.findById(novelTagId)
-                    .ifPresent((value) -> {
-                        throw new DataIntegrityViolationException("Already Existing NovelTag Record");
+            //NovelTag 엔티티가 있을경우 false 반환, 없을경우 새로 생성후 true 반환
+            return novelTagRepository.findById(novelTagId)
+                    .map(novelTag -> {
+                        log.warn("이미 소설에 태그 정보가 등록되어 있습니다" +
+                                "novel id =" + novel.getId() + " tagId=" + tag.getId());
+                        return false;
+                    })
+                    .orElseGet(() -> {
+                        novelTagRepository.save(NovelTag.builder()
+                                .id(novelTagId)
+                                .novel(novel)
+                                .tag(tag)
+                                .build());
+
+                        return true;
                     });
 
-            //DB에 저장
-            novelTagRepository.save(NovelTag.builder()
-                            .id(novelTagId)
-                            .novel(novel)
-                            .tag(tag)
-                    .build());
-
-            return novelTagId;
-
         } catch (Exception ex) {
-            throw new ServiceMethodException("createNovelTag() Error : "  + ex.getMessage());
+            throw new ServiceMethodException("createNovelTag메서드 에러 : " + ex + ex.getMessage());
         }
     }
 
@@ -124,7 +120,7 @@ public class NovelTagServiceImpl implements NovelTagService {
                 tagService.deleteTag(TagDeleteDto.builder().tagId(tag.getId()).build());
             }
         } catch (Exception ex) {
-            throw new ServiceMethodException("deleteNovelTag() Error : "  + ex.getMessage());
+            throw new ServiceMethodException("deleteNovelTag() Error : " + ex.getMessage());
         }
 
     }
