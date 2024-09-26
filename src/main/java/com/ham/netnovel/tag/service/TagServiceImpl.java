@@ -1,15 +1,17 @@
 package com.ham.netnovel.tag.service;
 
 import com.ham.netnovel.common.exception.ServiceMethodException;
+import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.tag.Tag;
 import com.ham.netnovel.tag.TagRepository;
 import com.ham.netnovel.tag.TagStatus;
 import com.ham.netnovel.tag.dto.TagDeleteDto;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -34,6 +36,23 @@ public class TagServiceImpl implements TagService {
     @Transactional(readOnly = true)
     public Optional<Tag> getTagByName(String tagName) {
         return tagRepository.findByName(tagName);
+    }
+
+
+    @Override
+    public List<String> getTagNamesBySearchWord(String searchWord) {
+
+        //파라미터 검증, SQL injection 에 사용되는 특수문자 제거,
+        String validateSearchWord = TypeValidationUtil.validateSearchWord(searchWord);
+
+        //검색어가 비어있거나 10자를 넘어가는 경우 빈리스트 반환
+        if (validateSearchWord.isEmpty()|| validateSearchWord.length()>10){
+            return Collections.emptyList();
+        }
+
+        //검색어 기반으로 태그 검색하여 반환
+        return tagRepository.findBySearchWord(validateSearchWord);
+
     }
 
     @Override

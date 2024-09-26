@@ -4,6 +4,7 @@ import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.tag.Tag;
 import com.ham.netnovel.tag.dto.TagDeleteDto;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TagService {
@@ -21,6 +22,18 @@ public interface TagService {
      * @return Optional
      */
     Optional<Tag> getTagByName(String tagName);
+
+
+    /**
+     * 주어진 검색어를 기반으로 태그 이름 목록을 반환하는 메서드입니다.
+     * <p>
+     * 검색어에 포함된 특수 문자를 제거하고, 검색어가 비어있거나 10자를 초과할 경우 빈 리스트를 반환합니다.
+     * </p>
+     *
+     * @param searchWord 검색할 태그의 일부 또는 전체 이름
+     * @return 검색어와 일치하는 태그 이름 목록. 검색어가 유효하지 않은 경우 빈 리스트 반환.
+     */
+    List<String> getTagNamesBySearchWord(String searchWord);
 
 
     /**
