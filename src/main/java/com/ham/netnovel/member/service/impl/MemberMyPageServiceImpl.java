@@ -3,14 +3,13 @@ package com.ham.netnovel.member.service.impl;
 import com.ham.netnovel.coinChargeHistory.service.CoinChargeHistoryService;
 import com.ham.netnovel.coinUseHistory.service.CoinUseHistoryService;
 import com.ham.netnovel.comment.service.CommentService;
-import com.ham.netnovel.member.MemberRepository;
 import com.ham.netnovel.member.dto.MemberCoinChargeDto;
 import com.ham.netnovel.member.dto.MemberCoinUseHistoryDto;
 import com.ham.netnovel.member.dto.MemberRecentReadDto;
 import com.ham.netnovel.member.service.MemberMyPageService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.novel.dto.NovelFavoriteDto;
-import com.ham.netnovel.novel.service.NovelService;
+import com.ham.netnovel.novel.service.NovelSearchService;
 import com.ham.netnovel.reComment.service.ReCommentService;
 import com.ham.netnovel.recentRead.service.RecentReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,30 +31,22 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
 
     private final ReCommentService reCommentService;
 
-    private final MemberRepository memberRepository;
 
     private final CoinUseHistoryService coinUseHistoryService;
 
     private final CoinChargeHistoryService coinChargeHistoryService;
 
-    private final NovelService novelService;
+
+    private final NovelSearchService novelSearchService;
 
     private final RecentReadService recentReadService;
 
-
-    public MemberMyPageServiceImpl(CommentService commentService,
-                                   ReCommentService reCommentService,
-                                   MemberRepository memberRepository,
-                                   CoinUseHistoryService coinUseHistoryService,
-                                   CoinChargeHistoryService coinChargeHistoryService,
-                                   NovelService novelService,
-                                   RecentReadService recentReadService) {
+    public MemberMyPageServiceImpl(CommentService commentService, ReCommentService reCommentService, CoinUseHistoryService coinUseHistoryService, CoinChargeHistoryService coinChargeHistoryService, NovelSearchService novelSearchService, RecentReadService recentReadService) {
         this.commentService = commentService;
         this.reCommentService = reCommentService;
-        this.memberRepository = memberRepository;
         this.coinUseHistoryService = coinUseHistoryService;
         this.coinChargeHistoryService = coinChargeHistoryService;
-        this.novelService = novelService;
+        this.novelSearchService = novelSearchService;
         this.recentReadService = recentReadService;
     }
 
@@ -82,7 +73,7 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
         //유저 providerId 유효성 검사
         validateProviderId(providerId, "getFavoriteNovelsByMember");
 
-        return novelService.getFavoriteNovels(providerId)
+        return novelSearchService.getFavoriteNovels(providerId)
                 .stream()
                 .map(novel -> NovelFavoriteDto.builder()
                         .novelId(novel.getId())

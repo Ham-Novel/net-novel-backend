@@ -1,4 +1,4 @@
-package com.ham.netnovel.novel.service;
+package com.ham.netnovel.novel.service.impl;
 
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
@@ -10,6 +10,7 @@ import com.ham.netnovel.novel.data.NovelType;
 import com.ham.netnovel.novel.dto.NovelCreateDto;
 import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import com.ham.netnovel.novel.repository.NovelRepository;
+import com.ham.netnovel.novel.service.NovelEditingService;
 import com.ham.netnovel.novelTag.dto.NovelTagCreateDto;
 import com.ham.netnovel.novelTag.dto.NovelTagDeleteDto;
 import com.ham.netnovel.novelTag.service.NovelTagService;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+//소설 생성/업데이트 관련 로직을 담는 서비스계층
 
 @Service
 @Slf4j
@@ -132,6 +134,12 @@ public class NovelEditingServiceImpl implements NovelEditingService {
                     .map(String::trim)
                     .distinct()//중복제거
                     .toList();
+
+            for (String newTagName : newTagNames) {
+                log.info("태그정보들 ={}",newTagName);
+                log.info("------------------------------------");
+
+            }
 
             //소설과 연결된 Tag들의 이름을 List 객체로 가져옴
             List<String> novelTagList = getNovelTagList(novel);

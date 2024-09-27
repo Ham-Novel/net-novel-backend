@@ -15,10 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 public class NovelUpdateDto {
 
-    @NotNull
     private Long novelId;
 
-    @NotNull
     private String accessorProviderId;
 
     @Size(max = 30)
