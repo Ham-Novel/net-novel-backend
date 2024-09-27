@@ -27,6 +27,7 @@ public class NovelFavoriteDto {
     //작가 provider ID 작가 엔티티 생성후 사용
     private String authorProviderId;
 
+    private String thumbnailUrl;//섬네일 URL
 
 
 }

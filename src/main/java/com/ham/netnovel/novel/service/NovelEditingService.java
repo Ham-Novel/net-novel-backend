@@ -8,6 +8,7 @@ import com.ham.netnovel.novel.dto.NovelUpdateDto;
 import java.nio.file.AccessDeniedException;
 import java.util.NoSuchElementException;
 
+//소설 생성/업데이트 관련 로직을 담는 서비스계층
 public interface NovelEditingService {
 
     /**

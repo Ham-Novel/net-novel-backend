@@ -7,6 +7,7 @@ import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.novel.data.NovelSearchType;
 import com.ham.netnovel.novel.dto.*;
 import com.ham.netnovel.novel.service.NovelEditingService;
+import com.ham.netnovel.novel.service.NovelSearchService;
 import com.ham.netnovel.novel.service.NovelService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,10 +32,12 @@ public class NovelController {
     private final Authenticator authenticator;
     private final NovelEditingService novelEditingService;
 
-    public NovelController(NovelService novelService, Authenticator authenticator, NovelEditingService novelEditingService) {
+    private final NovelSearchService novelSearchService;
+    public NovelController(NovelService novelService, Authenticator authenticator, NovelEditingService novelEditingService, NovelSearchService novelSearchService) {
         this.novelService = novelService;
         this.authenticator = authenticator;
         this.novelEditingService = novelEditingService;
+        this.novelSearchService = novelSearchService;
     }
 
     /**
@@ -46,12 +50,6 @@ public class NovelController {
     public ResponseEntity<NovelInfoDto> getNovel(@PathVariable("novelId") Long novelId) {
         return ResponseEntity.ok(novelService.getNovelInfo(novelId));
     }
-
-//    @GetMapping
-//    public ResponseEntity<List<NovelInfoDto>> getNovelList() {
-//        return null;
-//    }
-
 
     /**
      * 소설을 검색 조건에 따라 조회하는 API 입니다.
@@ -89,7 +87,7 @@ public class NovelController {
         //페이지 네이션을 위한 Pageable 객체 생성
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //조건을 메서드에 전달하여, 소설 정보 List를 받아옴
-        List<NovelListDto> novels = novelService.getNovelsBySearchCondition(sortBy, pageable, idList);
+        List<NovelListDto> novels = novelSearchService.getNovelsBySearchCondition(sortBy, pageable, idList);
         return ResponseEntity.ok(novels);//소설 정보 전송
     }
 
@@ -131,7 +129,7 @@ public class NovelController {
         //페이지 네이션을 위한 Pageable 객체 생성
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //조건을 메서드에 전달하여, 소설 정보 List를 받아옴
-        List<NovelListDto> novels = novelService.getNovelsBySearchWord(trimWord, novelSearchType,pageable);
+        List<NovelListDto> novels = novelSearchService.getNovelsBySearchWord(trimWord, novelSearchType,pageable);
         return ResponseEntity.ok(novels);//소설 정보 전송
     }
 
@@ -167,7 +165,7 @@ public class NovelController {
         //페이지네이션 객체 생성
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //유저가 요청한 랭킹 기간에 따라, 소설 정보를 랭킹 순서대로 정렬하여 List에 담음
-        List<NovelListDto> rankedNovels = novelService.getNovelsByRanking(period, pageable);
+        List<NovelListDto> rankedNovels = novelSearchService.getNovelsByRanking(period, pageable);
 
 
         return ResponseEntity.ok(rankedNovels);//소설 정보 전송
@@ -226,57 +224,70 @@ public class NovelController {
     /**
      * 유저가 소설(Novel)의 변경된 내용을 업데이트하는 API
      *
-     * @param reqBody        novelId, title, desc, providerId를 담은 객체
+     * @param novelUpdateDto        novelId, title, desc, providerId를 담은 객체
      * @param bindingResult  DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
      */
     @PutMapping("/novels/{novelId}")
-    public ResponseEntity<String> updateNovel(@PathVariable("novelId") Long urlNovelId,
-                                              @Valid @RequestBody NovelUpdateDto reqBody,
+    public ResponseEntity<String> updateNovel(@PathVariable("novelId") Long novelId,
+                                              @Valid @RequestBody NovelUpdateDto novelUpdateDto,
                                               BindingResult bindingResult,
-                                              Authentication authentication) {
-        //NovelUpdateDto Validation 예외 처리
+                                              Authentication authentication) throws AccessDeniedException {
+
         if (bindingResult.hasErrors()) {
-            log.error("updateNovel API Error = {}", bindingResult.getFieldError());
-            //badRequest 에러 메세지 body에 담아 전송
-            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrorMessages(
+                    bindingResult,
+                    "createEpisode");
             return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
+
+        log.info("정보={}",novelUpdateDto.toString());
+
 
         //유저 인증. 없으면 badRequest 응답. 있으면 CustomOAuth2User 타입캐스팅.
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
         //DTO에 유저 정보(providerId) 값 저장
-        reqBody.setAccessorProviderId(principal.getName());
+        novelUpdateDto.setAccessorProviderId(principal.getName());
 
-        return ResponseEntity.ok("작품 업데이트 완료.");
+        novelUpdateDto.setNovelId(novelId);
+
+        //업데이트
+        Boolean result = novelEditingService.updateNovel(novelUpdateDto);
+
+        if (result){
+            return ResponseEntity.ok("작품 업데이트 완료.");
+        }else {
+            return ResponseEntity.internalServerError().body("작품 업데이트 실패, 관리자에게 문의해주세요");
+        }
     }
 
+
+
     /**
-     * 유저가 생성한 소설을 DELETE_BY_USER로 삭제 처리하는 API
+     * 주어진 소설 ID를 기반으로 작품을 삭제 상태로 변경하는 API 입니다.
      *
-     * @param reqBody        novelId, providerId를 담은 객체
-     * @param bindingResult  DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
-     * @param authentication 유저의 인증 정보
-     * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
+     * <p>사용자의 인증 정보를 확인하고, 인증된 사용자만 작품 삭제 요청을 처리할 수 있습니다.</p>
+     *
+     * @param novelId 삭제할 소설의 ID (PathVariable을 통해 전달됨)
+     * @param authentication 현재 인증된 사용자 정보
+     * @return 성공적으로 삭제되었을 경우 "작품 삭제 완료." 메시지를 포함한 HTTP 200 응답
+     *
      */
     @DeleteMapping("/novels/{novelId}")
-    public ResponseEntity<String> deleteNovel(@PathVariable("novelId") Long urlNovelId,
-                                              @Valid @RequestBody NovelDeleteDto reqBody,
-                                              BindingResult bindingResult,
+    public ResponseEntity<String> deleteNovel(@PathVariable("novelId") Long novelId,
                                               Authentication authentication) {
-        //NovelDeleteDto Validation 예외 처리
-        if (bindingResult.hasErrors()) {
-            log.error("deleteNovel API Error = {}", bindingResult.getFieldError());
-            //badRequest 에러 메세지 body에 담아 전송
-            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
-            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
-        }
 
         //유저 인증. 없으면 badRequest 응답. 있으면 CustomOAuth2User 타입캐스팅.
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
-        //DTO에 유저 정보(providerId) 값 저장
-        reqBody.setAccessorProviderId(principal.getName());
+        //DTO 생성
+        NovelDeleteDto build = NovelDeleteDto.builder()
+                .accessorProviderId(principal.getName())
+                .novelId(novelId)
+                .build();
+
+        //소설 삭제상태로 변경
+        novelService.deleteNovel(build);
 
         return ResponseEntity.ok("작품 삭제 완료.");
     }

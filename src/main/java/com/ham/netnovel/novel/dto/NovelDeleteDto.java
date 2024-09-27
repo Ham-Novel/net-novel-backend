@@ -13,6 +13,5 @@ public class NovelDeleteDto {
     @NotNull
     private Long novelId;
 
-    @NotNull
     private String accessorProviderId;
 }
