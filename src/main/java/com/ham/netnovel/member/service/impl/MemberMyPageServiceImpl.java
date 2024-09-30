@@ -67,20 +67,24 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
     }
 
 
-    //ToDo Author 엔티티 생성 후, 작가 정보도 DTO에 담아서 반환
+    /**
+     * 사용자의 providerId로, 선호하는 소설 목록을 반환하는 메서드 입니다..
+     *
+     * <p>주어진 providerId의 유효성을 검사한 후,
+     * 해당 사용자가 좋아요를 누른 소설의 목록을 {@link NovelFavoriteDto} 형태로 반환합니다.</p>
+     *
+     * @param providerId 사용자의 정보 (providerId)
+     * @return 사용자가 선호하는 소설의 정보 리스트,
+     * {@link NovelFavoriteDto} 타입 객체를  {@link List} 타입으로 반환
+     * @throws IllegalArgumentException providerId가 유효하지 않은 경우 예외처리
+     */
     @Override
     public List<NovelFavoriteDto> getFavoriteNovelsByMember(String providerId) {
         //유저 providerId 유효성 검사
         validateProviderId(providerId, "getFavoriteNovelsByMember");
+        //유저의 선호 작품 DTO 로 반환
+        return novelSearchService.getFavoriteNovels(providerId);
 
-        return novelSearchService.getFavoriteNovels(providerId)
-                .stream()
-                .map(novel -> NovelFavoriteDto.builder()
-                        .novelId(novel.getId())
-                        .title(novel.getTitle())
-                        .status(novel.getType())
-                        .build()
-                ).collect(Collectors.toList());
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.ham.netnovel.novel.service;
 
 import com.ham.netnovel.common.exception.ServiceMethodException;
-import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.data.NovelSearchType;
+import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 import com.ham.netnovel.novel.dto.NovelListDto;
 import org.springframework.data.domain.Pageable;
 
@@ -54,7 +54,7 @@ public interface NovelSearchService {
 
 
     /**
-     * 주어진 기간에 따라 소설의 랭킹을 조회하여 해당 페이지의 소설 정보를 반환합니다.
+     * 주어진 기간에 따라 소설의 랭킹을 조회하여 해당 페이지의 소설 정보를 반환하는 메서드 입니다.
      *
      * <p>이 메서드는 다음과 같은 작업을 수행합니다:</p>
      * <ul>
@@ -77,10 +77,14 @@ public interface NovelSearchService {
 
 
     /**
-     * 유저의 선호작 Novel 리스트 반환.
-     * @param providerId 유저 PK 값.
-     * @return List<Novel>
+     * 사용자의 선호 작품 목록을 조회하여 DTO로 변환한 후 반환하는 메서드입니다.
+     * <p>주어진 사용자 ID로 해당 사용자가 선호하는 작품 목록을 조회하고,
+     * 조회한 목록을 DTO로 변환하여 반환합니다. </p>
+     * @param providerId 사용자의 OAuth2 provider ID (예: 구글, 네이버 등)
+     * @return 사용자가 선호하는 작품 목록을 {@link NovelFavoriteDto} 의 {@link List}형태로 반환
+     * @throws ServiceMethodException 작업중 중 예외 발생 시 예외를 던집니다.
+     *
      */
-    List<Novel> getFavoriteNovels(String providerId);
+    List<NovelFavoriteDto> getFavoriteNovels(String providerId);
 
 }

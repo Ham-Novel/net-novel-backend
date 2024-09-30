@@ -5,6 +5,7 @@ import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.novel.data.NovelSearchType;
 import com.ham.netnovel.novel.data.NovelSortOrder;
+import com.ham.netnovel.novel.dto.NovelFavoriteDto;
 import com.ham.netnovel.novel.dto.NovelListDto;
 import com.ham.netnovel.novel.repository.NovelRepository;
 import com.ham.netnovel.novel.service.NovelSearchService;
@@ -127,9 +128,13 @@ public class NovelSearchServiceImpl implements NovelSearchService {
     //Null체크, DTO 변환은 MemberMyPageService에서 진행
     @Override
     @Transactional(readOnly = true)
-    public List<Novel> getFavoriteNovels(java.lang.String providerId) {
+    public List<NovelFavoriteDto> getFavoriteNovels(String providerId) {
         try {
-            return novelRepository.findFavoriteNovelsByMember(providerId);
+            //유저 providerId 값으로 선호하는 작품을DTO로 변환하여 List객체에 담아 반환
+            return novelRepository.findFavoriteNovelsByMember(providerId)
+                    .stream()
+                    .map(this::convertEntityToFavoriteDto)//DTO로 변환
+                    .collect(Collectors.toList());//List 객체에 담음
         } catch (Exception ex) {//예외 발생시 처리
             throw new ServiceMethodException("getFavoriteNovels 메서드 에러 발생", ex.getCause());
         }
@@ -161,6 +166,25 @@ public class NovelSearchServiceImpl implements NovelSearchService {
                 .tags(dataDtoList).build();
     }
 
+    NovelFavoriteDto convertEntityToFavoriteDto(Novel novel){
+
+        //작품의 태그들 가져오기
+        List<TagDataDto> dataDtoList = novel.getNovelTags().stream()
+                .map(novelTag -> novelTag.getTag().getData())
+                .toList();
+
+        //AWS cloud front 섬네일 이미지 URL 객체 반환
+        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(), "mini");
+
+        //DTO 반환
+        return NovelFavoriteDto.builder()
+                .thumbnailUrl(String.valueOf(thumbnailUrl))
+                .title(novel.getTitle())
+                .authorName(novel.getAuthor().getNickName())
+                .id(novel.getId())
+                .build();
+
+    }
 
 
     //섬네일 파일 이미지 이름으로, CloudFront URL을 생성하는 메서드
