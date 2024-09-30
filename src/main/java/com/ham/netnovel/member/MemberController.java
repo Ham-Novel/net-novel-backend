@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Controller
@@ -42,29 +44,30 @@ public class MemberController {
 
 
     /**
-     * 마이페이지 GET 요청시 유저 정보를 전달하는 API
+     * 현재 인증된 사용자의 마이페이지 정보를 조회하여 반환하는 API 입니다.
      *
-     * @param authentication 유저의 인증 정보
-     * @return ResponseEntity 유저 정보 담은 응답 객체
+     * <p>사용자의 인증 정보를 확인하고, 유효하지 않은 경우 Bad Request 응답을 반환합니다.
+     * 인증이 유효할 경우, 해당 사용자의 정보를 데이터베이스에서 조회하여 반환합니다.</p>
+     *
+     * @param authentication 현재 인증된 사용자의 인증 정보
+     * @return 사용자의 마이페이지 정보가 포함된 {@link ResponseEntity} 객체
+     * @throws IllegalArgumentException 유저 인증 정보가 유효하지 않은 경우
+     * @throws NoSuchElementException   유저 정보가 DB에 존재하지 않는경우
      */
     @GetMapping("/members/me/mypage")
     @ResponseBody
-    public ResponseEntity<?> showMyPage(
-            Authentication authentication
-    ) {
-        log.info(authentication.getCredentials().toString());
+    public ResponseEntity<MemberMyPageDto> showMyPage(
+            Authentication authentication) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
-
         //유저 정보 DB에서 찾아 반환, 닉네임, 코인갯수, 이메일 정보 포함
         MemberMyPageDto memberMyPageInfo = memberService.getMemberMyPageInfo(principal.getName());
-
         //유저 정보 전
         return ResponseEntity.ok(memberMyPageInfo);
     }
 
     /**
-     * 유저의 닉네임을 수정하는 API
+     * 유저의 닉네임을 수정하는 API 입니다.
      *
      * @param changeNickNameDto 닉네임 변경을 위한 DTO, 유저의 providerId 값과 새로운 닉네임 값을 멤버변수로 가짐
      * @param bindingResult     ChangeNickNameDto 검증 에러를 담는 객체
@@ -122,13 +125,15 @@ public class MemberController {
     /**
      * 유저가 작성한 댓글, 대댓글을 반환하는 API
      * 유저 인증 정보가 올바르면 작성한 댓글,대댓글 정보 반환
+     *
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity 댓글과 대댓글의 정보 리스트를 담은 응답 객체
      */
     @GetMapping("/members/me/comments")
-    public ResponseEntity<?> getMemberCommentList(Authentication authentication,
-                                                   @RequestParam(defaultValue = "0") int pageNumber,
-                                                   @RequestParam(defaultValue = "10") int pageSize) {
+    public ResponseEntity<?> getMemberCommentList(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
@@ -136,20 +141,24 @@ public class MemberController {
         //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //유저가 작성한 댓글,대댓글 정보를 DB에서 받아와 DTO 형태로 변환(최근에 작성한 댓글이 index 앞에 위치)
-        List<MemberCommentDto> commentList = memberMyPageService.getMemberCommentAndReCommentList(principal.getName(),pageable);
-        
+        List<MemberCommentDto> commentList = memberMyPageService.getMemberCommentAndReCommentList(principal.getName(), pageable);
+
         //클라이언트로 정보 전송
         return ResponseEntity.ok(commentList);
-
 
     }
 
 
     /**
-     * 유저가 좋아요 누른 소설 리스트를 전송하는 API
+     * 인증된 사용자의 선호 소설 목록을 조회하여 반환하는 API입니다.
      *
-     * @param authentication 유저의 인증 정보
-     * @return ResponseEntity 유저가 좋아요를 누른 소설 리스트를 담은 응답 객체
+     * <p>사용자가 인증되었는지 확인한 후, 사용자의 선호 소설을 {@link NovelFavoriteDto}
+     * 객체의 목록으로 반환합니다.</p>
+     *
+     * @param authentication 사용자 인증 정보를 담고 있는 Authentication 객체입니다.
+     * @return 인증된 사용자의 선호 소설 목록을 포함하는 ResponseEntity를 반환하며,
+     *         인증되지 않은 경우에는 bad request 응답을 반환합니다.
+     * @throws AuthenticationCredentialsNotFoundException 유저의 인증정보가 없는경우
      */
     @GetMapping("/members/me/favorites")
     public ResponseEntity<?> getFavoriteNovels(Authentication authentication) {
@@ -167,15 +176,25 @@ public class MemberController {
 
 
     /**
-     * 유저가 코인 사용 기록 열람을 요청하면, body에 담아 전송하는 API
+     * 유저가 코인 사용 기록 열람을 요청하면, body에 담아 전송하는 API 입니다.
      *
-     * @param authentication 유저의 인정 정보
-     * @return ResponseEntity 데이터를 List에 담아 반환
+     *
+     * <p> 인증된 사용자의 코인 사용 내역을
+     * 최신순으로 정렬된 {@link MemberCoinUseHistoryDto} 객체 목록으로 반환합니다.</p>
+     *
+     * @param authentication 사용자 인증 정보를 담고 있는 {@link Authentication} 객체
+     * @param pageNumber 페이지 번호를 나타내는 정수값, 기본값은 0
+     * @param pageSize 페이지 크기를 나타내는 정수값, 기본값은 10
+     * @return 사용자의 코인 사용 기록을 담고 있는 {@link MemberCoinUseHistoryDto} 타입의 {@link List} 객체를
+     *         포함한 {@link ResponseEntity}를 반환합니다.
+     * @throws IllegalArgumentException 페이지 번호나 페이지 크기가 유효하지 않을 경우
+     * @throws AuthenticationCredentialsNotFoundException 유저 인증정보가 유효하지 않은경우
      */
     @GetMapping("/members/me/coin-use-history")
-    public ResponseEntity<?> getMemberCoinUseHistory(Authentication authentication,
-                                                      @RequestParam(defaultValue = "0") int pageNumber,
-                                                      @RequestParam(defaultValue = "10") int pageSize) {
+    public ResponseEntity<?> getMemberCoinUseHistory(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
@@ -191,37 +210,53 @@ public class MemberController {
     }
 
     /**
-     * 유저가 코인 충전 기록 열람을 요청하면, body에 담아 전송하는 API
+     * 유저가 코인 충전 기록 열람을 요청하면, body에 담아 전송하는 API 입니다.
      *
-     * @param authentication 유저의 인정 정보
-     * @return ResponseEntity 데이터를 List에 담아 반환
+     * <p> 인증된 사용자의 코인 충전 내역을
+     * 최신순으로 정렬된 {@link MemberCoinChargeDto} 객체 목록으로 반환합니다.</p>
+     *
+     * @param authentication 사용자 인증 정보를 담고 있는 {@link Authentication} 객체
+     * @param pageNumber 페이지 번호를 나타내는 정수값, 기본값은 0
+     * @param pageSize 페이지 크기를 나타내는 정수값, 기본값은 10
+     * @return 사용자의 코인 충전 기록을 담고 있는 {@link MemberCoinChargeDto} 타입의 {@link List} 객체를
+     *         포함한 {@link ResponseEntity}를 반환합니다.
+     * @throws IllegalArgumentException 페이지 번호나 페이지 크기가 유효하지 않을 경우
+     * @throws AuthenticationCredentialsNotFoundException 유저 인증정보가 유효하지 않은경우
      */
     @GetMapping("/members/me/coin-charge-history")
-    public ResponseEntity<List<MemberCoinChargeDto>> getMemberCoinChargeHistory(Authentication authentication,
-                                                                                 @RequestParam(defaultValue = "0") int pageNumber,
-                                                                                 @RequestParam(defaultValue = "10") int pageSize) {
+    public ResponseEntity<List<MemberCoinChargeDto>> getMemberCoinChargeHistory(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
         //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
         //유저 코인 충전 기록 조회
-        List<MemberCoinChargeDto> memberCoinChargeHistory = memberMyPageService.getMemberCoinChargeHistory(principal.getName(),pageable);
+        List<MemberCoinChargeDto> memberCoinChargeHistory = memberMyPageService.getMemberCoinChargeHistory(principal.getName(), pageable);
         //정보 전송
         return ResponseEntity.ok(memberCoinChargeHistory);
 
     }
-
     /**
+     * 유저가 최근 읽은 작품 기록 열람을 요청하면, body에 담아 전송하는 API입니다.
      *
-     * @param authentication
-     * @param pageNumber
-     * @param pageSize
-     * @return
+     * <p>인증된 사용자의 최근 읽은 작품 내역을
+     * 최신순으로 정렬된 {@link MemberRecentReadDto} 객체 목록으로 반환합니다.</p>
+     *
+     * @param authentication 사용자 인증 정보를 담고 있는 {@link Authentication} 객체
+     * @param pageNumber 페이지 번호를 나타내는 정수값, 기본값은 0
+     * @param pageSize 페이지 크기를 나타내는 정수값, 기본값은 10
+     * @return 사용자의 최근 읽은 작품 기록을 담고 있는 {@link MemberRecentReadDto} 타입의 {@link List} 객체를
+     *         포함한 {@link ResponseEntity}를 반환합니다.
+     * @throws IllegalArgumentException 페이지 번호나 페이지 크기가 유효하지 않을 경우
+     * @throws AuthenticationCredentialsNotFoundException 유저 인증 정보가 유효하지 않을 경우
      */
     @GetMapping("/members/me/recent-read")
-    public ResponseEntity<List<MemberRecentReadDto>> getMemberRecentRead(Authentication authentication,
-                                                  @RequestParam(defaultValue = "0") int pageNumber,
-                                                  @RequestParam(defaultValue = "10") int pageSize){
+    public ResponseEntity<List<MemberRecentReadDto>> getMemberRecentRead(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
 
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
@@ -230,10 +265,6 @@ public class MemberController {
         //유저의 최근 읽은 작품 레코드 조회
         List<MemberRecentReadDto> memberRecentReadInfo = memberMyPageService.getMemberRecentReadInfo(principal.getName(), pageable);
 
-        for (MemberRecentReadDto memberRecentReadDto : memberRecentReadInfo) {
-
-            log.info("정보={}",memberRecentReadDto.toString());
-        }
         //정보 전송
         return ResponseEntity.ok(memberRecentReadInfo);
     }

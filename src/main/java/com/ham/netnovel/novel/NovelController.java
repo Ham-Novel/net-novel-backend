@@ -224,16 +224,17 @@ public class NovelController {
     /**
      * 유저가 소설(Novel)의 변경된 내용을 업데이트하는 API
      *
-     * @param novelUpdateDto        novelId, title, desc, providerId를 담은 객체
+     * @param novelUpdateDto novelId, title, desc, providerId를 담은 객체
      * @param bindingResult  DTO 유효성 검사 정보, 에러 발생시 객체에 에러가 담김
      * @param authentication 유저의 인증 정보
      * @return ResponseEntity HttpStatus, Novel 데이터 문자열 반환.
      */
     @PutMapping("/novels/{novelId}")
-    public ResponseEntity<String> updateNovel(@PathVariable("novelId") Long novelId,
-                                              @Valid @RequestBody NovelUpdateDto novelUpdateDto,
-                                              BindingResult bindingResult,
-                                              Authentication authentication) throws AccessDeniedException {
+    public ResponseEntity<String> updateNovel(
+            @PathVariable("novelId") Long novelId,
+            @Valid @RequestBody NovelUpdateDto novelUpdateDto,
+            BindingResult bindingResult,
+            Authentication authentication) throws AccessDeniedException {
 
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = ValidationErrorHandler.handleValidationErrorMessages(
@@ -242,26 +243,22 @@ public class NovelController {
             return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
 
-        log.info("정보={}",novelUpdateDto.toString());
-
-
         //유저 인증. 없으면 badRequest 응답. 있으면 CustomOAuth2User 타입캐스팅.
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
-        //DTO에 유저 정보(providerId) 값 저장
+        //DTO에 유저 정보(providerId) 값 할당
         novelUpdateDto.setAccessorProviderId(principal.getName());
-
+        //DTO 에 novelId 값 할당
         novelUpdateDto.setNovelId(novelId);
 
-        //업데이트
+        //업데이트 결과 반환
         Boolean result = novelEditingService.updateNovel(novelUpdateDto);
 
-        if (result){
+        if (result) {
             return ResponseEntity.ok("작품 업데이트 완료.");
-        }else {
+        } else {
             return ResponseEntity.internalServerError().body("작품 업데이트 실패, 관리자에게 문의해주세요");
         }
     }
-
 
 
     /**
@@ -269,10 +266,9 @@ public class NovelController {
      *
      * <p>사용자의 인증 정보를 확인하고, 인증된 사용자만 작품 삭제 요청을 처리할 수 있습니다.</p>
      *
-     * @param novelId 삭제할 소설의 ID (PathVariable을 통해 전달됨)
+     * @param novelId        삭제할 소설의 ID (PathVariable을 통해 전달됨)
      * @param authentication 현재 인증된 사용자 정보
      * @return 성공적으로 삭제되었을 경우 "작품 삭제 완료." 메시지를 포함한 HTTP 200 응답
-     *
      */
     @DeleteMapping("/novels/{novelId}")
     public ResponseEntity<String> deleteNovel(@PathVariable("novelId") Long novelId,
