@@ -17,8 +17,8 @@ public class ReCommentCreateDto {
 
 
     //댓글 내용
-    @NotBlank
-    @Size(max = 300,message = "댓글은 300자 이하로 작성해주세요!")
+    @NotBlank(message = "대댓글을 입력해 주세요!")
+    @Size(max = 300,message = "대댓글은 300자 이하로 작성해주세요!")
     private String content;
 
     //원본 댓글 Id값
