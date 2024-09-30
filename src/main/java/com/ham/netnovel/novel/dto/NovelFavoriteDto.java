@@ -14,7 +14,7 @@ public class NovelFavoriteDto {
 
 
     //소설PK
-    private Long novelId;
+    private Long id;
 
     //소설제목
     private String title;

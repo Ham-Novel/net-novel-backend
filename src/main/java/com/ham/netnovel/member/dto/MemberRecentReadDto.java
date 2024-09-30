@@ -20,16 +20,15 @@ import java.util.List;
 public class MemberRecentReadDto {
 
 
-    private Long novelId;
+    private Long id;
 
-    private String novelTitle;
+    private String title;
 
     //연재정보
     private NovelType novelType;
 
     //작가명
     private String authorName;
-
 
     //최근본 에피소드 제목
     private String episodeTitle;
@@ -39,6 +38,9 @@ public class MemberRecentReadDto {
 
     //업데이트시간
     private LocalDateTime updatedAt;
+
+
+    private String thumbnailUrl;//섬네일 URL
 
 
 

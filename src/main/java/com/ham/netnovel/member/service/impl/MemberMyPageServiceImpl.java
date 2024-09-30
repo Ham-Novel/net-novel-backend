@@ -67,20 +67,14 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
     }
 
 
-    //ToDo Author 엔티티 생성 후, 작가 정보도 DTO에 담아서 반환
+
     @Override
     public List<NovelFavoriteDto> getFavoriteNovelsByMember(String providerId) {
         //유저 providerId 유효성 검사
         validateProviderId(providerId, "getFavoriteNovelsByMember");
+        //유저의 선호 작품 DTO 로 반환
+        return novelSearchService.getFavoriteNovels(providerId);
 
-        return novelSearchService.getFavoriteNovels(providerId)
-                .stream()
-                .map(novel -> NovelFavoriteDto.builder()
-                        .novelId(novel.getId())
-                        .title(novel.getTitle())
-                        .status(novel.getType())
-                        .build()
-                ).collect(Collectors.toList());
     }
 
     @Override
