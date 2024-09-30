@@ -9,6 +9,7 @@ import com.ham.netnovel.commentLike.dto.CommentLikeToggleDto;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.service.MemberService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 
 @Service
+@Slf4j
 public class CommentLikeServiceImpl implements CommentLikeService {
 
     private final MemberService memberService;
@@ -29,6 +31,7 @@ public class CommentLikeServiceImpl implements CommentLikeService {
         this.commentLikeRepository = commentLikeRepository;
         this.commentService = commentService;
     }
+
 
     @Override
     @Transactional
@@ -45,22 +48,33 @@ public class CommentLikeServiceImpl implements CommentLikeService {
         try {
             //CommentLike 엔티티 조회를 위한 composite key 생성
             CommentLikeId commentLikeId = new CommentLikeId(comment.getId(), member.getId());
-
             //DB에서 엔티티 찾아서 반환
             Optional<CommentLike> commentLike = commentLikeRepository.findById(commentLikeId);
-
             //찾은 값이 없으면(좋아요 누른 기록이 없음), 새로운 엔티티 만들어 DB에 저장 후 true 반환
             if (commentLike.isEmpty()) {
 
-                CommentLike newCommentLike = new CommentLike(commentLikeId, member, comment, commentLikeToggleDto.getLikeType());
+                //새로운 댓글 감정 엔티티 생성
+//                CommentLike newCommentLike = new CommentLike(commentLikeId, member, comment, commentLikeToggleDto.getLikeType());
 
+                //새로운 댓글 감정 엔티티 생성
+                CommentLike newCommentLike = CommentLike.builder()
+                        .likeType(commentLikeToggleDto.getLikeType())
+                        .id(commentLikeId)
+                        .comment(comment)
+                        .member(member)
+                        .build();
+                //DB에 저장
                 commentLikeRepository.save(newCommentLike);
-
+                log.info("댓글 감정 등록 완료, memberId={}, commentId={}", member.getId(), comment.getId());
                 return true;
-            } else {
+            } else if (commentLike.get().getLikeType().equals(commentLikeToggleDto.getLikeType())){
                 //찾은 값이 있으면(좋아요 누른 기록이 있음) 좋아요 기록 삭제, false 반환
                 commentLikeRepository.delete(commentLike.get());
-
+                log.info("댓글 감정 삭제 완료, memberId={}, commentId={}", member.getId(), comment.getId());
+                return true;
+            }else {
+                log.warn("toggleCommentLikeStatus 메서드 경고, 기존 댓글 감정표현과 요청된 감정표현이 다릅니다." +
+                        " memberId={}, commentId={}", member.getId(), comment.getId());
                 return false;
             }
 
