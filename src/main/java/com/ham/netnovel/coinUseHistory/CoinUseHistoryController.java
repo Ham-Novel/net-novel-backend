@@ -1,6 +1,6 @@
 package com.ham.netnovel.coinUseHistory;
 
-import com.ham.netnovel.OAuth.CustomOAuth2User;
+import com.ham.netnovel.common.OAuth.CustomOAuth2User;
 import com.ham.netnovel.coinUseHistory.dto.CoinUseCreateDto;
 import com.ham.netnovel.coinUseHistory.service.CoinUseHistoryService;
 import com.ham.netnovel.common.utils.Authenticator;

@@ -1,6 +1,6 @@
 package com.ham.netnovel.common.message;
 
-import com.ham.netnovel.OAuth.CustomOAuth2User;
+import com.ham.netnovel.common.OAuth.CustomOAuth2User;
 import com.ham.netnovel.common.utils.Authenticator;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;

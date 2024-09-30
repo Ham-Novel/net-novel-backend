@@ -1,4 +1,4 @@
-package com.ham.netnovel.OAuth;
+package com.ham.netnovel.common.OAuth.dto;
 
 import com.ham.netnovel.member.OAuthProvider;
 import com.ham.netnovel.member.data.Gender;

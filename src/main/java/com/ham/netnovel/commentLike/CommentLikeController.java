@@ -1,6 +1,6 @@
 package com.ham.netnovel.commentLike;
 
-import com.ham.netnovel.OAuth.CustomOAuth2User;
+import com.ham.netnovel.common.OAuth.CustomOAuth2User;
 import com.ham.netnovel.commentLike.dto.CommentLikeToggleDto;
 import com.ham.netnovel.commentLike.service.CommentLikeService;
 import com.ham.netnovel.common.utils.Authenticator;
