@@ -1,5 +1,7 @@
-package com.ham.netnovel.OAuth;
+package com.ham.netnovel.common.OAuth;
 
+import com.ham.netnovel.common.OAuth.dto.NaverOAuthResponse;
+import com.ham.netnovel.common.OAuth.dto.OAuth2Response;
 import com.ham.netnovel.member.data.MemberRole;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.MemberCreateDto;

@@ -1,6 +1,6 @@
 package com.ham.netnovel.favoriteNovel;
 
-import com.ham.netnovel.OAuth.CustomOAuth2User;
+import com.ham.netnovel.common.OAuth.CustomOAuth2User;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.favoriteNovel.service.FavoriteNovelService;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +30,15 @@ public class FavoriteNovelController {
      * @return ResponseEntity true, false 리턴
      */
     @GetMapping("/members/me/favorites/check")
-    public ResponseEntity<Boolean> checkIfFavorite(
+    public ResponseEntity<?> checkIfFavorite(
             Authentication authentication,
             @RequestParam(name = "novelId") Long novelId
     ) {
+
+        if (authentication==null){
+            return ResponseEntity.ok("로그인 정보 없음");
+        }
+
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 

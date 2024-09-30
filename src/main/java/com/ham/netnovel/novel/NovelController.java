@@ -1,6 +1,6 @@
 package com.ham.netnovel.novel;
 
-import com.ham.netnovel.OAuth.CustomOAuth2User;
+import com.ham.netnovel.common.OAuth.CustomOAuth2User;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
