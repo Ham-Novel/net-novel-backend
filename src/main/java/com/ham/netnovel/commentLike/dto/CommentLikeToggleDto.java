@@ -1,6 +1,6 @@
 package com.ham.netnovel.commentLike.dto;
 
-import com.ham.netnovel.commentLike.LikeType;
+import com.ham.netnovel.commentLike.data.LikeType;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
