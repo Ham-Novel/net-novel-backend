@@ -36,9 +36,10 @@ public class CommentLikeController {
      * 댓글 좋아요 요청을 받아 처리하는 API
      * 댓글에 좋아요를 누른 기록이 없으면, 해당 내용 DB에 저장
      * 댓글에 좋아요를 누른 기록이 있으면 기록 삭제
+     *
      * @param commentLikeToggleDto commentId, providerId(유저 정보), likeType(좋아요,싫어요 정보) 담는 DTO
-     * @param bindingResult DTO 유효성 검사 결과
-     * @param authentication 유저 인증 정보
+     * @param bindingResult        DTO 유효성 검사 결과
+     * @param authentication       유저 인증 정보
      * @return ResponseEntity body에 내용 담아 전달
      */
     @PostMapping("comments/{commentId}/comment-likes")
@@ -49,15 +50,11 @@ public class CommentLikeController {
             Authentication authentication) {
 
         //클라이언트에서 보낸 데이터 유효성 검사, 에러가 있을경우 에러메시지 전송
-        if (bindingResult.hasErrors()){
-            //에러 메시지들 List에 담음
-            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
-            //서버에 로그 출력
-            log.error("toggleCommentLikeStatus API 에러발생 ={}",errorMessages);
-            //에러 메시지 body에 담아 전송
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrorMessages(
+                    bindingResult, "createEpisode");
             return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
-
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
@@ -74,13 +71,20 @@ public class CommentLikeController {
         //유저가 댓글에 좋아요 누른 기록이 있으면 삭제후 false 반환, 없으면 DB에 저장후 true 반환
         boolean result = commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
 
-        //결과 검증
-        if(result){
-            return ResponseEntity.ok("좋아요 등록 완료");
-        }else {
-            return ResponseEntity.ok("좋아요 삭제 완료");
+        //클라이언트가 선택한 감정표현 타입
+        String typeName = "좋아요";
+        //싫어요일경우 재할당
+        if (commentLikeToggleDto.getLikeType().equals(LikeType.DISLIKE)) {
+            typeName = "싫어요";
         }
 
+        //결과 검증 true 일경우 HTTP 200번 코드와 메시지 전송
+        if (result) {
+            return ResponseEntity.ok(typeName+" 등록 완료!");
+        }
+        //false 일경우 badRequest 전송
+        String massage = "이미 " + typeName + "선택한 댓글입니다. 취소후 수정해주세요!";
+        return ResponseEntity.badRequest().body(massage);
 
     }
 

@@ -46,68 +46,65 @@ public class ReCommentServiceImpl implements ReCommentService {
     @Override
     @Transactional
     public void createReComment(ReCommentCreateDto reCommentCreateDto) {
-        log.info("댓글정보={}", reCommentCreateDto.toString());
         //Member 엔티티 조회, null 이면 예외로 던짐
         Member member = memberService.getMember(reCommentCreateDto.getProviderId())
-                .orElseThrow(() -> new NoSuchElementException("Member 정보 없음"));
-
+                .orElseThrow(() -> new NoSuchElementException("createReComment 에러, Member 정보가 없습니다."
+                        + reCommentCreateDto.getProviderId()));
 
         //comment 엔티티 조회, null 이면 예외로 던짐
-
         Comment comment = commentService.getComment(reCommentCreateDto.getCommentId())
-                .orElseThrow(() -> new NoSuchElementException("comment 정보 없음"));
+                .orElseThrow(() -> new NoSuchElementException("createReComment 에러, comment 정보가 없습니다."
+                        + reCommentCreateDto.getCommentId()));
         try {
-
-
             //ReComment 엔티티 생성
-            ReComment reComment = new ReComment(reCommentCreateDto.getContent(), comment, member);
-
+            ReComment reComment = ReComment.builder()
+                    .comment(comment)
+                    .member(member)
+                    .content(reCommentCreateDto.getContent())
+                    .build();
             //ReComment 엔티티 저장
             reCommentRepository.save(reComment);
 
-
         } catch (Exception ex) {
-
-            throw new ServiceMethodException("createReComment 메서드 에러 발생"); // 예외 던지기
+            throw new ServiceMethodException("createReComment 메서드 에러 발생" + ex + ex.getMessage()); // 예외 던지기
         }
-
-
     }
 
     @Override
     @Transactional
     public void updateReComment(ReCommentUpdateDto reCommentUpdateDto) {
-        //null 체크, null이면 예외로 던짐
+        //대댓글 null 체크, null이면 예외로 던짐
         ReComment reComment = getReComment(reCommentUpdateDto.getReCommentId())
-                .orElseThrow(() -> new RuntimeException("잘못된요청"));
+                .orElseThrow(() -> new NoSuchElementException("updateReComment 에러, ReComment 정보가 없습니다. reCommentId ="
+                        + reCommentUpdateDto.getReCommentId()));
+
+        //대댓글 작성한 유저 정보
+        String providerId = reComment.getMember().getProviderId();
+        //댓글의 Id 값
+        Long commentId = reComment.getComment().getId();
+        // 댓글 수정 요청자와 댓글 작성자가 일치하는지 확인
+        // 댓글 수정 에피소드와 기존 댓글과 매핑된 에피소드가 일치하는지 확인
+        if (!providerId.equals(reCommentUpdateDto.getProviderId()) &&
+                !commentId.equals(reCommentUpdateDto.getCommentId())) {
+            throw new IllegalArgumentException("잘못된 파라미터 입력: 수정 요청자와 작성자가 일치하지 않거나 잘못된 댓글 ID 입니다. " +
+                    "요청자 providerId="+ reCommentUpdateDto.getProviderId());
+        }
+        //엔티티 필드값 제거
+        reComment.updateReComment(reCommentUpdateDto.getContent());
         try {
-
-            //대댓글 작성한 유저 정보
-            String providerId = reComment.getMember().getProviderId();
-            //댓글의 Id 값
-            Long commentId = reComment.getComment().getId();
-            //댓글 수정 요청자와 댓글 작성자가 일치하는지 확인
-            //댓글 수정 에피소드와 기존 댓글과 mapping된 에피소드가 일치하는지 확인
-            if (providerId.equals(reCommentUpdateDto.getProviderId()) && Objects.equals(commentId, reCommentUpdateDto.getCommentId())) {
-                reComment.updateReComment(reCommentUpdateDto.getContent());
-                reCommentRepository.save(reComment);
-
-            } else {
-                throw new IllegalArgumentException("updateReComment 메서드 에러 발생, 잘못된 파라미터 입력");
-            }
+            reCommentRepository.save(reComment);
         } catch (Exception ex) {
             //그외 예외처리
-            throw new ServiceMethodException("updateReComment 메서드 에러 발생"); // 예외 던지기
+            throw new ServiceMethodException("updateReComment 메서드 에러 발생" + ex + ex.getMessage()); // 예외 던지기
         }
-
-
     }
 
     @Override
     @Transactional
     public void deleteReComment(ReCommentDeleteDto commentDeleteDto) {
         ReComment reComment = getReComment(commentDeleteDto.getReCommentId())
-                .orElseThrow(() -> new RuntimeException("잘못된요청"));
+                .orElseThrow(() -> new NoSuchElementException("deleteReComment 에러, ReComment 정보가 없습니다. reCommentId ="
+                        + commentDeleteDto.getReCommentId()));
         try {
             //대댓글 작성한 유저 정보
             String providerId = reComment.getMember().getProviderId();
@@ -116,27 +113,18 @@ public class ReCommentServiceImpl implements ReCommentService {
 
             //대댓글 삭제 요청자와 댓글 작성자가 일치하는지 확인
             //대댓글 삭제 댓글 mapping된 댓글이 일치하는지 확인
-            if (providerId.equals(commentDeleteDto.getProviderId()) && Objects.equals(commentId, commentDeleteDto.getCommentId())) {
-
-                //엔티티 상태 변경
+            if (providerId.equals(commentDeleteDto.getProviderId())
+                    && Objects.equals(commentId, commentDeleteDto.getCommentId())) {
+                //대댓글을 삭제 상태로 변경
                 reComment.changeReStatus(CommentStatus.DELETED_BY_USER);
-
-                //상태 변경한 엔티티 저장
+                //변경된 레코드 DB에 저장
                 reCommentRepository.save(reComment);
-
             } else {
                 throw new IllegalArgumentException("deleteReComment 메서드 에러 발생, 잘못된 파라미터 입력");
             }
-
-
         } catch (Exception ex) {
-            log.error("Failed to delete comment to database: {}", ex.getMessage());
-            throw new ServiceMethodException("deleteReComment 메서드 에러 발생"); // 예외 던지기
-
-
+            throw new ServiceMethodException("deleteReComment 메서드 에러 발생"+ex+ex.getMessage()); // 예외 던지기
         }
-
-
     }
 
     @Override
@@ -167,7 +155,7 @@ public class ReCommentServiceImpl implements ReCommentService {
 
         try {
             //유저가 작성한 대댓글이 있으면, DTO로 변환해서 반환
-            return reCommentRepository.findByMember(providerId,pageable)
+            return reCommentRepository.findByMember(providerId, pageable)
                     .stream()
                     .map(reComment -> MemberCommentDto.builder()
                             .type(CommentType.RECOMMENT)//타입지정

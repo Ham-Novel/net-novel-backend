@@ -18,7 +18,7 @@ public class CommentCreateDto {
 
 
     //댓글 내용
-    @NotBlank
+    @NotBlank(message = "댓글을 입력해 주세요!")
     @Size(max = 300,message = "댓글은 300자 이하로 작성해주세요!")
     private String content;
 

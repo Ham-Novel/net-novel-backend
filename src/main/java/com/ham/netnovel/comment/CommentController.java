@@ -49,16 +49,15 @@ public class CommentController {
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
     @PostMapping("/comments")
-    public ResponseEntity<String> createComment(@Valid @RequestBody CommentCreateDto commentCreateDto,
-                                                BindingResult bindingResult,
-                                                Authentication authentication) {
+    public ResponseEntity<String> createComment(
+            @Valid @RequestBody CommentCreateDto commentCreateDto,
+            BindingResult bindingResult,
+            Authentication authentication) {
 
-        //CommentCreateDto Validation 에러가 있을경우 badRequest 전송
+        //클라이언트에서 보낸 데이터 유효성 검사, 에러가 있을경우 에러메시지 전송
         if (bindingResult.hasErrors()) {
-            log.error("createComment API 에러발생 ={}", bindingResult.getFieldError());
-            //에러 메시지들 List에 담음
-            List<String> errorMessages = ValidationErrorHandler.handleValidationErrors(bindingResult);
-            //에러 메시지 body에 담아 전송
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrorMessages(
+                    bindingResult, "createComment");
             return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
 
@@ -156,6 +155,7 @@ public class CommentController {
      * 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API
      * 댓글은 좋아요 순으로 정렬하여 전송
      * 댓글과 대댓글 DTO는 엔티티PK, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
+     *
      * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
      */
     @GetMapping("/episodes/{episodeId}/comments")
@@ -163,20 +163,18 @@ public class CommentController {
             @PathVariable(name = "episodeId") Long episodeId,
             @RequestParam(name = "sortBy", defaultValue = "recent") String sortBy,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize){
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
 
         //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
 
         if (sortBy.equals("recent")) {
             //특정 episode에 달린 댓글 정보를 List에 담음. 최신순으로 정렬
-            return ResponseEntity.ok(commentService.getEpisodeCommentListByRecent(episodeId,pageable));
-        }
-        else if (sortBy.equals("likes")) {
+            return ResponseEntity.ok(commentService.getEpisodeCommentListByRecent(episodeId, pageable));
+        } else if (sortBy.equals("likes")) {
             //특정 episode에 달린 댓글 정보를 List에 담음. 좋아요 순으로 정렬
-            return ResponseEntity.ok(commentService.getEpisodeCommentListByLikes(episodeId,pageable));
-        }
-        else {
+            return ResponseEntity.ok(commentService.getEpisodeCommentListByLikes(episodeId, pageable));
+        } else {
             //정렬 값이 없으면 예외 발생
             throw new IllegalArgumentException("postNovelComments: invalid sortBy option");
         }
@@ -185,6 +183,7 @@ public class CommentController {
     /**
      * Novel(소설) Episode 에 달린 댓글과 대댓글 정보를 전송하는 API
      * 댓글은 최신 순으로 정렬
+     *
      * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
      */
     @GetMapping("/novels/{novelId}/comments")
@@ -192,21 +191,18 @@ public class CommentController {
             @PathVariable(name = "novelId") Long novelId,
             @RequestParam(name = "sortBy", defaultValue = "recent") String sortBy,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-    ) {
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
 
         //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
 
         if (sortBy.equals("recent")) {
             //특정 Novel의 모든 Episode에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 최신순으로 정렬
-            return ResponseEntity.ok(commentService.getNovelCommentListByRecent(novelId,pageable));
-        }
-        else if (sortBy.equals("likes")) {
+            return ResponseEntity.ok(commentService.getNovelCommentListByRecent(novelId, pageable));
+        } else if (sortBy.equals("likes")) {
             //특정 Novel의 모든 Episode에 달린 댓글,대댓글 정보를 List에 담음, 댓글은 좋아요순으로 정렬
-            return ResponseEntity.ok(commentService.getNovelCommentListByLikes(novelId,pageable));
-        }
-        else {
+            return ResponseEntity.ok(commentService.getNovelCommentListByLikes(novelId, pageable));
+        } else {
             //정렬 값이 없으면 예외 발생
             throw new IllegalArgumentException("getNovelComments: invalid sortBy option");
         }

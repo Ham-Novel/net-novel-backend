@@ -2,6 +2,7 @@ package com.ham.netnovel.reComment;
 
 
 import com.ham.netnovel.common.OAuth.CustomOAuth2User;
+import com.ham.netnovel.common.utils.ValidationErrorHandler;
 import com.ham.netnovel.reComment.dto.ReCommentCreateDto;
 import com.ham.netnovel.reComment.dto.ReCommentDeleteDto;
 import com.ham.netnovel.reComment.dto.ReCommentListDto;
@@ -13,14 +14,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
-@RestController("/api")
+@Controller
 @Slf4j
+@RequestMapping("/api")
 public class ReCommentController {
 
     private final ReCommentService reCommentService;
@@ -35,16 +38,17 @@ public class ReCommentController {
     }
 
     @PostMapping("/recomment")
-    public ResponseEntity<String> createReComment(@Valid @RequestBody ReCommentCreateDto reCommentCreateDto,
-                                                  BindingResult bindingResult,
-                                                  Authentication authentication) {
+    public ResponseEntity<String> createReComment(
+            @Valid @RequestBody ReCommentCreateDto reCommentCreateDto,
+            BindingResult bindingResult,
+            Authentication authentication) {
 
-        //ReCommentCreateDto Validation 에러가 있을경우 badRequest 전송
+        //클라이언트에서 보낸 데이터 유효성 검사, 에러가 있을경우 에러메시지 전송
         if (bindingResult.hasErrors()) {
-            log.error("createComment API 에러발생 ={}", bindingResult.getFieldError());
-            return ResponseEntity.badRequest().body("에러발생");
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrorMessages(
+                    bindingResult, "createReComment");
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
-
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
 
@@ -57,51 +61,70 @@ public class ReCommentController {
 
     }
 
-
+    /**
+     * 대댓글을 수정하는 API 입니다.
+     *
+     * <p>클라이언트에서 전송한 데이터를 검증한 후, 이상이 있으면 BadRequest를 전송합니다.
+     * 이상이 없으면 대댓글을 수정후  응답코드를 전송합니다.  </p>
+     *
+     * @param reCommentUpdateDto 수정할 대댓글의 데이터를 담고 있는 {@link ReCommentUpdateDto} 객체
+     * @param bindingResult      DTO의 유효성 검사 결과가 담긴 객체. 에러가 있을 경우 HTTP 400 코드와 에러메시지 전송
+     * @param authentication     현재 사용자 인증 정보를 담고 있는 객체. 인증된 사용자 정보가 없으면 HTTP 401 전송
+     * @return {@link ResponseEntity<String>} 대댓글 업데이트 결과를 담고 있는 응답 객체 반환
+     */
     @PatchMapping("/recomment")
-    public ResponseEntity<String> updateReComment(@Valid @RequestBody ReCommentUpdateDto reCommentUpdateDto,
-                                                  BindingResult bindingResult,
-                                                  Authentication authentication) {
+    public ResponseEntity<String> updateReComment(
+            @Valid @RequestBody ReCommentUpdateDto reCommentUpdateDto,
+            BindingResult bindingResult,
+            Authentication authentication) {
 
-        //ReCommentCreateDto Validation 에러가 있을경우 badRequest 전송
+        //클라이언트에서 보낸 데이터 유효성 검사, 에러가 있을경우 에러메시지 전송
         if (bindingResult.hasErrors()) {
-            log.error("createComment API 에러발생 ={}", bindingResult.getFieldError());
-            return ResponseEntity.badRequest().body("에러발생");
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrorMessages(
+                    bindingResult, "updateReComment");
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
-
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
-
+        //DTO에 유저 정보 할당
         reCommentUpdateDto.setProviderId(principal.getName());
-
+        //대댓글 업데이트
         reCommentService.updateReComment(reCommentUpdateDto);
-
         return ResponseEntity.ok("대댓글 수정 완료");
 
 
     }
 
+    /**
+     * 대댓글을 삭제상태로 변경하는 API 입니다.
+     *
+     * <p>클라이언트에서 전송한 데이터를 검증한 후, 이상이 있으면 BadRequest를 전송합니다.
+     * 이상이 없으면 대댓글을 삭제 상태로 변경하고, 응답코드를 전송합니다.  </p>
+     *
+     * @param reCommentDeleteDto 삭제할 대댓글의 데이터를 담고 있는 {@link ReCommentDeleteDto} 객체
+     * @param bindingResult      DTO의 유효성 검사 결과가 담긴 객체. 에러가 있을 경우 HTTP 400 코드와 에러메시지 전송
+     * @param authentication     현재 사용자 인증 정보를 담고 있는 객체. 인증된 사용자 정보가 없으면 HTTP 401 전송
+     * @return {@link ResponseEntity<String>} 대댓글 삭제 결과를 담고 있는 응답 객체 반환
+     */
     @DeleteMapping("/recomment")
-    public ResponseEntity<String> deleteReComment(@Valid @RequestBody ReCommentDeleteDto reCommentDeleteDto,
-                                                  BindingResult bindingResult,
-                                                  Authentication authentication) {
+    public ResponseEntity<String> deleteReComment(
+            @Valid @RequestBody ReCommentDeleteDto reCommentDeleteDto,
+            BindingResult bindingResult,
+            Authentication authentication) {
 
-        //ReCommentDeleteDto Validation 에러가 있을경우 badRequest 전송
-        if (bindingResult.hasErrors()){
-            log.error("deleteReComment API 에러발생 ={}", bindingResult.getFieldError());
-            return ResponseEntity.badRequest().body("에러발생");
+        //클라이언트에서 보낸 데이터 유효성 검사, 에러가 있을경우 에러메시지 전송
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = ValidationErrorHandler.handleValidationErrorMessages(
+                    bindingResult, "updateReComment");
+            return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
-
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
         CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
-
+        //DTO에 유저 정보 할당
         reCommentDeleteDto.setProviderId(principal.getName());
-
+        //대댓글 삭제상태로 변경
         reCommentService.deleteReComment(reCommentDeleteDto);
-
-        log.info("대댓글 삭제 요청 완료, commentId ={}",reCommentDeleteDto.getCommentId());
         return ResponseEntity.ok("삭제완료");
-
 
     }
 
