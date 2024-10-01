@@ -3,7 +3,7 @@ package com.ham.netnovel.reComment;
 
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.CommentStatus;
-import com.ham.netnovel.commentLike.LikeType;
+import com.ham.netnovel.commentLike.data.LikeType;
 import com.ham.netnovel.member.Member;
 import jakarta.persistence.*;
 import lombok.Builder;

@@ -5,6 +5,7 @@ import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.commentLike.CommentLike;
 import com.ham.netnovel.commentLike.CommentLikeId;
 import com.ham.netnovel.commentLike.CommentLikeRepository;
+import com.ham.netnovel.commentLike.data.LikeResult;
 import com.ham.netnovel.commentLike.dto.CommentLikeToggleDto;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
@@ -35,7 +36,7 @@ public class CommentLikeServiceImpl implements CommentLikeService {
 
     @Override
     @Transactional
-    public boolean toggleCommentLikeStatus(CommentLikeToggleDto commentLikeToggleDto) {
+    public LikeResult toggleCommentLikeStatus(CommentLikeToggleDto commentLikeToggleDto) {
 
         //멤버 엔티티 조회, 없을경우 예외로 던짐
         Member member = memberService.getMember(commentLikeToggleDto.getProviderId())
@@ -54,9 +55,6 @@ public class CommentLikeServiceImpl implements CommentLikeService {
             if (commentLike.isEmpty()) {
 
                 //새로운 댓글 감정 엔티티 생성
-//                CommentLike newCommentLike = new CommentLike(commentLikeId, member, comment, commentLikeToggleDto.getLikeType());
-
-                //새로운 댓글 감정 엔티티 생성
                 CommentLike newCommentLike = CommentLike.builder()
                         .likeType(commentLikeToggleDto.getLikeType())
                         .id(commentLikeId)
@@ -66,23 +64,23 @@ public class CommentLikeServiceImpl implements CommentLikeService {
                 //DB에 저장
                 commentLikeRepository.save(newCommentLike);
                 log.info("댓글 감정 등록 완료, memberId={}, commentId={}", member.getId(), comment.getId());
-                return true;
+                return LikeResult.CREATION;//생성상태 반환
+
             } else if (commentLike.get().getLikeType().equals(commentLikeToggleDto.getLikeType())){
                 //찾은 값이 있으면(좋아요 누른 기록이 있음) 좋아요 기록 삭제, false 반환
                 commentLikeRepository.delete(commentLike.get());
                 log.info("댓글 감정 삭제 완료, memberId={}, commentId={}", member.getId(), comment.getId());
-                return true;
+                return LikeResult.DELETION;//삭제상태 반환
+
             }else {
                 log.warn("toggleCommentLikeStatus 메서드 경고, 기존 댓글 감정표현과 요청된 감정표현이 다릅니다." +
                         " memberId={}, commentId={}", member.getId(), comment.getId());
-                return false;
+                return LikeResult.FAILURE;//실패상태 반환
             }
 
         } catch (Exception ex) {
             // 그 외의 예외는 ServiceMethodException으로 래핑하여 던짐
             throw new ServiceMethodException("toggleCommentLikeStatus 메서드 에러 발생" + ex.getMessage());
         }
-
-
     }
 }

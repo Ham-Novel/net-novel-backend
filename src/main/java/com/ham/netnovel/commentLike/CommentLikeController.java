@@ -1,5 +1,7 @@
 package com.ham.netnovel.commentLike;
 
+import com.ham.netnovel.commentLike.data.LikeResult;
+import com.ham.netnovel.commentLike.data.LikeType;
 import com.ham.netnovel.common.OAuth.CustomOAuth2User;
 import com.ham.netnovel.commentLike.dto.CommentLikeToggleDto;
 import com.ham.netnovel.commentLike.service.CommentLikeService;
@@ -33,18 +35,22 @@ public class CommentLikeController {
     }
 
     /**
-     * 댓글 좋아요 요청을 받아 처리하는 API
-     * 댓글에 좋아요를 누른 기록이 없으면, 해당 내용 DB에 저장
-     * 댓글에 좋아요를 누른 기록이 있으면 기록 삭제
+     * 댓글에 대한 좋아요 또는 싫어요 요청을 처리하는 API입니다.
      *
-     * @param commentLikeToggleDto commentId, providerId(유저 정보), likeType(좋아요,싫어요 정보) 담는 DTO
+     * <p>사용자가 댓글에 좋아요를 눌렀는지의 여부를 확인하고,
+     * 기록이 없으면 이를 DB에 저장하며, 이미 기록이 존재하면 해당 기록을 삭제합니다.</p>
+     *
+     * <p>만약 유저가, 감정표현을 한 상태에서, 다른 감정표현을 클릭시(기존에 좋아요 누른 상태에서 싫어요 선택)
+     * HTTP 400 코드와 에러메시지를 전달합니다.</p>
+     *
+     * @param commentLikeToggleDto commentId, providerId(유저 정보), likeType(좋아요,싫어요 정보) 담
+     *                             는 {@link CommentLikeToggleDto} 객체
      * @param bindingResult        DTO 유효성 검사 결과
      * @param authentication       유저 인증 정보
-     * @return ResponseEntity body에 내용 담아 전달
+     * @return {@link ResponseEntity} 감정 등록시 true, 삭제시 false, 실패시 HTTP 400 코드 전송
      */
     @PostMapping("comments/{commentId}/comment-likes")
     public ResponseEntity<?> toggleCommentLikeStatus(
-            @PathVariable(name = "commentId") Long urlCommentId,
             @Valid @RequestBody CommentLikeToggleDto commentLikeToggleDto,
             BindingResult bindingResult,
             Authentication authentication) {
@@ -61,15 +67,8 @@ public class CommentLikeController {
         //DTO에 유저 인증 정보 저장
         commentLikeToggleDto.setProviderId(principal.getName());
 
-        //URL의 commentId와 RequestBody의 commentlId가 같은지 검증
-        if (!urlCommentId.equals(commentLikeToggleDto.getCommentId())) {
-            String errorMessage = "deleteComment API Error = 'Path Variable Id != Message Body Id'";
-            log.error(errorMessage);
-            return ResponseEntity.badRequest().body(errorMessage);
-        }
-
-        //유저가 댓글에 좋아요 누른 기록이 있으면 삭제후 false 반환, 없으면 DB에 저장후 true 반환
-        boolean result = commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
+        //댓글 감정표현 저장 결과 반환, 감정표현 생성시 CREATION , 삭제시 DELETION 실패시 FAILURE 반환
+        LikeResult likeResult = commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
 
         //클라이언트가 선택한 감정표현 타입
         String typeName = "좋아요";
@@ -77,16 +76,23 @@ public class CommentLikeController {
         if (commentLikeToggleDto.getLikeType().equals(LikeType.DISLIKE)) {
             typeName = "싫어요";
         }
-
-        //결과 검증 true 일경우 HTTP 200번 코드와 메시지 전송
-        if (result) {
-            return ResponseEntity.ok(typeName+" 등록 완료!");
+        // LikeResult에 따른 결과 처리
+        switch (likeResult) {
+            case CREATION -> {
+                return ResponseEntity.ok(true);
+            }//댓글 감정표현 저장 완료
+            case DELETION -> {
+                return ResponseEntity.ok(false);
+            }//댓글 감정표현 삭제 완료
+            case FAILURE -> {//false 일경우 badRequest 전송
+                String massage = "이미 " + typeName + "선택한 댓글입니다. 취소후 수정해주세요!";
+                return ResponseEntity.badRequest().body(massage);
+            }
+            default -> {
+                return ResponseEntity.internalServerError().body("알수없는에러발생");
+            }
         }
-        //false 일경우 badRequest 전송
-        String massage = "이미 " + typeName + "선택한 댓글입니다. 취소후 수정해주세요!";
-        return ResponseEntity.badRequest().body(massage);
+
 
     }
-
-
 }

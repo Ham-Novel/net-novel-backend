@@ -2,6 +2,7 @@ package com.ham.netnovel.commentLike;
 
 
 import com.ham.netnovel.comment.Comment;
+import com.ham.netnovel.commentLike.data.LikeType;
 import com.ham.netnovel.member.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
