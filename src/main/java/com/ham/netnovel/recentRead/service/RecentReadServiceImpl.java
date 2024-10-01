@@ -98,12 +98,13 @@ public class RecentReadServiceImpl implements RecentReadService {
         try {
             return recentReadRepository.findByMemberProviderId(providerId, pageable)
                     .stream()
+                    //소설 정보를 DTO로 변환해서 List 객체로  반환
                     .map(recentRead -> {
                         Episode episode = recentRead.getEpisode();//에피소드 엔티티 객체에 저장
                         Novel novel = recentRead.getNovel();//노벨 엔티티 객체에 저장
                         return MemberRecentReadDto.builder()//DTO로 변환하여 반환
-                                .novelId(novel.getId())
-                                .novelTitle(novel.getTitle())
+                                .id(novel.getId())
+                                .title(novel.getTitle())
                                 .novelType(novel.getType())
                                 .authorName(novel.getAuthor().getNickName())
                                 .episodeTitle(episode.getTitle())
@@ -118,6 +119,9 @@ public class RecentReadServiceImpl implements RecentReadService {
         }
 
     }
+
+
+
 
 
 }

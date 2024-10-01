@@ -50,14 +50,15 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public void createComment(CommentCreateDto commentCreateDto) {
-        log.info("댓글정보={}", commentCreateDto.toString());
-        //Member 엔티티 조회, null이면 예외로 던짐
-        Member member = memberService.getMember(commentCreateDto.getProviderId())
-                .orElseThrow(() -> new NoSuchElementException("Member 정보 없음"));
 
         //Member 엔티티 조회, null이면 예외로 던짐
+        Member member = memberService.getMember(commentCreateDto.getProviderId())
+                .orElseThrow(() -> new NoSuchElementException("createComment 에러, Member 정보가 없습니다."
+                        +commentCreateDto.getProviderId()));
+        //Episode 엔티티 조회, null이면 예외로 던짐
         Episode episode = episodeService.getEpisode(commentCreateDto.getEpisodeId())
-                .orElseThrow(() -> new NoSuchElementException("Episode 정보 없음"));
+                .orElseThrow(() -> new NoSuchElementException("createComment 에러, Episode 정보가 없습니다."
+                        +commentCreateDto.getEpisodeId()));
 
         try {
             //Comment 엔티티 생성
