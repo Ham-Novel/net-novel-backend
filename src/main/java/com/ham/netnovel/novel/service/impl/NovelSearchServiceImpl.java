@@ -169,9 +169,9 @@ public class NovelSearchServiceImpl implements NovelSearchService {
     NovelFavoriteDto convertEntityToFavoriteDto(Novel novel){
 
         //작품의 태그들 가져오기
-        List<TagDataDto> dataDtoList = novel.getNovelTags().stream()
-                .map(novelTag -> novelTag.getTag().getData())
-                .toList();
+//        List<TagDataDto> dataDtoList = novel.getNovelTags().stream()
+//                .map(novelTag -> novelTag.getTag().getData())
+//                .toList();
 
         //AWS cloud front 섬네일 이미지 URL 객체 반환
         String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(), "mini");
@@ -181,6 +181,7 @@ public class NovelSearchServiceImpl implements NovelSearchService {
                 .thumbnailUrl(String.valueOf(thumbnailUrl))
                 .title(novel.getTitle())
                 .authorName(novel.getAuthor().getNickName())
+                .novelType(novel.getType())
                 .id(novel.getId())
                 .build();
 

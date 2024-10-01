@@ -19,7 +19,8 @@ public class NovelFavoriteDto {
     //소설제목
     private String title;
 
-    private NovelType status;
+    private NovelType novelType;
+
 
     //작가이름 작가 엔티티 생성후 사용
     private String authorName;
