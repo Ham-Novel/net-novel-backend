@@ -61,6 +61,7 @@ public class NovelSearchRepositoryImpl implements NovelSearchRepository {
             var query = jpaQueryFactory.select(Projections.bean(NovelListDto.class,//DTO에 값을 넣어 반환
                             novel.id.as("id"),
                             novel.title.as("title"),
+                            novel.description.as("description"),
                             member.providerId.as("providerId"),
                             member.nickName.as("authorName"),
                             novelMetaData.totalFavorites.as("totalFavorites"),

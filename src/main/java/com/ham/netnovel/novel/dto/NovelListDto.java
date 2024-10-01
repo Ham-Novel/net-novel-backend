@@ -45,6 +45,8 @@ public class NovelListDto {//랭킹 등 리스트로 소설정보를 전달시 �
 
     private String thumbnailUrl;//섬네일 URL
 
+    private String description;//소설 설명
+
 
 
 
