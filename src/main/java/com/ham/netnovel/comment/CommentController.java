@@ -1,6 +1,7 @@
 package com.ham.netnovel.comment;
 
 
+import com.ham.netnovel.comment.data.CommentSortOrder;
 import com.ham.netnovel.common.OAuth.CustomOAuth2User;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
@@ -152,33 +153,41 @@ public class CommentController {
     }
 
     /**
-     * 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API
-     * 댓글은 좋아요 순으로 정렬하여 전송
-     * 댓글과 대댓글 DTO는 엔티티PK, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
+     * 에피소드에 달린 댓글과 대댓글 정보를 전송하는 API 입니다.
+     * 댓글은 좋아요 또는 최신순으로 정렬하여 전송
+     * 댓글과 대댓글 DTO는 id, content(내용), nickName(작성자닉네임), updatedAt(마지막으로 업데이트한 시각)을 멤버변수로 가짐
      *
-     * @return ResponseEntity 댓글 내용을 CommentListDto의 List 형태로 반환
+     * @return ResponseEntity 댓글 내용을 {@link CommentEpisodeListDto} List 형태로 반환
      */
     @GetMapping("/episodes/{episodeId}/comments")
     public ResponseEntity<?> getEpisodeComments(
             @PathVariable(name = "episodeId") Long episodeId,
             @RequestParam(name = "sortBy", defaultValue = "recent") String sortBy,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            Authentication authentication) {
 
+        //유저 인증정보가 있을경우 검증후 객체에 할당, 없으면 "NON_LOGIN" 할당
+        String providerId;
+        if (authentication == null) {
+            providerId = "NON_LOGIN";
+        } else {
+            CustomOAuth2User principal = authenticator.checkAuthenticate(authentication);
+            providerId = principal.getName();
+        }
         //Pageable 객체 생성, null 이거나 음수면 예외로 던짐
         Pageable pageable = PageableUtil.createPageable(pageNumber, pageSize);
 
+        //유저가 선택한 정렬방식이 최신순 일경우, 최신순으로 댓글을 정렬하여 반환
         if (sortBy.equals("recent")) {
-            //특정 episode에 달린 댓글 정보를 List에 담음. 최신순으로 정렬
-            return ResponseEntity.ok(commentService.getEpisodeCommentListByRecent(episodeId, pageable));
-        } else if (sortBy.equals("likes")) {
-            //특정 episode에 달린 댓글 정보를 List에 담음. 좋아요 순으로 정렬
-            return ResponseEntity.ok(commentService.getEpisodeCommentListByLikes(episodeId, pageable));
-        } else {
-            //정렬 값이 없으면 예외 발생
-            throw new IllegalArgumentException("postNovelComments: invalid sortBy option");
+            return ResponseEntity.ok(commentService.getEpisodeComment(episodeId, pageable, providerId, CommentSortOrder.RECENT));
         }
+        //정렬 기본값은 좋아요순, 좋아요순으로 댓글을 정렬하여 반환
+        return ResponseEntity.ok(commentService.getEpisodeComment(episodeId, pageable, providerId, CommentSortOrder.LIKES));
+
     }
+
+    //ToDo 유저검증로직 추가(수정삭제용)
 
     /**
      * Novel(소설) Episode 에 달린 댓글과 대댓글 정보를 전송하는 API
@@ -206,17 +215,6 @@ public class CommentController {
             //정렬 값이 없으면 예외 발생
             throw new IllegalArgumentException("getNovelComments: invalid sortBy option");
         }
-    }
-
-
-    //댓글 생성 테스트용 API
-    @GetMapping("/test")
-    public String commentTest() {
-
-
-        return "/comment/comment-test";
-
-
     }
 
 

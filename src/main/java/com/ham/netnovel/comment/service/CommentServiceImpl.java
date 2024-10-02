@@ -4,6 +4,7 @@ package com.ham.netnovel.comment.service;
 import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.CommentRepository;
 import com.ham.netnovel.comment.CommentStatus;
+import com.ham.netnovel.comment.data.CommentSortOrder;
 import com.ham.netnovel.comment.data.CommentType;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
@@ -15,6 +16,7 @@ import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
+import com.ham.netnovel.reComment.ReComment;
 import com.ham.netnovel.reComment.dto.ReCommentListDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -54,11 +56,11 @@ public class CommentServiceImpl implements CommentService {
         //Member 엔티티 조회, null이면 예외로 던짐
         Member member = memberService.getMember(commentCreateDto.getProviderId())
                 .orElseThrow(() -> new NoSuchElementException("createComment 에러, Member 정보가 없습니다."
-                        +commentCreateDto.getProviderId()));
+                        + commentCreateDto.getProviderId()));
         //Episode 엔티티 조회, null이면 예외로 던짐
         Episode episode = episodeService.getEpisode(commentCreateDto.getEpisodeId())
                 .orElseThrow(() -> new NoSuchElementException("createComment 에러, Episode 정보가 없습니다."
-                        +commentCreateDto.getEpisodeId()));
+                        + commentCreateDto.getEpisodeId()));
 
         try {
             //Comment 엔티티 생성
@@ -140,11 +142,11 @@ public class CommentServiceImpl implements CommentService {
     //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
-    public List<MemberCommentDto> getMemberCommentList(String providerId,Pageable pageable) {
+    public List<MemberCommentDto> getMemberCommentList(String providerId, Pageable pageable) {
 
         try {
             //유저가 작성한 댓글이 있으면, DTO로 변환해서 반환
-            return commentRepository.findByMember(providerId,pageable)
+            return commentRepository.findByMember(providerId, pageable)
                     .stream()
                     .map(comment -> MemberCommentDto.builder()
                             .type(CommentType.COMMENT)//타입지정
@@ -165,56 +167,38 @@ public class CommentServiceImpl implements CommentService {
 
 
 
-    //ToDo 댓글 페이지네이션
     @Override
-    @Transactional(readOnly = true)
-    public List<CommentEpisodeListDto> getEpisodeCommentListByRecent(Long episodeId,Pageable pageable) {
-
+    @Transactional
+    public List<CommentEpisodeListDto> getEpisodeComment(Long episodeId,
+                                                         Pageable pageable,
+                                                         String providerId,
+                                                         CommentSortOrder sortOrder) {
         try {
-            return commentRepository.findByEpisodeIdByCreatedAt(episodeId,pageable)
-                    .stream()
-                    //엔티티 DTO로 convert
-                    .map(this::convertToCommentEpisodeListDto)
-                    //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
-                    .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt).reversed())
-                    .collect(Collectors.toList()); // List로 변환
-        } catch (Exception e) {
-            throw new ServiceMethodException("getReCommentList 메서드 에러 발생"); // 예외 던지기
-        }
-
-
-    }
-    //ToDo 댓글 페이지네이션
-    @Override
-    @Transactional(readOnly = true)
-    public List<CommentEpisodeListDto> getEpisodeCommentListByLikes(Long episodeId,Pageable pageable) {
-        try {
-            return commentRepository.findByEpisodeIdByCommentLikes(episodeId,pageable)
-                    .stream()
-                    //엔티티 DTO로 convert
-                    .map(this::convertToCommentEpisodeListDto)
-                    //좋아요 순으로 정렬, 기본값은 오름차순 정렬이므로 reversed 추가
-                    .sorted(Comparator.comparing(CommentEpisodeListDto::getLikes).reversed())
-                    .collect(Collectors.toList()); // List로 변환
-
+            // 정렬 기준에 따라 서로 다른 repository 메서드를 호출(최신순/좋아요순)
+            List<Comment> comments = (sortOrder.equals(CommentSortOrder.RECENT))
+                    ? commentRepository.findByEpisodeIdByCreatedAt(episodeId, pageable)
+                    : commentRepository.findByEpisodeIdByCommentLikes(episodeId, pageable);
+            // DTO 로 변환하여 반환
+            return comments.stream()
+                    .map(comment -> convertToCommentEpisodeListDto(comment, providerId)) // DTO로 변환
+                    .toList();
         } catch (Exception ex) {
             throw new ServiceMethodException("getReCommentList 메서드 에러 발생" + ex.getMessage()); // 예외 던지기
         }
     }
 
 
-
     @Override
     @Transactional(readOnly = true)
-    public List<CommentEpisodeListDto> getNovelCommentListByRecent(Long novelId,Pageable pageable) {
+    public List<CommentEpisodeListDto> getNovelCommentListByRecent(Long novelId, Pageable pageable) {
         try {
-            return commentRepository.findByNovelOrderByCreatedAt(novelId,pageable).stream()
-                //엔티티 DTO로 convert
-                .map(this::convertToCommentEpisodeListDto)
-                //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
-                .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt).reversed())
-                .collect(Collectors.toList());
-        }catch (Exception e) {
+            return commentRepository.findByNovelOrderByCreatedAt(novelId, pageable).stream()
+                    //엔티티 DTO로 convert
+                    .map(this::convertToCommentEpisodeListDto)
+                    //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
+                    .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt).reversed())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
             throw new ServiceMethodException("getMemberCommentList 메서드 에러 발생"); // 예외 던지기
         }
 
@@ -224,13 +208,13 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     public List<CommentEpisodeListDto> getNovelCommentListByLikes(Long novelId, Pageable pageable) {
         try {
-            return commentRepository.findByNovelOrderByCommentLikes(novelId,pageable).stream()
+            return commentRepository.findByNovelOrderByCommentLikes(novelId, pageable).stream()
                     //엔티티 DTO로 convert
                     .map(this::convertToCommentEpisodeListDto)
                     //좋아요 순으로 정렬, 기본값은 오름차순 정렬이므로 reversed 추가
                     .sorted(Comparator.comparing(CommentEpisodeListDto::getLikes).reversed())
                     .collect(Collectors.toList());
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new ServiceMethodException("getMemberCommentList 메서드 에러 발생"); // 예외 던지기
         }
 
@@ -272,5 +256,61 @@ public class CommentServiceImpl implements CommentService {
                 .build();
     }
 
+    //Comment 엔티티를 CommentEpisodeListDto 변환하는 메서드
+    private CommentEpisodeListDto convertToCommentEpisodeListDto(Comment comment, String providerId) {
 
+        //댓글 작성자와, 접속자가 같으면 수정가능여부 true 할당 아닐경우 false 할당
+        boolean isEditable = comment.getMember().getProviderId().equals(providerId);
+
+        CommentEpisodeListDto commentEpisodeListDto = CommentEpisodeListDto.builder()
+                .nickName(comment.getMember().getNickName())//작성자 닉네임
+                .episodeTitle(comment.getEpisode().getTitle())//에피소드 제목
+                .content(comment.getContent())
+                .commentId(comment.getId())
+                .updatedAt(comment.getUpdatedAt())
+                .createdAt(comment.getCreatedAt())
+                .likes(comment.getTotalLikes())//댓글에 달린  좋아요 수
+                .disLikes(comment.getTotalDisLikes())//댓글에 달린 싫어요 수
+                .isEditable(isEditable)//수정가능여부
+                .build();
+
+
+        if (!comment.getReComments().isEmpty()) {
+            List<ReCommentListDto> reCommentListDtos = convertReCommentsToDtoList(comment.getReComments(), providerId);
+            commentEpisodeListDto.setReCommentList(reCommentListDtos);
+        }
+        return commentEpisodeListDto;
+
+    }
+
+    //대댓글을 ReCommentListDto 변환하는 메서드
+    private List<ReCommentListDto> convertReCommentsToDtoList(List<ReComment> reComments, String providerId) {
+
+        //반환용 객체
+        List<ReCommentListDto> reCommentListDtos = new ArrayList<>();
+
+        for (ReComment reComment : reComments) {
+
+            //댓글 작성자와, 접속자가 같으면 수정가능여부 true 할당 아닐경우 false 할당
+            boolean isEditable = reComment.getMember().getProviderId().equals(providerId);
+
+            //DTO 생성
+            ReCommentListDto dto = ReCommentListDto.builder()
+                    .nickName(reComment.getMember().getNickName())
+                    .content(reComment.getContent())
+                    .reCommentId(reComment.getId())
+                    .createdAt(reComment.getCreatedAt())
+                    .updatedAt(reComment.getUpdatedAt())
+                    .likes(reComment.getTotalLikes())//댓글에 달린 싫어요 수
+                    .disLikes(reComment.getTotalDisLikes())//대댓글에 달린 싫어요 수
+                    .isEditable(isEditable)//수정가능여부
+                    .build();
+
+            reCommentListDtos.add(dto);
+        }
+
+        return reCommentListDtos;
+
+
+    }
 }

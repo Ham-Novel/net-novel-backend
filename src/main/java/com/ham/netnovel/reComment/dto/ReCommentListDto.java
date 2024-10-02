@@ -28,6 +28,8 @@ public class ReCommentListDto {
     //싫어요 수
     private int disLikes;
 
+    boolean isEditable;//수정/삭제 가능여부
+
     private LocalDateTime createdAt;
 
 
