@@ -70,12 +70,7 @@ public class CommentLikeController {
         //댓글 감정표현 저장 결과 반환, 감정표현 생성시 CREATION , 삭제시 DELETION 실패시 FAILURE 반환
         LikeResult likeResult = commentLikeService.toggleCommentLikeStatus(commentLikeToggleDto);
 
-        //클라이언트가 선택한 감정표현 타입
-        String typeName = "좋아요";
-        //싫어요일경우 재할당
-        if (commentLikeToggleDto.getLikeType().equals(LikeType.DISLIKE)) {
-            typeName = "싫어요";
-        }
+
         // LikeResult에 따른 결과 처리
         switch (likeResult) {
             case CREATION -> {
@@ -84,7 +79,14 @@ public class CommentLikeController {
             case DELETION -> {
                 return ResponseEntity.ok(false);
             }//댓글 감정표현 삭제 완료
-            case FAILURE -> {//false 일경우 badRequest 전송
+            case FAILURE -> {
+                //false 일경우 badRequest 전송
+                //클라이언트가 현재 선택한 타입과 반대타입 할당(기존에 선택한 감정표현을 에러메시지로 전송하기 위함)
+                String typeName = "싫어요";
+                //싫어요일경우 재할당
+                if (commentLikeToggleDto.getLikeType().equals(LikeType.DISLIKE)) {
+                    typeName = "좋아요";
+                }
                 String massage = "이미 " + typeName + "선택한 댓글입니다. 취소후 수정해주세요!";
                 return ResponseEntity.badRequest().body(massage);
             }
