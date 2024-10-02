@@ -11,14 +11,18 @@ import com.ham.netnovel.novel.service.NovelService;
 import com.ham.netnovel.settlement.Settlement;
 import com.ham.netnovel.settlement.SettlementRepository;
 import com.ham.netnovel.settlement.SettlementStatus;
+import com.ham.netnovel.settlement.dto.SettlementHistoryDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -97,8 +101,6 @@ public class SettlementServiceImpl implements SettlementService {
         if (novelIds.isEmpty()) {
             throw new IllegalArgumentException("작성한 소설이 없습니다.");
         }
-
-
         //유저가 정산 요청중인 이력이 있는지 확인, 있으면 true 반환
         //이미 정산 요청중일경우 false 반환하고 메서드 종료
         boolean result = hasRequestedSettlement(member.getId());
@@ -130,6 +132,29 @@ public class SettlementServiceImpl implements SettlementService {
         settlementRepository.saveAll(settlements);
         //true 반환
         return true;
+    }
+
+    @Override
+    public List<SettlementHistoryDto> getSettlementHistory(String providerId, Pageable pageable) {
+
+        // providerId가 null이거나 비어있는 경우 예외로 던짐
+        if (TypeValidationUtil.isNullOrEmpty(providerId)) {
+            throw new IllegalArgumentException("getSettlementHistory 에러, providerId null 이거나 비었습니다..");
+        }
+        //유저 정보 확인
+        Member member = memberService.getMember(providerId)
+                .orElseThrow(() ->
+                        new NoSuchElementException("getSettlementHistory 에러, 유저정보가 없습니다. providerId=" + providerId));
+        try {
+            //유저의 과거 정산 내역을 페이지네이션적용하여 가져온후 DTO로 반환
+            return settlementRepository.findSettlementsByMember(member.getId(), pageable)
+                    .stream()
+                    .map(this::converToSettlementHistoryDto)//DTO로 변환
+                    .collect(Collectors.toList());
+
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getSettlementHistory 메서드 에러" + ex + ex.getMessage());
+        }
     }
 
 
@@ -191,6 +216,28 @@ public class SettlementServiceImpl implements SettlementService {
     private boolean hasRequestedSettlement(Long memberId) {
         List<Settlement> result = settlementRepository.findRequestedByMember(memberId);
         return !result.isEmpty();
+    }
+
+
+    //Settlement 엔티티를 SettlementHistoryDto 변환하는 메서드
+    private SettlementHistoryDto converToSettlementHistoryDto(Settlement settlement) {
+        //날짜 포맷터, 연 월 일 시간 분 까지만 표현
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        //DTO로 반환
+        SettlementHistoryDto dto = SettlementHistoryDto.builder()
+                .revenue(settlement.getRevenue())
+                .coinCount(settlement.getCoinCount())
+                .novelTitle(settlement.getNovel().getTitle())
+                .status(settlement.getStatus())
+                .createdAt(settlement.getCreatedAt().format(formatter)) // 포맷된 문자열로 변경
+                .build();
+
+        //정산 완료일이 있을경우 DTO에 할당 없으면 바로반환
+        if (settlement.getCompletionDate()!=null){
+            dto.setCompletionDate( settlement.getCompletionDate().format(formatter));
+        }
+
+        return dto;
     }
 
 }
