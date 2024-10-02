@@ -5,7 +5,9 @@ import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.tag.Tag;
 import com.ham.netnovel.tag.TagRepository;
 import com.ham.netnovel.tag.TagStatus;
+import com.ham.netnovel.tag.dto.TagDataDto;
 import com.ham.netnovel.tag.dto.TagDeleteDto;
+import com.ham.netnovel.tag.dto.TagFindDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,7 @@ import java.util.Optional;
 @Slf4j
 public class TagServiceImpl implements TagService {
 
-   private final TagRepository tagRepository;
+    private final TagRepository tagRepository;
 
     public TagServiceImpl(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
@@ -38,6 +40,49 @@ public class TagServiceImpl implements TagService {
         return tagRepository.findByName(tagName);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public TagDataDto getTagDtoByName(String tagName) {
+        //DB에서 검색하여 결과 DTO로 변환하여 반환, 검색결과가 없을경우 빈객체 반환
+        return getTagByName(tagName)
+                .map(this::convertToTagDataDto) // 값이 있을 경우 DTO 변환
+                .orElse(new TagDataDto());
+    }
+
+    @Override
+    public TagDataDto getTagDtoById(Long tagId) {
+        // tagId가 null인 경우 바로 빈 객체 반환
+        if (tagId == null) {
+            return new TagDataDto();
+        }
+
+        //DB에서 검색하여 결과 DTO로 변환하여 반환, 검색결과가 없을경우 빈객체 반환
+        return tagRepository.findById(tagId)
+                .map(this::convertToTagDataDto)// 값이 있을 경우 DTO 변환
+                .orElse(new TagDataDto());
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TagDataDto getTagDto(TagFindDto tagFindDto) {
+
+        try {
+            //태그이름이 기본값일경우 ID 로 검색
+            if ("defaultName".equals(tagFindDto.getTagName())) {
+                return getTagDtoById(tagFindDto.getId());
+            }
+            //태그이름이 기본값이 아닐경우 태그명으로 검색
+            return getTagDtoByName(tagFindDto.getTagName());
+        } catch (Exception ex) {
+
+            throw new ServiceMethodException("getTagDto 에러 : " + ex + ex.getMessage());
+
+        }
+
+
+    }
+
 
     @Override
     public List<String> getTagNamesBySearchWord(String searchWord) {
@@ -46,7 +91,7 @@ public class TagServiceImpl implements TagService {
         String validateSearchWord = TypeValidationUtil.validateSearchWord(searchWord);
 
         //검색어가 비어있거나 10자를 넘어가는 경우 빈리스트 반환
-        if (validateSearchWord.isEmpty()|| validateSearchWord.length()>10){
+        if (validateSearchWord.isEmpty() || validateSearchWord.length() > 10) {
             return Collections.emptyList();
         }
 
@@ -77,7 +122,7 @@ public class TagServiceImpl implements TagService {
             //만들어진 Tag 엔티티 반환
 
             Tag save = tagRepository.save(tag);
-            log.info("새로운 Tag 생성 완료, 태그명 ={} ",save.getId());
+            log.info("새로운 Tag 생성 완료, 태그명 ={} ", save.getId());
             return save;
 
         } catch (Exception ex) {
@@ -153,4 +198,21 @@ public class TagServiceImpl implements TagService {
             throw new ServiceMethodException("deleteTag() Error : " + ex.getMessage());
         }
     }
+
+
+    //null 파라미터 넣지 말것!!
+    private TagDataDto convertToTagDataDto(Tag tag) {
+
+        if (tag == null) {
+            return new TagDataDto();
+        }
+        return TagDataDto.builder()
+                .name(tag.getName())
+                .id(tag.getId())
+                .status(tag.getStatus())
+                .build();
+
+    }
+
+
 }
