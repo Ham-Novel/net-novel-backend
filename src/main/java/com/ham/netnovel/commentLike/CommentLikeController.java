@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,7 +57,7 @@ public class CommentLikeController {
         //클라이언트에서 보낸 데이터 유효성 검사, 에러가 있을경우 에러메시지 전송
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = ValidationErrorHandler.handleValidationErrorMessages(
-                    bindingResult, "createEpisode");
+                    bindingResult, "toggleCommentLikeStatus");
             return ResponseEntity.badRequest().body(String.join(", ", errorMessages));
         }
         //유저 인증 정보가 없으면 badRequest 응답, 정보가 있으면  CustomOAuth2User로 타입캐스팅
