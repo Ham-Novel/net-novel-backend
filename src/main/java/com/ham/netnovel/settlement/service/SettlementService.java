@@ -2,7 +2,10 @@ package com.ham.netnovel.settlement.service;
 
 
 import com.ham.netnovel.coinUseHistory.dto.NovelRevenueDto;
+import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.settlement.Settlement;
+import com.ham.netnovel.settlement.dto.SettlementHistoryDto;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,6 +63,24 @@ public interface SettlementService {
      * @throws IllegalArgumentException 유저가 작성한 소설이 없을 경우
      */
     boolean processSettlementRequest(String providerId);
+
+
+    /**
+     * 유저의 소설 정산 내역을 가져와 리스트로 반환하는 메서드 입니다.
+     *
+     * <p>
+     * 사용자 정보가 없을 경우 예외를 던지며, 사용자 정보가 올바른 경우 정산 기록을
+     * 페이지네이션 정보에 따라 DTO로 변환해 반환합니다.</p>
+     * <p>반환되는 DTO의 날짜 형식은 "년-월-일 시:분"입니다.</p>
+     *
+     * @param providerId 유저의 고유 식별자 (providerId)
+     * @param pageable 페이지 정보 {@link Pageable} 객체
+     * @return {@link SettlementHistoryDto} 리스트로 유저의 정산 내역
+     * @throws IllegalArgumentException providerId가 null이거나 비어 있는 경우
+     * @throws NoSuchElementException 주어진 providerId에 해당하는 유저 정보가 없는 경우
+     * @throws ServiceMethodException 정산 내역을 가져오는 중 발생한 나머지 예외
+     */
+    List<SettlementHistoryDto> getSettlementHistory(String providerId, Pageable pageable);
 
 
 }
