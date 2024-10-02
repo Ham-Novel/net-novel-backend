@@ -39,7 +39,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             "where c.episode.id =:episodeId " +
             "and c.status = 'ACTIVE' " + //ACTIVE 상태인 댓글만 가져옴
             "order by (select count(cl) from CommentLike  cl " +//CommentLike 엔티티의 commentId 를 count
-            "where cl.comment.id = c.id) desc ")//좋아요 순으로 내림차순으로 정렬(좋아요 많은 댓글이 위로옴)
+            "where cl.comment.id = c.id and cl.likeType ='LIKE') desc ")//좋아요 순으로 내림차순으로 정렬(좋아요 많은 댓글이 위로옴)
 //날짜순으로 역정렬, 최신순이 위로옴
     List<Comment> findByEpisodeIdByCommentLikes(@Param("episodeId") Long episodeId, Pageable pageable);
 

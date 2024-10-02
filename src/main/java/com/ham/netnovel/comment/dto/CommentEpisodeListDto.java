@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,6 +39,9 @@ public class CommentEpisodeListDto {//뷰에 반환할때 사용하는 DTO
     @Min(0)
     //싫어요 수
     private int disLikes;
+
+
+    boolean isEditable;//수정/삭제 가능여부
 
     //댓글에 달린 대댓글 목록
 
