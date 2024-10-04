@@ -15,7 +15,8 @@ public interface NovelRepository extends JpaRepository<Novel, Long>, NovelSearch
             "join fetch n.author m " +
             "left join fetch n.novelMetaData nm " +
             "left join fetch n.novelAverageRating nr " +
-            "where m.providerId =:providerId")
+            "where m.providerId =:providerId " +
+            "and n.status = 'ACTIVE'")
     List<Novel> findNovelsByMember(@Param("providerId") String providerId);
 
 
