@@ -139,32 +139,16 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
-    //ToDo 댓글 페이지네이션
     @Override
     @Transactional(readOnly = true)
     public List<MemberCommentDto> getMemberCommentList(String providerId, Pageable pageable) {
-
         try {
-            //유저가 작성한 댓글이 있으면, DTO로 변환해서 반환
-            return commentRepository.findByMember(providerId, pageable)
-                    .stream()
-                    .map(comment -> MemberCommentDto.builder()
-                            .type(CommentType.COMMENT)//타입지정
-                            .id(comment.getId())
-                            .content(comment.getContent())
-                            .createAt(comment.getCreatedAt())
-                            .updatedAt(comment.getUpdatedAt())
-                            .build())
-                    //생성시간 역순으로 정렬(최신 댓글이 먼저 나오도록)
-                    .sorted(Comparator.comparing(MemberCommentDto::getCreateAt).reversed())
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            throw new ServiceMethodException("getMemberCommentList 메서드 에러 발생"); // 예외 던지기
+            return commentRepository.findCommentByMember(providerId, pageable);
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getMemberCommentList 메서드 에러 발생" + ex + ex.getMessage()); // 예외 던지기
         }
 
     }
-
 
 
     @Override
@@ -199,7 +183,7 @@ public class CommentServiceImpl implements CommentService {
                     .sorted(Comparator.comparing(CommentEpisodeListDto::getCreatedAt).reversed())
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new ServiceMethodException("getMemberCommentList 메서드 에러 발생"); // 예외 던지기
+            throw new ServiceMethodException("getNovelCommentListByRecent 메서드 에러 발생"); // 예외 던지기
         }
 
     }
@@ -215,7 +199,7 @@ public class CommentServiceImpl implements CommentService {
                     .sorted(Comparator.comparing(CommentEpisodeListDto::getLikes).reversed())
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new ServiceMethodException("getMemberCommentList 메서드 에러 발생"); // 예외 던지기
+            throw new ServiceMethodException("getNovelCommentListByLikes 메서드 에러 발생"); // 예외 던지기
         }
 
     }

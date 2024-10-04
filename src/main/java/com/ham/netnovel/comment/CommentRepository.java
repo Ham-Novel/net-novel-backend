@@ -1,5 +1,6 @@
 package com.ham.netnovel.comment;
 
+import com.ham.netnovel.comment.repository.CommentSearchRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -7,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface CommentRepository extends JpaRepository<Comment, Long> {
+public interface CommentRepository extends JpaRepository<Comment, Long>, CommentSearchRepository {
 
     /**
      * 유저가 작성한 댓글을 모두찾아 반환하는 메서드
@@ -15,8 +16,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * @param providerId 유저의 providerId 값
      * @return List Comment 엔티티 List로 반환
      */
-    @Query("select c from Comment c " +//Episode 테이블과 join(N:1)
-            "join fetch c.member m " +//Member 테이블과 join(N:1)
+    @Query("select c from Comment c " +
+            "join fetch c.member m " +//Episode 테이블과 join(N:1)
+            "join fetch c.episode e " +//Episode 테이블과 join(N:1)
             "where m.providerId =:providerId " +
             "order by c.createdAt DESC ")//생성 시간으로 내림차순 정렬
 //날짜순으로 역정렬, 최신순이 위로옴

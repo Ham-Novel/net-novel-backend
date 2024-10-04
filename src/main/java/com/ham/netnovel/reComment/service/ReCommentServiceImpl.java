@@ -6,11 +6,12 @@ import com.ham.netnovel.comment.CommentStatus;
 import com.ham.netnovel.comment.data.CommentType;
 import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.common.exception.ServiceMethodException;
+import com.ham.netnovel.episode.Episode;
 import com.ham.netnovel.member.Member;
 import com.ham.netnovel.member.service.MemberService;
 import com.ham.netnovel.member.dto.MemberCommentDto;
 import com.ham.netnovel.reComment.ReComment;
-import com.ham.netnovel.reComment.ReCommentRepository;
+import com.ham.netnovel.reComment.repository.ReCommentRepository;
 import com.ham.netnovel.reComment.dto.ReCommentCreateDto;
 import com.ham.netnovel.reComment.dto.ReCommentDeleteDto;
 import com.ham.netnovel.reComment.dto.ReCommentListDto;
@@ -108,13 +109,13 @@ public class ReCommentServiceImpl implements ReCommentService {
         try {
             //대댓글 작성한 유저 정보
             String providerId = reComment.getMember().getProviderId();
-            //댓글의 Id 값
-            Long commentId = reComment.getComment().getId();
+            //대댓글의 Id 값
+            Long reCommentId = reComment.getComment().getId();
 
             //대댓글 삭제 요청자와 댓글 작성자가 일치하는지 확인
             //대댓글 삭제 댓글 mapping된 댓글이 일치하는지 확인
             if (providerId.equals(commentDeleteDto.getProviderId())
-                    && Objects.equals(commentId, commentDeleteDto.getCommentId())) {
+                    && Objects.equals(reCommentId, commentDeleteDto.getReCommentId())) {
                 //대댓글을 삭제 상태로 변경
                 reComment.changeReStatus(CommentStatus.DELETED_BY_USER);
                 //변경된 레코드 DB에 저장
@@ -154,25 +155,37 @@ public class ReCommentServiceImpl implements ReCommentService {
     public List<MemberCommentDto> getMemberReCommentList(String providerId, Pageable pageable) {
 
         try {
-            //유저가 작성한 대댓글이 있으면, DTO로 변환해서 반환
-            return reCommentRepository.findByMember(providerId, pageable)
-                    .stream()
-                    .map(reComment -> MemberCommentDto.builder()
-                            .type(CommentType.RECOMMENT)//타입지정
-                            .id(reComment.getId())
-                            .content(reComment.getContent())
-                            .createAt(reComment.getCreatedAt())
-                            .updatedAt(reComment.getUpdatedAt())
-                            .build())
-                    //생성시간 역순으로 정렬(최신 대댓글이 먼저 나오도록)
-                    .sorted(Comparator.comparing(MemberCommentDto::getCreateAt).reversed())
-                    .collect(Collectors.toList());
 
+           return reCommentRepository.findReCommentByMember(providerId, pageable);
 
-        } catch (Exception e) {
-            throw new ServiceMethodException("getMemberReCommentList 메서드 에러 발생"); // 예외 던지기
+        } catch (Exception ex) {
+            throw new ServiceMethodException("getMemberReCommentList 메서드 에러 발생"+ex+ex.getMessage()); // 예외 던지기
         }
 
 
     }
+
+    private MemberCommentDto convertToMemberCommentDto(ReComment recomment) {
+        if (recomment==null) {
+            throw new IllegalArgumentException("convertToMemberCommentDto 에러, 파라미터가 null 입니다.");
+        }
+        Episode episode = recomment.getComment().getEpisode();
+        if (episode == null || episode.getNovel() == null) {
+            throw new IllegalArgumentException("convertToMemberCommentDto 에러: Episode 또는 Novel이 null입니다.");
+        }
+        return  MemberCommentDto.builder()
+                .type(CommentType.RECOMMENT)//타입지정
+                .id(recomment.getId())
+                .content(recomment.getContent())
+                .novelTitle(episode.getNovel().getTitle())
+                .episodeId(episode.getId())//리다이렉트용 ID
+                .episodeTitle(episode.getTitle())
+                .createdAt(recomment.getCreatedAt())
+                .isEditable(true)//수정가능여부 true
+                .likes(recomment.getTotalLikes())
+                .disLikes(recomment.getTotalDisLikes())
+                .build();
+
+    }
+
 }
