@@ -5,7 +5,6 @@ import com.ham.netnovel.comment.Comment;
 import com.ham.netnovel.comment.CommentRepository;
 import com.ham.netnovel.comment.CommentStatus;
 import com.ham.netnovel.comment.data.CommentSortOrder;
-import com.ham.netnovel.comment.data.CommentType;
 import com.ham.netnovel.comment.dto.CommentCreateDto;
 import com.ham.netnovel.comment.dto.CommentDeleteDto;
 import com.ham.netnovel.comment.dto.CommentEpisodeListDto;
@@ -219,7 +218,7 @@ public class CommentServiceImpl implements CommentService {
                 .nickName(comment.getMember().getNickName())//작성자 닉네임
                 .episodeTitle(comment.getEpisode().getTitle())//에피소드 제목
                 .content(comment.getContent())
-                .commentId(comment.getId())
+                .id(comment.getId())
                 .updatedAt(comment.getUpdatedAt())
                 .createdAt(comment.getCreatedAt())
                 .likes(comment.getTotalLikes())//댓글에 달린  좋아요 수
@@ -250,7 +249,7 @@ public class CommentServiceImpl implements CommentService {
                 .nickName(comment.getMember().getNickName())//작성자 닉네임
                 .episodeTitle(comment.getEpisode().getTitle())//에피소드 제목
                 .content(comment.getContent())
-                .commentId(comment.getId())
+                .id(comment.getId())
                 .updatedAt(comment.getUpdatedAt())
                 .createdAt(comment.getCreatedAt())
                 .likes(comment.getTotalLikes())//댓글에 달린  좋아요 수
