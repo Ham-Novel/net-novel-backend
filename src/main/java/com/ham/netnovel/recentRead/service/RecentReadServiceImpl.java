@@ -10,6 +10,7 @@ import com.ham.netnovel.novel.Novel;
 import com.ham.netnovel.recentRead.RecentRead;
 import com.ham.netnovel.recentRead.RecentReadId;
 import com.ham.netnovel.recentRead.RecentReadRepository;
+import com.ham.netnovel.s3.S3Service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,10 +30,13 @@ public class RecentReadServiceImpl implements RecentReadService {
     private final MemberService memberService;
     private final EpisodeService episodeService;
 
-    public RecentReadServiceImpl(RecentReadRepository recentReadRepository, MemberService memberService, EpisodeService episodeService) {
+    private final S3Service s3Service;
+
+    public RecentReadServiceImpl(RecentReadRepository recentReadRepository, MemberService memberService, EpisodeService episodeService, S3Service s3Service) {
         this.recentReadRepository = recentReadRepository;
         this.memberService = memberService;
         this.episodeService = episodeService;
+        this.s3Service = s3Service;
     }
 
     @Override
@@ -99,24 +103,28 @@ public class RecentReadServiceImpl implements RecentReadService {
             return recentReadRepository.findByMemberProviderId(providerId, pageable)
                     .stream()
                     //소설 정보를 DTO로 변환해서 List 객체로  반환
-                    .map(recentRead -> {
-                        Episode episode = recentRead.getEpisode();//에피소드 엔티티 객체에 저장
-                        Novel novel = recentRead.getNovel();//노벨 엔티티 객체에 저장
-                        return MemberRecentReadDto.builder()//DTO로 변환하여 반환
-                                .id(novel.getId())
-                                .title(novel.getTitle())
-                                .novelType(novel.getType())
-                                .authorName(novel.getAuthor().getNickName())
-                                .episodeTitle(episode.getTitle())
-                                .episodeId(episode.getId())
-                                .updatedAt(recentRead.getUpdatedAt())
-                                .build();
-                    })
+                    .map(this::convertToMemberRecentReadDto)
                     .collect(Collectors.toList());//List로 collect
-
         } catch (Exception ex) {
             throw new ServiceMethodException("getMemberRecentReads 메서드 에러 발생" + ex.getMessage(), ex);
         }
+
+    }
+
+    private MemberRecentReadDto convertToMemberRecentReadDto(RecentRead recentRead){
+        Episode episode = recentRead.getEpisode();//에피소드 엔티티 객체에 저장
+        Novel novel = recentRead.getNovel();//노벨 엔티티 객체에 저장
+        String thumbnailUrl = s3Service.generateCloudFrontUrl(novel.getThumbnailFileName(),"normal");
+        return MemberRecentReadDto.builder()//DTO로 변환하여 반환
+                .id(novel.getId())
+                .title(novel.getTitle())
+                .novelType(novel.getType())
+                .authorName(novel.getAuthor().getNickName())
+                .episodeTitle(episode.getTitle())
+                .episodeId(episode.getId())
+                .updatedAt(recentRead.getUpdatedAt())
+                .thumbnailUrl(thumbnailUrl)
+                .build();
 
     }
 
