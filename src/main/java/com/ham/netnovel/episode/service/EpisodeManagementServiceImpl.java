@@ -5,7 +5,7 @@ import com.ham.netnovel.common.exception.EpisodeNotPurchasedException;
 import com.ham.netnovel.common.exception.ServiceMethodException;
 import com.ham.netnovel.common.utils.TypeValidationUtil;
 import com.ham.netnovel.episode.Episode;
-import com.ham.netnovel.episode.EpisodeRepository;
+import com.ham.netnovel.episode.repository.EpisodeRepository;
 import com.ham.netnovel.episode.data.EpisodeStatus;
 import com.ham.netnovel.episode.data.IndexDirection;
 import com.ham.netnovel.episode.dto.EpisodeDetailDto;

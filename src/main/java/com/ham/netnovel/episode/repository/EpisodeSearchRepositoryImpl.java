@@ -1,5 +1,7 @@
-package com.ham.netnovel.episode;
+package com.ham.netnovel.episode.repository;
 
+import com.ham.netnovel.episode.Episode;
+import com.ham.netnovel.episode.QEpisode;
 import com.ham.netnovel.novel.QNovel;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -11,11 +13,11 @@ import java.util.List;
 
 
 @Repository
-public class EpisodeCustomRepositoryImpl implements EpisodeCustomRepository {
+public class EpisodeSearchRepositoryImpl implements EpisodeSearchRepository {
 
     private final JPQLQueryFactory jpaQueryFactory;
 
-    public EpisodeCustomRepositoryImpl(JPQLQueryFactory jpaQueryFactory) {
+    public EpisodeSearchRepositoryImpl(JPQLQueryFactory jpaQueryFactory) {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 

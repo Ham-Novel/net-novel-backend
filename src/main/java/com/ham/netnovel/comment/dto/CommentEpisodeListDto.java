@@ -17,7 +17,7 @@ public class CommentEpisodeListDto {//뷰에 반환할때 사용하는 DTO
 
 
     //댓글 PK
-    private Long commentId;
+    private Long id;
 
     //댓글내용
     private String content;

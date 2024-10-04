@@ -70,7 +70,7 @@ public class NovelController {
             @RequestParam(name = "sortBy", defaultValue = "view") String sortBy,
             @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
-            @RequestParam(name = "tagId", required = false) String ids) {
+            @RequestParam(name = "tagIds", required = false) String ids) {
 
         List<Long> idList = new ArrayList<>();
         //"," 로 구분된 tag 들을 분리하여 List 객체에 담음
