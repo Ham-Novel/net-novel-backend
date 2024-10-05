@@ -23,6 +23,9 @@ public class MemberCommentDto {
     //타입, 댓글인지 대댓글인지 저장
     private CommentType type;
 
+    //대댓글일 경우 상위 댓글의 id. 댓글이면 null 값
+    private Long commentId;
+
     private String novelTitle;//소설제목
 
     private Long novelId;
