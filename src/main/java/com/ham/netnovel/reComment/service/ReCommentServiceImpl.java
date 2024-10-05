@@ -109,13 +109,13 @@ public class ReCommentServiceImpl implements ReCommentService {
         try {
             //대댓글 작성한 유저 정보
             String providerId = reComment.getMember().getProviderId();
-            //대댓글의 Id 값
-            Long reCommentId = reComment.getComment().getId();
+            //대댓글에 mapping된 댓글의 Id 값
+            Long commentId = reComment.getComment().getId();
 
             //대댓글 삭제 요청자와 댓글 작성자가 일치하는지 확인
             //대댓글 삭제 댓글 mapping된 댓글이 일치하는지 확인
             if (providerId.equals(commentDeleteDto.getProviderId())
-                    && Objects.equals(reCommentId, commentDeleteDto.getReCommentId())) {
+                    && Objects.equals(commentId, commentDeleteDto.getCommentId())) {
                 //대댓글을 삭제 상태로 변경
                 reComment.changeReStatus(CommentStatus.DELETED_BY_USER);
                 //변경된 레코드 DB에 저장
