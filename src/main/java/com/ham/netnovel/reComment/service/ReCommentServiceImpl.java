@@ -136,7 +136,7 @@ public class ReCommentServiceImpl implements ReCommentService {
                     .stream().map(reComment -> ReCommentListDto.builder()
                             .nickName(reComment.getMember().getNickName())
                             .content(reComment.getContent())
-                            .reCommentId(reComment.getComment().getId())
+                            .id(reComment.getComment().getId())
                             .updatedAt(reComment.getUpdatedAt())
                             .build())
                     .sorted(Comparator.comparing(ReCommentListDto::getCreatedAt).reversed())
