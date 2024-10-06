@@ -61,7 +61,7 @@ public class MemberMyPageServiceImpl implements MemberMyPageService {
                         reCommentService.getMemberReCommentList(providerId, pageable).stream()
                 )
                 //멤버변수인 생성 시간을 기준으로 재정렬
-                .sorted(Comparator.comparing(MemberCommentDto::getCreateAt).reversed())
+                .sorted(Comparator.comparing(MemberCommentDto::getCreatedAt).reversed())
                 // 정렬된 스트림을 리스트 형태로 수집하여 반환
                 .collect(Collectors.toList());
     }
