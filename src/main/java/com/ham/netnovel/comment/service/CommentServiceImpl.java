@@ -229,7 +229,7 @@ public class CommentServiceImpl implements CommentService {
                         .map(reComment -> ReCommentListDto.builder()
                                 .nickName(reComment.getMember().getNickName())
                                 .content(reComment.getContent())
-                                .reCommentId(reComment.getId())
+                                .id(reComment.getId())
                                 .createdAt(reComment.getCreatedAt())
                                 .updatedAt(reComment.getUpdatedAt())
                                 .likes(reComment.getTotalLikes())//댓글에 달린 싫어요 수
@@ -281,7 +281,7 @@ public class CommentServiceImpl implements CommentService {
             ReCommentListDto dto = ReCommentListDto.builder()
                     .nickName(reComment.getMember().getNickName())
                     .content(reComment.getContent())
-                    .reCommentId(reComment.getId())
+                    .id(reComment.getId())
                     .createdAt(reComment.getCreatedAt())
                     .updatedAt(reComment.getUpdatedAt())
                     .likes(reComment.getTotalLikes())//댓글에 달린 싫어요 수

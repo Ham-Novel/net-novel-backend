@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 public class ReCommentListDto {
 
-    private Long reCommentId;
+    private Long id;
 
     private String content;
 

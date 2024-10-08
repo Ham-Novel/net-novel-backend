@@ -41,7 +41,6 @@ public class ReCommentSearchRepositoryImpl implements ReCommentSearchRepository 
         QNovel novel = QNovel.novel;
         QComment comment = QComment.comment;
 
-
         //원하는 값을 찾아와 DTO에 할당하여 반환
         return jpaQueryFactory.select(
                         reComment.id,
@@ -52,7 +51,8 @@ public class ReCommentSearchRepositoryImpl implements ReCommentSearchRepository 
                         reCommentLike.likeType.when(LikeType.LIKE).then(1).otherwise(0).sum(), // as 없이 사용
                         reCommentLike.likeType.when(LikeType.DISLIKE).then(1).otherwise(0).sum(), // as 없이 사용
                         novel.title,
-                         novel.id
+                        novel.id,
+                        comment.id
                 )
                 .from(reComment)
                 .join(reComment.comment, comment)
@@ -74,6 +74,7 @@ public class ReCommentSearchRepositoryImpl implements ReCommentSearchRepository 
                         .disLikes(Optional.ofNullable(tuple.get(6, Integer.class)).orElse(0)) // null 방지
                         .isEditable(true)
                         .type(CommentType.RECOMMENT)
+                        .commentId(tuple.get(comment.id))
                         .build()).toList();
 
     }
