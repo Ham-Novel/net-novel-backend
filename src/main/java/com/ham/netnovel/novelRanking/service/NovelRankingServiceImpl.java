@@ -8,6 +8,10 @@ import com.ham.netnovel.novelRanking.NovelRanking;
 import com.ham.netnovel.novelRanking.RankingPeriod;
 import com.ham.netnovel.novelRanking.dto.NovelRankingUpdateDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -36,7 +40,9 @@ public class NovelRankingServiceImpl implements NovelRankingService {
     private final RedisTemplate<String, String> redisTemplate;
 
 
-    public NovelRankingServiceImpl(NovelRakingRepository novelRakingRepository, EpisodeViewCountService episodeViewCountService, RedisTemplate<String, String> redisTemplate) {
+    public NovelRankingServiceImpl(NovelRakingRepository novelRakingRepository,
+                                   EpisodeViewCountService episodeViewCountService,
+                                   @Qualifier("redisCacheTemplate") RedisTemplate<String, String> redisTemplate) {
         this.novelRakingRepository = novelRakingRepository;
         this.episodeViewCountService = episodeViewCountService;
 
@@ -103,7 +109,6 @@ public class NovelRankingServiceImpl implements NovelRankingService {
     }
 
     /**
-     *
      * @param scoresOfNovel 소설 엔티티를 key로, 점수를 value로 갖는 Map형 객체
      * @return List<NovelRankingUpdateDto>
      */
@@ -288,13 +293,11 @@ public class NovelRankingServiceImpl implements NovelRankingService {
      * 존재하는 엔티티는 업데이트 후, 변경 사항을 데이터베이스에 저장합니다.
      * </p>
      *
-     *
-     *
      * @param todayDate              오늘 날짜 {@link LocalDate }객체 입니다. 랭킹 정보를 업데이트할 기준 날짜로 사용됩니다.
      * @param rankingPeriod          랭킹 주기입니다. 예를 들어, 일간, 주간, 월간 등의 주기를 설정하는 {@link RankingPeriod} 객체입니다.
      * @param novelRankingUpdateDtos 업데이트할 소설 랭킹 정보가 담긴 DTO 리스트입니다. 각 DTO는 소설의 점수와 랭킹 정보를 포함합니다.
      * @param existingRankings       기존에 데이터베이스에 저장된 랭킹 엔티티를 담고 있는 {@link Map} 객체입니다.
-     *                              이 맵의 키는 소설 ID이며, 값은 해당 소설의 랭킹 엔티티입니다.
+     *                               이 맵의 키는 소설 ID이며, 값은 해당 소설의 랭킹 엔티티입니다.
      */
     private void saveOrUpdateNovelRankings(LocalDate todayDate,
                                            RankingPeriod rankingPeriod,
@@ -348,13 +351,21 @@ public class NovelRankingServiceImpl implements NovelRankingService {
         //Redis key 생성
         String key = periodForKey + "_rankings:" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-        List<NovelRanking> dailyRaking = novelRakingRepository.findByRankingDateAndRankingPeriod(todayDate, rankingPeriod);
-        for (NovelRanking novelRanking : dailyRaking) {
-            String novelId = novelRanking.getNovel().getId().toString();//novelId 문자열로 변환
-            Integer ranking = novelRanking.getRanking();//랭킹 점수 객체에 저장
-            // Redis에 저장할 데이터 객체 생성(정렬된 Set 타입)후 Redis 에 저장
-            redisTemplate.opsForZSet().add(key, novelId, ranking);
-        }
+        //랭킹은 200개만 추출해서 Redis에 저장
+        Pageable pageable = PageRequest.of(0, 200);
+
+        List<NovelRanking> dailyRaking = novelRakingRepository.findByRankingDateAndRankingPeriod(todayDate, rankingPeriod, pageable);
+
+        //Redis에 한번에 저장기 위한 Set 객체 생성
+        Set<ZSetOperations.TypedTuple<String>> rankingSet=
+        dailyRaking.stream()
+                .map(novelRanking -> new DefaultTypedTuple<>(
+                        novelRanking.getNovel().getId().toString(),//novelId 문자열로 변환
+                        novelRanking.getRanking().doubleValue()//랭킹 등수 double 형태로 변환
+                )).collect(Collectors.toSet());//set 자료형으로 collect
+
+        redisTemplate.opsForZSet().add(key, rankingSet);
+
         // redis에  데이터 만료 시간 설정, 1일로 설정
         redisTemplate.expire(key, Duration.ofDays(1));
     }

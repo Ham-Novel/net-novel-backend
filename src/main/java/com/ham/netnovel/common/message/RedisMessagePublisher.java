@@ -2,6 +2,7 @@ package com.ham.netnovel.common.message;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,8 @@ public class RedisMessagePublisher {
      * @param redisTemplate Redis 서버와의 상호작용을 위한 RedisTemplate 객체
      */
     @Autowired
-    public RedisMessagePublisher(RedisTemplate<String, String> redisTemplate) {
+    public RedisMessagePublisher(
+            @Qualifier("redisCacheTemplate") RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -41,7 +43,7 @@ public class RedisMessagePublisher {
      * @param channel 발행할 Redis 채널의 이름
      * @param message 발행할 메시지의 내용
      */
-    public void publish(String channel,String message) {
+    public void publish(String channel, String message) {
         redisTemplate.convertAndSend(channel, message);
     }
 }

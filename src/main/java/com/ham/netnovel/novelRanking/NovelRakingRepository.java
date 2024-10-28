@@ -1,5 +1,6 @@
 package com.ham.netnovel.novelRanking;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -49,7 +50,8 @@ public interface NovelRakingRepository extends JpaRepository<NovelRanking, Long>
             "where nr.rankingDate = :rankingDate " +
             "and nr.rankingPeriod =:rankingPeriod")
     List<NovelRanking> findByRankingDateAndRankingPeriod(@Param("rankingDate") LocalDate rankingDate,
-                                                         @Param("rankingPeriod") RankingPeriod rankingPeriod);
+                                                         @Param("rankingPeriod") RankingPeriod rankingPeriod,
+                                                         Pageable pageable);
 
 
     @Query("select nr.novel, " +
