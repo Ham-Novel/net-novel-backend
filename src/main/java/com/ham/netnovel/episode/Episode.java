@@ -7,7 +7,6 @@ import com.ham.netnovel.coinCostPolicy.CoinCostPolicy;
 import com.ham.netnovel.episode.data.EpisodeStatus;
 import com.ham.netnovel.episodeViewCount.EpisodeViewCount;
 import com.ham.netnovel.novel.Novel;
-import com.ham.netnovel.weeklyViewCount.WeeklyViewCount;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -93,6 +92,13 @@ public class Episode {
         this.costPolicy = costPolicy;
     }
 
+    /**
+     * Episode 엔티티를 수정하는 메서드 입니다.
+     *
+     * @param title 수정된 에피소드 제목
+     * @param content 수정된 에피소드 내용
+     * @param costPolicy 수정된 가격정책
+     */
     public void updateEpisode(String title, String content, CoinCostPolicy costPolicy) {
         this.title = title;
         this.content = content;
