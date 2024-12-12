@@ -6,6 +6,11 @@ plugins {
 
 group = 'com.ham'
 version = '0.0.1-SNAPSHOT'
+//config jar build
+bootJar{
+    archiveFileName = 'netnovel-latest.jar'
+    archiveVersion = ""
+}
 
 java {
     toolchain {
@@ -29,11 +34,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
 
-//    runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
-
-
 //    oauth2
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server'
+//    implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 
@@ -62,10 +64,6 @@ dependencies {
 
     //quartz library(Scheduler)
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
-
-
-    //Spring Session Library for JDBC
-//    implementation 'org.springframework.session:spring-session-jdbc'
 
     //Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
