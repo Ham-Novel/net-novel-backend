@@ -127,40 +127,48 @@ public class NovelRankingQuartzConfig {
     public Trigger novelPreviousDayRankingAtStartTime() {
         return createSingleRunTrigger("novelPreviousDayRankingAtStartTime",
                 novelPreviousDayRankingJobDetail(),//실행시킬 JobDetail
-                3);//딜레이 시간(초)
+                130);//딜레이 시간(초)
     }
 
 
+    /*
+    애플리케이션 시작시 일간 Novel 조회수 랭킹 갱신 Trigger 설정
+    시작 시점부터 150초뒤 일간 Novel 랭킹 갱신
+     */
     @Bean
     public Trigger novelDailyRankingTriggerAtStartTime() {
         return createSingleRunTrigger("novelDailyRankingTriggerAtStartTime",
                 novelDailyRankingJobDetail(),//실행시킬 JobDetail
-                5);//딜레이 시간(초)
+                150);//딜레이 시간(초)
 
 
     }
 
-    //애플리케이션 시작시 주간 Novel 조회수 랭킹 갱신 Trigger 설정
-    //시작 시점부터 10초뒤 주간 Novel 랭킹 갱신
+    /*
+    애플리케이션 시작시 주간 Novel 조회수 랭킹 갱신 Trigger 설정
+    시작 시점부터 180초뒤 주간 Novel 랭킹 갱신
+     */
     @Bean
     public Trigger novelWeeklyRankingTriggerAtStartTime() {
         return createSingleRunTrigger("novelWeeklyRankingTriggerAtStartTime",
                 novelWeeklyRankingJobDetail(),//실행시킬 JobDetail
-                10);//딜레이 시간(초)
+                180);//딜레이 시간(초)
     }
 
-    //애플리케이션 시작시 주간 Novel 조회수 랭킹 갱신 Trigger 설정
-    //시작 시점부터 10초뒤 주간 Novel 랭킹 갱신
+    /*
+    애플리케이션 시작시 주간 Novel 조회수 랭킹 갱신 Trigger 설정
+    시작 시점부터 210초뒤 주간 Novel 랭킹 갱신
+     */
     @Bean
     public Trigger monthlyRankingTriggerAtStartTime() {
         return createSingleRunTrigger("monthlyRankingTriggerAtStartTime",
                 novelMonthlyRankingJobDetail(),//실행시킬 JobDetail
-                15);//딜레이 시간(초)
+                210);//딜레이 시간(초)
     }
 
 
     /**
-     * 애플리케이션 시작시 한번만 실행되는 Trigger 정의 메서드
+     * 애플리케이션 시작시 한번만 실행되는 Trigger 정의 메서드입니다.
      *
      * @param triggerName    트리거 메서드 이름
      * @param jobDetail      실행시킬 jobDetail

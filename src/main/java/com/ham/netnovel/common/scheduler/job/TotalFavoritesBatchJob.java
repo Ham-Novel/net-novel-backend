@@ -27,14 +27,14 @@ public class TotalFavoritesBatchJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        log.info("소설 좋아요 메타 데이터 업데이트 배치 작업 시작");
+        log.info("Novel Meta Data: 총 좋아요 배치 작업 시작");
         try {
             JobParameters params = new JobParametersBuilder()
                     .addLong("time", System.currentTimeMillis()) // 매번 새로운 파라미터 필요
                     .toJobParameters();
             // Spring Batch Job 실행
             jobLauncher.run(novelTotalFavoritesUpdateJob, params);
-            log.info("소설 좋아요 메타 데이터 업데이트 배치 작업 완료");
+            log.info("Novel Meta Data: 총 좋아요 배치 작업 시작");
         } catch (Exception e) {
             log.error("TotalFavoritesBatchJob 실행 에러");
             throw new JobExecutionException(e);
