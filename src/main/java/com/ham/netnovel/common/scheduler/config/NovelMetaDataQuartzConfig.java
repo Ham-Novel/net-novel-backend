@@ -7,6 +7,8 @@ import org.quartz.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Date;
+
 @Configuration
 public class NovelMetaDataQuartzConfig {
 
@@ -29,7 +31,15 @@ public class NovelMetaDataQuartzConfig {
     }
 
     @Bean
-    public JobDetail totalFavoritesUpdateJobDetail(){
+    public Trigger totalViewUpdateAtStartTrigger() {
+        return createSingleRunTrigger(
+                "totalViewUpdateAtStartTrigger"
+                , totalViewUpdatejobDetail(),
+                60);
+    }
+
+    @Bean
+    public JobDetail totalFavoritesUpdateJobDetail() {
         return JobBuilder.newJob(TotalFavoritesBatchJob.class)
                 .withIdentity("totalFavoritesUpdateJobDetail")
                 .storeDurably()
@@ -44,12 +54,23 @@ public class NovelMetaDataQuartzConfig {
                 .forJob(totalFavoritesUpdateJobDetail())
                 .withIdentity("totalFavoritesUpdateTrigger")
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 10 3,14 * * ?")) // 매일 03시 10분과 14시 10분에 실행
-                .startNow() // 애플리케이션 시작 시 즉시 실행
                 .build();
     }
 
+
+    //소설메타데이터의 좋아요수를 업데이트하는 트리거, 애플리케이션 시작시 한번 실행
+
     @Bean
-    public JobDetail latestDateUpdateJobDetail(){
+    public Trigger totalFavoritesUpdateTriggerAtStartTime() {
+        return createSingleRunTrigger(
+                "totalFavoritesUpdateTriggerAtStartTime",
+                totalFavoritesUpdateJobDetail(),
+                90);
+
+    }
+
+    @Bean
+    public JobDetail latestDateUpdateJobDetail() {
         return JobBuilder.newJob(LatestDateBatchJob.class)
                 .withIdentity("latestDateUpdateJobDetail")
                 .storeDurably()
@@ -63,7 +84,36 @@ public class NovelMetaDataQuartzConfig {
                 .forJob(totalFavoritesUpdateJobDetail())
                 .withIdentity("latestDateUpdateTrigger")
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 20 3 * * ?")) // 매일 새벽 03시 20분에 실행
-                .startNow() // 애플리케이션 시작 시 즉시 실행
+                .build();
+    }
+
+    //소설메타데이터의 최근 업데이트 시간을 변경하는 트리거, 애플리케이션 시작시 한번만 실행
+    @Bean
+    public Trigger latestDateUpdateTriggerAtStartTime() {
+        return createSingleRunTrigger(
+                "latestDateUpdateTriggerAtStartTime"
+                , latestDateUpdateJobDetail()
+                , 120);
+
+    }
+
+
+    /**
+     * 애플리케이션 시작시 한번만 실행되는 Trigger 정의 메서드
+     *
+     * @param triggerName    트리거 메서드 이름
+     * @param jobDetail      실행시킬 jobDetail
+     * @param delayInSeconds 애플리케이션 시작후 n초 뒤 실행
+     * @return
+     */
+    private Trigger createSingleRunTrigger(String triggerName, JobDetail jobDetail, int delayInSeconds) {
+        Date startTime = DateBuilder.futureDate(delayInSeconds, DateBuilder.IntervalUnit.SECOND);
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)//실행시킬 JobDetail 메서드
+                .withIdentity(triggerName)//식별자 이름
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                        .withRepeatCount(0)) // 단 한 번만 실행
+                .startAt(startTime) // 지정된 시간에 실행 시작
                 .build();
     }
 

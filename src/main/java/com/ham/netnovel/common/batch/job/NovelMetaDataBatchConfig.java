@@ -36,7 +36,7 @@ public class NovelMetaDataBatchConfig {
     private static final long DEFAULT_VIEWS = 0L;//조회수 기본값
     private static final int DEFAULT_FAVORITES = 0;//좋아요수 기본값
     //날짜 기본값
-    private static final LocalDateTime DEFAULT_DATE = LocalDateTime.of(2000, 1, 1, 0, 0);
+    private static final LocalDateTime DEFAULT_DATE = LocalDateTime.of(2020, 1, 1, 0, 0);
     private final NovelMetaDataRepository novelMetaDataRepository;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;

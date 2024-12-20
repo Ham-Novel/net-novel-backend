@@ -29,14 +29,14 @@ public class TotalViewsBatchJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        log.info("배치 작업 시작");
+        log.info("Novel Meta Data: 총 조회수 배치 작업 시작");
         try {
             JobParameters params = new JobParametersBuilder()
                     .addLong("time", System.currentTimeMillis()) // 매번 새로운 파라미터 필요
                     .toJobParameters();
             // Spring Batch Job 실행
             jobLauncher.run(novelTotalViewUpdateJob, params);
-            log.info("배치 작업 완료");
+            log.info("Novel Meta Data: 총 조회수 배치 작업 완료");
 
         } catch (Exception e) {
             log.error("TotalViewsBatchJob 실행 에러");
