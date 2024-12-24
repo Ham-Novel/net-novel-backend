@@ -7,6 +7,7 @@ import com.ham.netnovel.episodeViewCount.EpisodeViewCount;
 import com.ham.netnovel.episodeViewCount.EpisodeViewCountRepository;
 import com.ham.netnovel.episodeViewCount.ViewCountIncreaseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,8 @@ public class EpisodeViewCountServiceImpl implements EpisodeViewCountService {
     private final EpisodeViewCountRepository episodeViewCountRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
-    public EpisodeViewCountServiceImpl(EpisodeViewCountRepository episodeViewCountRepository, RedisTemplate<String, String> redisTemplate) {
+    public EpisodeViewCountServiceImpl(EpisodeViewCountRepository episodeViewCountRepository,
+                                       @Qualifier("redisCacheTemplate")RedisTemplate<String, String> redisTemplate) {
         this.episodeViewCountRepository = episodeViewCountRepository;
         this.redisTemplate = redisTemplate;
     }
@@ -67,7 +69,6 @@ public class EpisodeViewCountServiceImpl implements EpisodeViewCountService {
             //엔티티 List DB에 저장
             episodeViewCountRepository.saveAll(episodeViewCounts);
             log.info("에피소드 조회수 갱신 완료, 총 에피소드 수 ={} ", episodeViewCounts.size());
-            //ToDo 초기화 실패시 예외처리, 후처리
             redisTemplate.delete(VIEW_HASH_KEY);//Redis 조회수 정보 초기화
 
 
