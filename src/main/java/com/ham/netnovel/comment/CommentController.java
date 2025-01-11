@@ -11,6 +11,13 @@ import com.ham.netnovel.comment.service.CommentService;
 import com.ham.netnovel.common.utils.Authenticator;
 import com.ham.netnovel.common.utils.PageableUtil;
 import com.ham.netnovel.common.utils.ValidationErrorHandler;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +33,7 @@ import java.util.List;
 @Controller
 @Slf4j
 @RequestMapping("/api")
+@Tag(name = "Comments", description = "댓글과 관련된 작업")
 public class CommentController {
 
 
@@ -49,6 +57,23 @@ public class CommentController {
      * @param authentication   유저의 인증정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
+    @Operation(summary = "댓글 작성 API",
+            description = "클라이언트에서 전달한 댓글 내용을 서버에 저장합니다.된 사용자만 접근할 수 있습니다. ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "댓글 추가 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "string", example = "댓글 추가 완료"))),
+            @ApiResponse(responseCode = "400", description = "유효성 검사 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object", example = """
+                                        { "error": "Bad Request", "message": "댓글 내용은 비워둘 수 없습니다.", "status": 400 }
+                                    """))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object", example = """
+                                        { "error": "Unauthorized", "message": "로그인 정보가 없습니다.", "status": 401 }
+                                    """)))
+    })
     @PostMapping("/comments")
     public ResponseEntity<String> createComment(
             @Valid @RequestBody CommentCreateDto commentCreateDto,
@@ -84,6 +109,28 @@ public class CommentController {
      * @param authentication   유저의 인증 정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
+    @Operation(
+            summary = "댓글 수정 API",
+            description = """
+                        클라이언트에서 전달한 데이터를 기반으로 댓글 내용을 수정합니다.
+                        인증된 사용자만 접근할 수 있습니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "댓글 수정 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "string", example = "댓글 수정 완료"))),
+            @ApiResponse(responseCode = "400", description = "유효성 검사 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object", example = """
+                                        { "error": "Bad Request", "message": "댓글 내용은 비워둘 수 없습니다.", "status": 400 }
+                                    """))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object", example = """
+                                        { "error": "Unauthorized", "message": "로그인 정보가 없습니다.", "status": 401 }
+                                    """)))
+    })
     @PatchMapping("/comments/{commentId}")
     public ResponseEntity<String> updateComment(
             @PathVariable(name = "commentId") Long urlCommentId,
@@ -122,6 +169,28 @@ public class CommentController {
      * @param authentication   유저의 인증 정보
      * @return ResponseEntity 처리 결과를 Httpstatus와 메시지에 담아 전송
      */
+    @Operation(
+            summary = "댓글 삭제 API",
+            description = """
+                        클라이언트에서 전달한 데이터를 기반으로 댓글 상태를 삭제 상태로 변경합니다.
+                        인증된 사용자만 접근할 수 있습니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "댓글 삭제 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "string", example = "삭제완료"))),
+            @ApiResponse(responseCode = "400", description = "유효성 검사 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object", example = """
+                                        { "error": "Bad Request", "message": "댓글 ID는 필수입니다.", "status": 400 }
+                                    """))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object", example = """
+                                        { "error": "Unauthorized", "message": "로그인 정보가 없습니다.", "status": 401 }
+                                    """)))
+    })
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<String> deleteComment(
             @PathVariable(name = "commentId") Long urlCommentId,
@@ -159,6 +228,33 @@ public class CommentController {
      *
      * @return ResponseEntity 댓글 내용을 {@link CommentEpisodeListDto} List 형태로 반환
      */
+
+    @Operation(
+            summary = "에피소드 댓글 조회 API",
+            description = """
+                        특정 에피소드에 달린 댓글과 대댓글을 조회합니다.
+                        댓글은 최신순 또는 좋아요순으로 정렬할 수 있습니다.
+                        인증되지 않은 사용자는 기본 조회만 가능합니다.
+                    """,
+            parameters = {
+                    @Parameter(name = "episodeId",description = "에피소드의 ID",example = "123"),
+                    @Parameter(name = "sortBy",description = "에피소드의 ID",example = "123"),
+                    @Parameter(name = "pageNumber", description = "페이지번호 0부터 시작", example = "0"),
+                    @Parameter(name = "pageSize", description = "페이지 크기 기본값 10", example = "10")
+            }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "댓글 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CommentEpisodeListDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object", example = """
+                                        { "error": "Bad Request", "message": "정렬 기준은 'recent' 또는 'likes' 중 하나여야 합니다.", "status": 400 }
+                                    """)))
+    })
+
+
     @GetMapping("/episodes/{episodeId}/comments")
     public ResponseEntity<?> getEpisodeComments(
             @PathVariable(name = "episodeId") Long episodeId,
@@ -195,6 +291,24 @@ public class CommentController {
      *
      * @return CommentEpisodeListDto 댓글과 대댓글 정보를 담는 객체
      */
+
+    @Operation(
+            summary = "소설 댓글 조회 API",
+            description = """
+                        특정 소설의 모든 에피소드에 달린 댓글과 대댓글을 조회합니다.
+                        댓글은 최신순 또는 좋아요순으로 정렬할 수 있습니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "댓글 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CommentEpisodeListDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object", example = """
+                                        { "error": "Bad Request", "message": "정렬 기준은 'recent' 또는 'likes' 중 하나여야 합니다.", "status": 400 }
+                                    """)))
+    })
     @GetMapping("/novels/{novelId}/comments")
     public ResponseEntity<List<CommentEpisodeListDto>> getNovelComments(
             @PathVariable(name = "novelId") Long novelId,

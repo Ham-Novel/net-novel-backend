@@ -50,7 +50,8 @@ public class SecurityConfig {
 
         //사용자 인증 URL 설정
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login**", "/api/**", "/api/novels/**").permitAll()//인증 예외 URL
+                .requestMatchers("/", "/login**", "/api/**", "/api/novels/**", "/v3/**", "/swagger-ui/**")
+                .permitAll() // Swagger 관련 경로 추가
                 .anyRequest().authenticated()
         );
 
